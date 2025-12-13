@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Users, CheckCircle, Mail, Sparkles, Star } from 'lucide-react'
+import { Users, CheckCircle, Mail } from 'lucide-react'
 import DemoButton from '@/components/marketing/DemoButton'
 import { AGENCY_CONFIG } from '@/config/pricing'
 import { useSalesModeStore } from '@/stores/salesModeStore'
@@ -19,29 +19,40 @@ export default function AgencyPricingPage() {
   return (
     <>
       {/* Hero */}
-      <section className="py-20 sm:py-32">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="relative py-12 sm:py-16 bg-gradient-to-b from-[#F2F4FC] to-white overflow-hidden">
+        {/* Background Pattern */}
+        <div
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `
+              linear-gradient(to right, #000 1px, transparent 1px),
+              linear-gradient(to bottom, #000 1px, transparent 1px)
+            `,
+            backgroundSize: '40px 40px',
+          }}
+        />
+
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            className="text-center mb-10"
           >
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 flex items-center justify-center mx-auto mb-6">
-              <Users className="text-purple-400" size={32} />
+            <div className="inline-flex p-3 rounded-2xl bg-gradient-to-br from-purple-100 to-pink-100 border border-purple-200 mb-4">
+              <Users size={24} className="text-purple-600" />
             </div>
-            {salesMode && (
-              <div className="mb-4">
-                <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white text-sm font-semibold">
-                  <Star size={16} />
-                  פתרון ארגוני מתקדם
-                </span>
-              </div>
-            )}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-6">
-              {salesMode ? 'Creators OS Enterprise' : AGENCY_CONFIG.title}
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+              <span
+                className="bg-clip-text text-transparent"
+                style={{
+                  backgroundImage: 'linear-gradient(135deg, rgb(15,128,226) 0%, rgb(113,48,234) 100%)',
+                }}
+              >
+                {salesMode ? 'Creators OS Enterprise' : AGENCY_CONFIG.title}
+              </span>
             </h1>
-            <p className="text-lg sm:text-xl text-neutral-300 max-w-2xl mx-auto">
+            <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto">
               {AGENCY_CONFIG.subtitle}
             </p>
           </motion.div>
@@ -49,26 +60,26 @@ export default function AgencyPricingPage() {
       </section>
 
       {/* Who it's for */}
-      <section className="pb-16">
+      <section className="py-12 sm:py-14 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-12"
+            className="text-center mb-10"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-gray-900">
               למי זה מתאים?
             </h2>
-            <p className="text-neutral-400 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               {salesMode
                 ? 'ארגונים שמחפשים שליטה מלאה על תהליכי התוכן שלהם'
                 : 'סוכנויות וצוותים שמנהלים לקוחות מרובים'}
             </p>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {AGENCY_CONFIG.useCases.map((useCase, index) => (
               <motion.div
                 key={useCase.title}
@@ -76,16 +87,10 @@ export default function AgencyPricingPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className={`
-                  p-6 rounded-2xl border transition-colors
-                  ${salesMode
-                    ? 'bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/50'
-                    : 'bg-neutral-900 border-neutral-800'
-                  }
-                `}
+                className="p-6 rounded-2xl border border-gray-200 bg-white hover:border-purple-200 hover:shadow-xl transition-all duration-300"
               >
-                <h3 className="text-xl font-bold mb-2">{useCase.title}</h3>
-                <p className="text-neutral-400">{useCase.description}</p>
+                <h3 className="text-xl font-bold mb-2 text-gray-900">{useCase.title}</h3>
+                <p className="text-gray-600">{useCase.description}</p>
               </motion.div>
             ))}
           </div>
@@ -93,16 +98,16 @@ export default function AgencyPricingPage() {
       </section>
 
       {/* Benefits */}
-      <section className="pb-16 bg-neutral-950">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <section className="py-12 sm:py-14 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="mb-12"
+            className="mb-10"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-center">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-3 text-center text-gray-900">
               {salesMode ? 'יכולות מתקדמות' : 'כלול בפתרון'}
             </h2>
           </motion.div>
@@ -115,19 +120,10 @@ export default function AgencyPricingPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.05 }}
-                className={`
-                  flex items-start gap-3 p-4 rounded-xl
-                  ${salesMode
-                    ? 'bg-gradient-to-r from-purple-900/30 to-transparent'
-                    : 'bg-neutral-900/50'
-                  }
-                `}
+                className="flex items-start gap-3 p-4 rounded-xl bg-white border border-gray-200"
               >
-                <CheckCircle
-                  className={salesMode ? 'text-purple-400' : 'text-green-400'}
-                  size={20}
-                />
-                <span className="text-neutral-200">{benefit}</span>
+                <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5" size={20} />
+                <span className="text-gray-700">{benefit}</span>
               </motion.div>
             ))}
           </div>
@@ -135,40 +131,40 @@ export default function AgencyPricingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20">
+      <section className="py-12 sm:py-14 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="p-8 sm:p-12 rounded-2xl bg-gradient-to-br from-purple-900/30 to-pink-900/30 border border-purple-500/30 text-center"
+            className="p-8 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 text-center shadow-lg"
           >
-            <h2 className="text-3xl sm:text-4xl font-bold mb-4">
+            <h2 className="text-3xl sm:text-4xl font-bold mb-4 text-gray-900">
               {salesMode ? 'בואו נדבר על הצרכים שלכם' : 'מוכנים לראות איך זה עובד?'}
             </h2>
-            <p className="text-lg text-neutral-300 mb-8 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
               {salesMode
                 ? 'נבנה פתרון מותאם בדיוק לארגון שלכם'
                 : 'נציג את המערכת ונבנה פתרון מותאם לסוכנות'}
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
               <Link
                 href="/contact?type=agency"
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all flex items-center gap-2"
+                className="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
               >
                 <Mail size={20} />
                 <span>{salesMode ? 'בקשו פגישה' : 'השאירו פרטים'}</span>
               </Link>
-              <DemoButton size="lg" variant="secondary" />
+              <DemoButton size="lg" />
             </div>
 
-            <p className="text-sm text-neutral-400">
+            <p className="text-sm text-gray-600">
               או שלחו אימייל ל-{' '}
               <a
                 href={`mailto:${AGENCY_CONFIG.contactEmail}`}
-                className="text-purple-400 hover:text-purple-300 transition-colors"
+                className="text-purple-600 hover:text-purple-700 font-medium transition-colors"
               >
                 {AGENCY_CONFIG.contactEmail}
               </a>
@@ -181,12 +177,12 @@ export default function AgencyPricingPage() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            className="mt-12 text-center"
+            className="mt-8 text-center"
           >
-            <p className="text-neutral-400 mb-2">יוצר בודד?</p>
+            <p className="text-gray-600 mb-2">יוצר בודד?</p>
             <Link
               href="/pricing"
-              className="text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+              className="text-purple-600 hover:text-purple-700 font-semibold transition-colors"
             >
               צפו בתמחור ליחידים →
             </Link>

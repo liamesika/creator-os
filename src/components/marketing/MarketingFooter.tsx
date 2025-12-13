@@ -1,8 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
-import { Mail, Sparkles, ArrowLeft } from 'lucide-react'
+import { Mail } from 'lucide-react'
 import Logo from '@/components/Logo'
 
 export default function MarketingFooter() {
@@ -12,11 +11,9 @@ export default function MarketingFooter() {
     מוצר: [
       { label: 'תמחור', href: '/pricing' },
       { label: 'תמחור לסוכנויות', href: '/pricing/agencies' },
-      { label: 'בלוג', href: '/blog' },
     ],
     חברה: [
       { label: 'אודות', href: '/about' },
-      { label: 'קריירה', href: '/careers' },
       { label: 'צור קשר', href: '/contact' },
     ],
     משפטי: [
@@ -36,34 +33,11 @@ export default function MarketingFooter() {
               <Link href="/" className="inline-block mb-4">
                 <Logo size="md" />
               </Link>
-              <p className="text-base text-gray-600 leading-relaxed mb-6 max-w-md">
+              <p className="text-base text-gray-600 leading-relaxed max-w-md">
                 מערכת ניהול מושלמת ליוצרי תוכן ומנהלי קהילה.
                 <br />
                 <span className="font-semibold text-gray-700">כל מה שצריך, במקום אחד.</span>
               </p>
-
-              {/* Newsletter */}
-              <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl p-5 border border-purple-100">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles size={16} className="text-purple-600" />
-                  <h3 className="font-bold text-gray-900 text-sm">הישארו מעודכנים</h3>
-                </div>
-                <p className="text-xs text-gray-600 mb-3">
-                  קבלו טיפים, עדכונים ותכונות חדשות ישירות למייל
-                </p>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="המייל שלכם"
-                    className="flex-1 px-3 py-2 rounded-xl border border-purple-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-100 outline-none transition-all text-xs"
-                    dir="ltr"
-                  />
-                  <button className="px-3 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl font-medium hover:shadow-lg transition-all flex items-center gap-1 text-xs">
-                    <span>הרשמה</span>
-                    <ArrowLeft size={14} />
-                  </button>
-                </div>
-              </div>
             </div>
 
             {/* Links Columns */}

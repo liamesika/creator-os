@@ -14,7 +14,6 @@ export default function MarketingHeader() {
 
   const navItems = [
     { label: 'תמחור', href: '/pricing' },
-    { label: 'בלוג', href: '/blog' },
     { label: 'אודות', href: '/about' },
     { label: 'צור קשר', href: '/contact' },
   ]
@@ -51,12 +50,6 @@ export default function MarketingHeader() {
 
           {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-3">
-            <Link
-              href="/login"
-              className="text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-            >
-              התחברות
-            </Link>
             <DemoButton size="sm" />
           </div>
 
@@ -96,14 +89,7 @@ export default function MarketingHeader() {
                   {item.label}
                 </Link>
               ))}
-              <div className="pt-3 space-y-2">
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-2 text-base font-medium text-gray-700 hover:text-gray-900 transition-colors"
-                >
-                  התחברות
-                </Link>
+              <div className="pt-3">
                 <DemoButton size="md" className="w-full" />
               </div>
             </div>
