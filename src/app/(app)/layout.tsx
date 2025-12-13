@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
+import { useDemoModeStore } from '@/stores/demoModeStore'
 import { useStoreInitialization } from '@/hooks/useStoreInitialization'
 import Sidebar from '@/components/app/Sidebar'
 import AppHeader from '@/components/app/AppHeader'
@@ -17,6 +18,7 @@ export default function AppLayout({
   children: React.ReactNode
 }) {
   const { user, isLoading } = useAuth()
+  const { isDemo } = useDemoModeStore()
   const router = useRouter()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
   const [showSplash, setShowSplash] = useState(true)
@@ -26,18 +28,19 @@ export default function AppLayout({
   useStoreInitialization()
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    // Allow access if user is logged in OR if demo mode is active
+    if (!isLoading && !user && !isDemo) {
       router.push('/login')
     }
-  }, [user, isLoading, router])
+  }, [user, isLoading, isDemo, router])
 
   useEffect(() => {
-    // Check if user just logged in
+    // Check if user just logged in or demo mode activated
     const justLoggedIn = sessionStorage.getItem('creators-os-just-logged-in')
-    if (justLoggedIn === 'true' && user) {
+    if (justLoggedIn === 'true' && (user || isDemo)) {
       setShowSplash(true)
       sessionStorage.removeItem('creators-os-just-logged-in')
-    } else if (user) {
+    } else if (user || isDemo) {
       // Check if this is a new session
       const hasSeenSplash = sessionStorage.getItem('creators-os-splash-seen')
       if (!hasSeenSplash) {
@@ -47,7 +50,7 @@ export default function AppLayout({
         setAppReady(true)
       }
     }
-  }, [user])
+  }, [user, isDemo])
 
   const handleSplashComplete = () => {
     setShowSplash(false)
@@ -66,7 +69,8 @@ export default function AppLayout({
     )
   }
 
-  if (!user) {
+  // Allow access if user is logged in OR demo mode is active
+  if (!user && !isDemo) {
     return null
   }
 
