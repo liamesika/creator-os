@@ -36,6 +36,12 @@ export default function AppLayout({
     if (!isLoading && !user && !isDemo) {
       router.push('/login')
     }
+
+    // Re-populate demo data if demo mode is active but data was lost (page refresh)
+    if (isDemo) {
+      const { populateDemoData } = useDemoModeStore.getState()
+      populateDemoData()
+    }
   }, [user, isLoading, isDemo, isDemoHydrated, router])
 
   useEffect(() => {

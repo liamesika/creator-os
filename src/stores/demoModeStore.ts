@@ -58,7 +58,12 @@ export const useDemoModeStore = create<DemoModeState>()(
       },
 
       populateDemoData: () => {
-        if (get().isInitialized) return
+        // Check if demo data actually exists in stores (not just the flag)
+        // This handles the case where isInitialized was persisted but data wasn't
+        const companiesState = useCompaniesStore.getState()
+        const hasDemoData = companiesState.companies.some(c => c.id.startsWith('demo-'))
+
+        if (get().isInitialized && hasDemoData) return
 
         // Populate companies - use setState for proper reactivity
         const companiesWithDates = DEMO_DATA.companies.map((company) => ({
