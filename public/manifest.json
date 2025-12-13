@@ -1,0 +1,43 @@
+{
+  "name": "Creators OS",
+  "short_name": "Creators OS",
+  "description": "מערכת ניהול חכמה ליוצרי תוכן - שליטה מלאה בזמן, תוכן ושגרה",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#7c3aed",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "business"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "דשבורד",
+      "url": "/dashboard",
+      "description": "פתיחת דשבורד"
+    },
+    {
+      "name": "תוכן AI",
+      "url": "/ai-content",
+      "description": "יצירת תוכן חדש עם AI"
+    },
+    {
+      "name": "משימות",
+      "url": "/tasks",
+      "description": "ניהול משימות"
+    }
+  ]
+}
