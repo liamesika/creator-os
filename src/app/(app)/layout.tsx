@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import { useAuth } from '@/context/AuthContext'
-import { useDemoModeStore } from '@/stores/demoModeStore'
+import { useDemoModeStore, useDemoModeHydration } from '@/stores/demoModeStore'
 import { useStoreInitialization } from '@/hooks/useStoreInitialization'
 import Sidebar from '@/components/app/Sidebar'
 import AppHeader from '@/components/app/AppHeader'
@@ -19,6 +19,7 @@ export default function AppLayout({
 }) {
   const { user, isLoading } = useAuth()
   const { isDemo } = useDemoModeStore()
+  const isDemoHydrated = useDemoModeHydration()
   const router = useRouter()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true)
   const [showSplash, setShowSplash] = useState(true)
@@ -28,11 +29,14 @@ export default function AppLayout({
   useStoreInitialization()
 
   useEffect(() => {
+    // Wait for demo store to hydrate before checking auth
+    if (!isDemoHydrated) return
+
     // Allow access if user is logged in OR if demo mode is active
     if (!isLoading && !user && !isDemo) {
       router.push('/login')
     }
-  }, [user, isLoading, isDemo, router])
+  }, [user, isLoading, isDemo, isDemoHydrated, router])
 
   useEffect(() => {
     // Check if user just logged in or demo mode activated
@@ -58,7 +62,8 @@ export default function AppLayout({
     setTimeout(() => setAppReady(true), 100)
   }
 
-  if (isLoading) {
+  // Wait for both auth and demo store to be ready
+  if (isLoading || !isDemoHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50">
         <div className="flex flex-col items-center gap-4">

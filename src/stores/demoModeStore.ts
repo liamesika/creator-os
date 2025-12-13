@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useEffect, useState } from 'react'
 import { DEMO_DATA } from '@/lib/demo-data'
 import { useCompaniesStore } from './companiesStore'
 import { useCalendarStore } from './calendarStore'
@@ -12,12 +13,14 @@ import { toast } from 'sonner'
 interface DemoModeState {
   isDemo: boolean
   isInitialized: boolean
+  _hasHydrated: boolean
 
   activateDemoMode: () => void
   deactivateDemoMode: () => void
   resetDemo: () => void
   populateDemoData: () => void
   clearDemoData: () => void
+  setHasHydrated: (state: boolean) => void
 }
 
 export const useDemoModeStore = create<DemoModeState>()(
@@ -25,6 +28,11 @@ export const useDemoModeStore = create<DemoModeState>()(
     (set, get) => ({
       isDemo: false,
       isInitialized: false,
+      _hasHydrated: false,
+
+      setHasHydrated: (state: boolean) => {
+        set({ _hasHydrated: state })
+      },
 
       activateDemoMode: () => {
         set({ isDemo: true })
@@ -146,6 +154,32 @@ export const useDemoModeStore = create<DemoModeState>()(
     {
       name: 'demo-mode-storage',
       partialize: (state) => ({ isDemo: state.isDemo, isInitialized: state.isInitialized }),
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true)
+      },
     }
   )
 )
+
+// Hook to check if store has hydrated
+export const useDemoModeHydration = () => {
+  const [hydrated, setHydrated] = useState(false)
+
+  useEffect(() => {
+    // Check if already hydrated
+    const unsubFinishHydration = useDemoModeStore.persist.onFinishHydration(() => {
+      setHydrated(true)
+    })
+
+    // If already hydrated (e.g., from SSR), set immediately
+    if (useDemoModeStore.persist.hasHydrated()) {
+      setHydrated(true)
+    }
+
+    return () => {
+      unsubFinishHydration()
+    }
+  }, [])
+
+  return hydrated
+}
