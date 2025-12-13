@@ -60,93 +60,89 @@ export const useDemoModeStore = create<DemoModeState>()(
       populateDemoData: () => {
         if (get().isInitialized) return
 
-        // Populate companies - directly set into store state
-        const companiesStore = useCompaniesStore.getState()
+        // Populate companies - use setState for proper reactivity
         const companiesWithDates = DEMO_DATA.companies.map((company) => ({
           ...company,
           createdAt: new Date(),
           updatedAt: new Date(),
         }))
-        companiesStore.companies.push(...companiesWithDates)
+        useCompaniesStore.setState((state) => ({
+          companies: [...state.companies, ...companiesWithDates],
+        }))
 
-        // Populate events - directly set into store state
-        const calendarStore = useCalendarStore.getState()
+        // Populate events - use setState for proper reactivity
         const eventsWithDates = DEMO_DATA.events.map((event) => ({
           ...event,
           createdAt: new Date(),
           updatedAt: new Date(),
         }))
-        calendarStore.events.push(...eventsWithDates)
+        useCalendarStore.setState((state) => ({
+          events: [...state.events, ...eventsWithDates],
+        }))
 
-        // Populate tasks - directly set into store state
-        const tasksStore = useTasksStore.getState()
+        // Populate tasks - use setState for proper reactivity
         const tasksWithDates = DEMO_DATA.tasks.map((task) => ({
           ...task,
           createdAt: new Date(),
           updatedAt: new Date(),
         }))
-        tasksStore.tasks.push(...tasksWithDates)
+        useTasksStore.setState((state) => ({
+          tasks: [...state.tasks, ...tasksWithDates],
+        }))
 
-        // Populate goals - directly set into store state
-        const goalsStore = useGoalsStore.getState()
+        // Populate goals - use setState for proper reactivity
         const goalsWithDates = DEMO_DATA.goals.map((goal) => ({
           ...goal,
           createdAt: new Date(),
           updatedAt: new Date(),
         }))
-        goalsStore.goals.push(...goalsWithDates)
+        useGoalsStore.setState((state) => ({
+          goals: [...state.goals, ...goalsWithDates],
+        }))
 
-        // Populate AI content - directly set into store state
-        const aiContentStore = useAIContentStore.getState()
+        // Populate AI content - use setState for proper reactivity
         const contentWithDates = DEMO_DATA.aiContent.map((content) => ({
           ...content,
           createdAt: new Date(),
           updatedAt: new Date(),
         }))
-        aiContentStore.generations.push(...contentWithDates)
+        useAIContentStore.setState((state) => ({
+          generations: [...state.generations, ...contentWithDates],
+        }))
 
-        // Populate activities - directly set into store state
-        const activityStore = useActivityStore.getState()
-        activityStore.events.push(...DEMO_DATA.activities)
+        // Populate activities - use setState for proper reactivity
+        useActivityStore.setState((state) => ({
+          events: [...state.events, ...DEMO_DATA.activities],
+        }))
 
         set({ isInitialized: true })
       },
 
       clearDemoData: () => {
-        // Clear all demo data from stores
-        const companiesStore = useCompaniesStore.getState()
-        const calendarStore = useCalendarStore.getState()
-        const tasksStore = useTasksStore.getState()
-        const goalsStore = useGoalsStore.getState()
-        const aiContentStore = useAIContentStore.getState()
-        const activityStore = useActivityStore.getState()
+        // Remove demo items (those with 'demo-' prefix) using setState for proper reactivity
+        useCompaniesStore.setState((state) => ({
+          companies: state.companies.filter((c) => !c.id.startsWith('demo-')),
+        }))
 
-        // Remove demo items (those with 'demo-' prefix)
-        companiesStore.companies
-          .filter((c) => c.id.startsWith('demo-'))
-          .forEach((c) => companiesStore.deleteCompany(c.id))
+        useCalendarStore.setState((state) => ({
+          events: state.events.filter((e) => !e.id.startsWith('demo-')),
+        }))
 
-        calendarStore.events
-          .filter((e) => e.id.startsWith('demo-'))
-          .forEach((e) => calendarStore.deleteEvent(e.id))
+        useTasksStore.setState((state) => ({
+          tasks: state.tasks.filter((t) => !t.id.startsWith('demo-')),
+        }))
 
-        tasksStore.tasks
-          .filter((t) => t.id.startsWith('demo-'))
-          .forEach((t) => tasksStore.deleteTask(t.id))
+        useGoalsStore.setState((state) => ({
+          goals: state.goals.filter((g) => !g.id.startsWith('demo-')),
+        }))
 
-        // Filter out demo goals
-        goalsStore.goals = goalsStore.goals.filter(
-          (g) => !g.id.startsWith('demo-')
-        )
+        useAIContentStore.setState((state) => ({
+          generations: state.generations.filter((c) => !c.id.startsWith('demo-')),
+        }))
 
-        aiContentStore.generations
-          .filter((c) => c.id.startsWith('demo-'))
-          .forEach((c) => aiContentStore.deleteGeneration(c.id))
-
-        // Filter out demo activities
-        activityStore.events = activityStore.events.filter(
-          (a) => !a.id.startsWith('demo-')
-        )
+        useActivityStore.setState((state) => ({
+          events: state.events.filter((a) => !a.id.startsWith('demo-')),
+        }))
 
         set({ isInitialized: false })
       },
