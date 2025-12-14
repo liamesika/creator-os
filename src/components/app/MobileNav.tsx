@@ -7,27 +7,29 @@ import {
   LayoutDashboard,
   CalendarDays,
   CheckSquare,
-  Target,
   Building2,
-  Sparkles,
   TrendingUp,
   Users,
+  ClipboardCheck,
+  Sliders,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 
-// Creator mobile nav items
+// Creator mobile nav items (5 key items for mobile - prioritized)
 const creatorNavItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'דשבורד', color: 'accent' },
-  { href: '/ai-content', icon: Sparkles, label: 'AI', color: 'purple' },
   { href: '/calendar', icon: CalendarDays, label: 'יומן', color: 'blue' },
+  { href: '/companies', icon: Building2, label: 'חברות', color: 'violet' },
+  { href: '/approvals', icon: ClipboardCheck, label: 'אישורים', color: 'emerald' },
   { href: '/tasks', icon: CheckSquare, label: 'משימות', color: 'green' },
-  { href: '/goals', icon: Target, label: 'מטרות', color: 'orange' },
 ]
 
 // Agency mobile nav items
 const agencyNavItems = [
   { href: '/agency', icon: TrendingUp, label: 'דשבורד', color: 'accent' },
   { href: '/agency/members', icon: Users, label: 'יוצרים', color: 'blue' },
+  { href: '/agency/approvals', icon: ClipboardCheck, label: 'אישורים', color: 'emerald' },
+  { href: '/agency/control', icon: Sliders, label: 'בקרה', color: 'violet' },
 ]
 
 const colorClasses: Record<string, { active: string; dot: string }> = {
@@ -36,6 +38,7 @@ const colorClasses: Record<string, { active: string; dot: string }> = {
   blue: { active: 'text-blue-600', dot: 'bg-blue-500' },
   violet: { active: 'text-violet-600', dot: 'bg-violet-500' },
   green: { active: 'text-emerald-600', dot: 'bg-emerald-500' },
+  emerald: { active: 'text-emerald-600', dot: 'bg-emerald-500' },
   orange: { active: 'text-orange-600', dot: 'bg-orange-500' },
 }
 

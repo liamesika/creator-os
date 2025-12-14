@@ -9,7 +9,7 @@ interface PremiumEmptyStateProps {
   description?: string
   actionLabel?: string
   onAction?: () => void
-  color?: 'accent' | 'green' | 'blue' | 'orange' | 'purple'
+  color?: 'accent' | 'green' | 'blue' | 'orange' | 'purple' | 'violet'
 }
 
 export default function PremiumEmptyState({
@@ -46,6 +46,12 @@ export default function PremiumEmptyState({
       shape: 'bg-orange-100',
     },
     purple: {
+      iconBg: 'bg-gradient-to-br from-violet-100 to-violet-50',
+      icon: 'text-violet-500',
+      button: 'bg-violet-600 hover:bg-violet-700 shadow-violet-500/20',
+      shape: 'bg-violet-100',
+    },
+    violet: {
       iconBg: 'bg-gradient-to-br from-violet-100 to-violet-50',
       icon: 'text-violet-500',
       button: 'bg-violet-600 hover:bg-violet-700 shadow-violet-500/20',

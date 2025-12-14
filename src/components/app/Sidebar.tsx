@@ -10,13 +10,13 @@ import {
   Target,
   Sparkles,
   Settings,
-  ChevronRight,
-  ChevronLeft,
   PanelLeftClose,
   PanelLeft,
   Building2,
   Users,
   TrendingUp,
+  ClipboardCheck,
+  Sliders,
 } from 'lucide-react'
 import Logo from '../Logo'
 import { useAuth } from '@/context/AuthContext'
@@ -26,6 +26,7 @@ const creatorNavItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'דשבורד', color: 'accent' },
   { href: '/calendar', icon: CalendarDays, label: 'יומן', color: 'blue' },
   { href: '/companies', icon: Building2, label: 'חברות', color: 'violet' },
+  { href: '/approvals', icon: ClipboardCheck, label: 'אישורים', color: 'emerald' },
   { href: '/tasks', icon: CheckSquare, label: 'משימות', color: 'green' },
   { href: '/goals', icon: Target, label: 'מטרות', color: 'orange' },
   { href: '/ai', icon: Sparkles, label: 'תוכן AI', color: 'purple' },
@@ -35,6 +36,8 @@ const creatorNavItems = [
 const agencyNavItems = [
   { href: '/agency', icon: TrendingUp, label: 'דשבורד סוכנות', color: 'accent' },
   { href: '/agency/members', icon: Users, label: 'ניהול יוצרים', color: 'blue' },
+  { href: '/agency/approvals', icon: ClipboardCheck, label: 'אישורים', color: 'emerald' },
+  { href: '/agency/control', icon: Sliders, label: 'בקרה', color: 'violet' },
 ]
 
 const bottomNavItems = [
@@ -61,6 +64,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       blue: 'bg-blue-50 text-blue-700 border-blue-200',
       violet: 'bg-violet-50 text-violet-700 border-violet-200',
       green: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
       orange: 'bg-orange-50 text-orange-700 border-orange-200',
       purple: 'bg-violet-50 text-violet-700 border-violet-200',
       neutral: 'bg-neutral-100 text-neutral-800 border-neutral-200',

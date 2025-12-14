@@ -28,6 +28,8 @@ import {
   QuickStats,
 } from '@/components/app/agency/AgencyAnalytics'
 import AnalyticsCard from '@/components/app/AnalyticsCard'
+import { InsightsStrip } from '@/components/app/insights/InsightsStrip'
+import { useInsights } from '@/hooks/useInsights'
 import { formatEarnings, getMonthName } from '@/types/agency'
 import type { AgencyDashboardStats, AgencyCreatorStats } from '@/types/agency'
 
@@ -58,6 +60,7 @@ export default function AgencyDashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFilter, setDateFilter] = useState<'month' | 'quarter' | 'year'>('month')
+  const { insights } = useInsights({ scope: 'agency' })
 
   useEffect(() => {
     if (user?.accountType !== 'agency') {
@@ -146,6 +149,16 @@ export default function AgencyDashboardPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Insights Strip */}
+        {insights.length > 0 && (
+          <motion.div variants={itemVariants} className="mb-8">
+            <InsightsStrip
+              insights={insights}
+              delay={0.15}
+            />
+          </motion.div>
+        )}
 
         {/* Stats Cards */}
         <motion.div variants={itemVariants} className="mb-8">

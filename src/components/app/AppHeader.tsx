@@ -3,12 +3,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { Bell, Search, LogOut, User, Settings, ChevronDown, Menu, Sparkles, Building2 } from 'lucide-react'
+import { Search, LogOut, Settings, ChevronDown, Menu, Sparkles, Building2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useDemoModeStore } from '@/stores/demoModeStore'
 import Logo from '../Logo'
 import MobileMenuSheet from './MobileMenuSheet'
+import NotificationCenter from './NotificationCenter'
 
 interface AppHeaderProps {
   sidebarCollapsed: boolean
@@ -19,18 +20,13 @@ export default function AppHeader({ sidebarCollapsed }: AppHeaderProps) {
   const router = useRouter()
   const { isDemo } = useDemoModeStore()
   const [showDropdown, setShowDropdown] = useState(false)
-  const [showNotifications, setShowNotifications] = useState(false)
   const [showMobileMenu, setShowMobileMenu] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
-  const notifRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setShowDropdown(false)
-      }
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
-        setShowNotifications(false)
       }
     }
 
@@ -115,41 +111,7 @@ export default function AppHeader({ sidebarCollapsed }: AppHeaderProps) {
         </button>
 
         {/* Notifications */}
-        <div className="relative" ref={notifRef}>
-          <motion.button
-            whileTap={{ scale: 0.95 }}
-            onClick={() => setShowNotifications(!showNotifications)}
-            className="relative p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-xl transition-colors"
-          >
-            <Bell size={20} />
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-accent-500 rounded-full" />
-          </motion.button>
-
-          <AnimatePresence>
-            {showNotifications && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="absolute left-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-neutral-100 overflow-hidden z-50"
-              >
-                <div className="px-4 py-3 border-b border-neutral-100">
-                  <h3 className="font-semibold text-neutral-900">התראות</h3>
-                </div>
-                <div className="p-4">
-                  <div className="empty-state py-6">
-                    <div className="empty-state-icon">
-                      <Bell size={20} className="text-neutral-400" />
-                    </div>
-                    <p className="empty-state-title">אין התראות חדשות</p>
-                    <p className="empty-state-description">נעדכן אותך כשיהיה משהו חדש</p>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+        <NotificationCenter />
 
         {/* User menu */}
         <div className="relative" ref={dropdownRef}>

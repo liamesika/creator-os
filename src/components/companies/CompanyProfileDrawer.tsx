@@ -19,7 +19,10 @@ import {
   Plus,
   Clock,
   Building2,
+  Package,
 } from 'lucide-react'
+import Link from 'next/link'
+import ClientPortalSection from '@/components/client-portal/ClientPortalSection'
 import {
   Company,
   BRAND_TYPE_PRESETS,
@@ -396,6 +399,29 @@ export default function CompanyProfileDrawer({
                   </button>
                 </div>
               </div>
+
+              {/* Quick Links - Timeline & Deliverables */}
+              <div className="px-5 py-4 border-b border-neutral-100">
+                <div className="flex gap-2">
+                  <Link
+                    href={`/companies/${company.id}/timeline`}
+                    className="flex-1 px-4 py-2.5 bg-indigo-50 text-indigo-700 rounded-xl font-medium text-sm hover:bg-indigo-100 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Clock size={16} />
+                    ציר זמן
+                  </Link>
+                  <Link
+                    href={`/companies/${company.id}/deliverables`}
+                    className="flex-1 px-4 py-2.5 bg-violet-50 text-violet-700 rounded-xl font-medium text-sm hover:bg-violet-100 transition-all flex items-center justify-center gap-2"
+                  >
+                    <Package size={16} />
+                    תוצרים
+                  </Link>
+                </div>
+              </div>
+
+              {/* Client Portal */}
+              <ClientPortalSection companyId={company.id} companyName={company.name} />
 
               {/* Linked Events */}
               <div className="px-5 py-4">

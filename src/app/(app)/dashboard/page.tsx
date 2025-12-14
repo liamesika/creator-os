@@ -22,6 +22,7 @@ import {
   Building2,
   AlertTriangle,
   Briefcase,
+  Focus,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useCompaniesStore } from '@/stores/companiesStore'
@@ -34,6 +35,10 @@ import { formatRelativeTime } from '@/lib/format-time'
 import PremiumCard from '@/components/app/PremiumCard'
 import AnalyticsCard from '@/components/app/AnalyticsCard'
 import PremiumEmptyState from '@/components/app/PremiumEmptyState'
+import HealthScoreCard from '@/components/app/HealthScoreCard'
+import { InsightsStrip } from '@/components/app/insights/InsightsStrip'
+import { useHealthScore } from '@/hooks/useHealthScore'
+import { useInsights } from '@/hooks/useInsights'
 
 // Get greeting based on time
 const getGreeting = () => {
@@ -96,6 +101,8 @@ export default function DashboardPage() {
   } = useCalendarStore()
   const { companies } = useCompaniesStore()
   const { events: activityEvents, fetchEvents } = useActivityStore()
+  const { health, isLoading: healthLoading } = useHealthScore()
+  const { insights, isLoading: insightsLoading } = useInsights({ scope: 'creator' })
 
   useEffect(() => {
     if (user?.id) {
@@ -246,6 +253,17 @@ export default function DashboardPage() {
             </div>
           </div>
         </motion.div>
+
+        {/* Insights Strip */}
+        {insights.length > 0 && (
+          <motion.div variants={itemVariants} className="mb-8">
+            <InsightsStrip
+              insights={insights}
+              loading={insightsLoading}
+              delay={0.25}
+            />
+          </motion.div>
+        )}
 
         {/* Main Content Grid */}
         <div className="grid lg:grid-cols-3 gap-6">
@@ -429,6 +447,42 @@ export default function DashboardPage() {
 
           {/* Right Column - Calendar & Progress */}
           <div className="space-y-6">
+            {/* Health Score Card */}
+            {health && !healthLoading && (
+              <motion.div variants={itemVariants}>
+                <HealthScoreCard
+                  score={health.score}
+                  status={health.status}
+                  statusLabel={health.statusLabel}
+                  insights={health.details.insights}
+                  delay={0.3}
+                />
+              </motion.div>
+            )}
+
+            {/* Focus Mode CTA */}
+            <motion.div variants={itemVariants}>
+              <Link href="/focus">
+                <motion.div
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl p-5 cursor-pointer shadow-xl shadow-indigo-600/20"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                  <div className="relative z-10 flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
+                      <Focus size={24} className="text-white" />
+                    </div>
+                    <div className="text-white">
+                      <h3 className="font-bold text-lg">מצב פוקוס</h3>
+                      <p className="text-white/80 text-sm">התחל את היום המרוכז שלך</p>
+                    </div>
+                    <ChevronLeft size={20} className="text-white/60 mr-auto" />
+                  </div>
+                </motion.div>
+              </Link>
+            </motion.div>
+
             {/* Calendar Preview */}
             <motion.div variants={itemVariants}>
               <PremiumCard delay={0.45}>

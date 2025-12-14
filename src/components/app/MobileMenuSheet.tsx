@@ -12,10 +12,32 @@ import {
   Building2,
   Sparkles,
   Settings,
-  User,
   LogOut,
+  TrendingUp,
+  Users,
+  ClipboardCheck,
+  Sliders,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
+
+// Creator nav items
+const creatorNavItems = [
+  { href: '/dashboard', label: 'דשבורד', icon: LayoutDashboard },
+  { href: '/calendar', label: 'לוח שנה', icon: Calendar },
+  { href: '/companies', label: 'חברות', icon: Building2 },
+  { href: '/approvals', label: 'אישורים', icon: ClipboardCheck },
+  { href: '/tasks', label: 'משימות', icon: CheckSquare },
+  { href: '/goals', label: 'מטרות', icon: Target },
+  { href: '/ai', label: 'AI', icon: Sparkles },
+]
+
+// Agency nav items
+const agencyNavItems = [
+  { href: '/agency', label: 'דשבורד סוכנות', icon: TrendingUp },
+  { href: '/agency/members', label: 'ניהול יוצרים', icon: Users },
+  { href: '/agency/approvals', label: 'אישורים', icon: ClipboardCheck },
+  { href: '/agency/control', label: 'בקרה', icon: Sliders },
+]
 
 interface MobileMenuSheetProps {
   isOpen: boolean
@@ -30,14 +52,9 @@ export default function MobileMenuSheet({
   const router = useRouter()
   const { user, logout } = useAuth()
 
-  const navItems = [
-    { href: '/dashboard', label: 'דשבורד', icon: LayoutDashboard },
-    { href: '/calendar', label: 'לוח שנה', icon: Calendar },
-    { href: '/tasks', label: 'משימות', icon: CheckSquare },
-    { href: '/goals', label: 'מטרות', icon: Target },
-    { href: '/companies', label: 'חברות', icon: Building2 },
-    { href: '/ai', label: 'AI', icon: Sparkles },
-  ]
+  // Select nav items based on account type
+  const isAgency = user?.accountType === 'agency'
+  const navItems = isAgency ? agencyNavItems : creatorNavItems
 
   const handleNavigate = (href: string) => {
     router.push(href)
