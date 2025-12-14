@@ -1,4 +1,4 @@
-export type PlanTier = 'free' | 'premium' | 'agency'
+export type PlanTier = 'trial' | 'basic' | 'premium' | 'agency'
 
 export interface PricingPlan {
   id: PlanTier
@@ -30,29 +30,52 @@ export interface AgencyPricingConfig {
 
 // Pricing configuration - easy to adjust
 export const PRICING_CONFIG: Record<PlanTier, PricingPlan> = {
-  free: {
-    id: 'free',
-    name: 'Free',
-    nameHebrew: 'חינם',
-    description: 'התחילו בחינם',
+  trial: {
+    id: 'trial',
+    name: 'Trial',
+    nameHebrew: 'ניסיון',
+    description: '14 ימים חינם',
     monthlyPrice: 0,
     annualPrice: 0,
     annualDiscount: 0,
     currency: 'ILS',
     features: [
-      'עד 3 לקוחות פעילים',
-      'עד 10 אירועים בחודש',
-      'עד 20 משימות',
-      'מטרות יומיות',
-      'ציר פעילות בסיסי',
+      'גישה מלאה לכל התכונות',
+      '14 ימים ללא התחייבות',
+      'ללא צורך בכרטיס אשראי',
     ],
     limitations: [
-      'ללא תבניות לוח שנה',
-      'ללא יצירת תוכן AI',
-      'ללא סקירה שבועית',
+      'מוגבל ל-14 ימים',
     ],
-    cta: 'התחילו חינם',
-    ctaLink: 'https://wa.me/972587878676?text=' + encodeURIComponent('Hi, I\'d like to purchase the Free plan on Creators OS and create a user.'),
+    cta: 'התחילו ניסיון חינם',
+    ctaLink: 'https://wa.me/972587878676?text=' + encodeURIComponent('Hi, I\'d like to start a 14-day free trial on Creators OS.'),
+    popular: false,
+    showPrice: true,
+  },
+  basic: {
+    id: 'basic',
+    name: 'Basic',
+    nameHebrew: 'בסיסי',
+    description: 'עבור יוצרים מתחילים',
+    monthlyPrice: 39,
+    annualPrice: 390, // ~17% discount
+    annualDiscount: 17,
+    currency: 'ILS',
+    features: [
+      'עד 5 לקוחות פעילים',
+      'עד 20 אירועים בחודש',
+      'עד 50 משימות',
+      'מטרות יומיות',
+      'ציר פעילות בסיסי',
+      'תבניות לוח שנה בסיסיות',
+    ],
+    limitations: [
+      'ללא יצירת תוכן AI',
+      'ללא פורטל לקוחות',
+      'ללא מעקב תוצרים',
+    ],
+    cta: 'התחילו Basic',
+    ctaLink: 'https://wa.me/972587878676?text=' + encodeURIComponent('Hi, I\'d like to purchase the Basic plan on Creators OS and create a user.'),
     popular: false,
     showPrice: true,
   },
@@ -61,8 +84,8 @@ export const PRICING_CONFIG: Record<PlanTier, PricingPlan> = {
     name: 'Premium',
     nameHebrew: 'פרימיום',
     description: 'עבור יוצרים מקצועיים',
-    monthlyPrice: 79,
-    annualPrice: 790, // ~17% discount
+    monthlyPrice: 99,
+    annualPrice: 990, // ~17% discount
     annualDiscount: 17,
     currency: 'ILS',
     features: [
@@ -144,6 +167,7 @@ export const AGENCY_CONFIG: AgencyPricingConfig = {
 export function getMonthlyPrice(tier: PlanTier): string {
   const plan = PRICING_CONFIG[tier]
   if (!plan.showPrice) return 'תמחור מותאם'
+  if (tier === 'trial') return '14 ימים חינם'
   if (plan.monthlyPrice === 0) return 'חינם'
   return `₪${plan.monthlyPrice}`
 }

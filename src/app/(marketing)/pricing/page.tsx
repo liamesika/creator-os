@@ -11,7 +11,7 @@ import { trackEvent } from '@/lib/analytics'
 
 export default function PricingPage() {
   const { isEnabled: salesMode } = useSalesModeStore()
-  const plans = [PRICING_CONFIG.free, PRICING_CONFIG.premium]
+  const plans = [PRICING_CONFIG.trial, PRICING_CONFIG.basic, PRICING_CONFIG.premium]
 
   useEffect(() => {
     trackEvent('pricing_viewed')
@@ -60,7 +60,7 @@ export default function PricingPage() {
       {/* Pricing Cards */}
       <section className="py-12 sm:py-14 bg-white">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
             {plans.map((plan, index) => (
               <motion.div
                 key={plan.id}
@@ -95,9 +95,6 @@ export default function PricingPage() {
                     </span>
                     {plan.monthlyPrice > 0 && (
                       <span className="text-gray-600">לחודש</span>
-                    )}
-                    {plan.monthlyPrice === 0 && (
-                      <span className="text-gray-600">לתמיד</span>
                     )}
                   </div>
                 </div>
