@@ -5,22 +5,19 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter, useParams } from 'next/navigation'
 import {
-  User,
   Building2,
   DollarSign,
   Calendar,
-  CheckSquare,
   ChevronRight,
   Plus,
   TrendingUp,
   Clock,
-  ArrowUpRight,
   Loader2,
   X,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { db } from '@/lib/supabase/database'
-import PremiumCard from '@/components/app/PremiumCard'
+import { AgencyCard, AgencyCardHeader, AgencyRow, AgencyEmptyState } from '@/components/app/agency/AgencyCard'
 import AnalyticsCard from '@/components/app/AnalyticsCard'
 import { formatEarnings, getMonthName } from '@/types/agency'
 import { BRAND_TYPE_PRESETS, formatCurrency } from '@/types/company'
@@ -108,10 +105,16 @@ export default function CreatorDetailPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 size={32} className="text-accent-600 animate-spin" />
-          <p className="text-sm text-neutral-500 text-center">טוען נתוני יוצר...</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent-100 to-violet-100 flex items-center justify-center">
+            <Loader2 size={24} className="text-accent-600 animate-spin" />
+          </div>
+          <p className="text-sm text-neutral-500">טוען נתוני יוצר...</p>
+        </motion.div>
       </div>
     )
   }
@@ -141,20 +144,23 @@ export default function CreatorDetailPage() {
         <motion.div variants={itemVariants} className="mb-8">
           <Link
             href="/agency"
-            className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 mb-4 transition-colors"
           >
             <ChevronRight size={16} />
             חזרה לדשבורד
           </Link>
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center justify-center sm:justify-start gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-100 to-violet-100 flex items-center justify-center">
+            <div className="flex items-center gap-4">
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent-100 to-violet-100 flex items-center justify-center shadow-lg shadow-accent-100/50"
+              >
                 <span className="text-2xl font-bold text-accent-700">
                   {data.creator.name.charAt(0)}
                 </span>
-              </div>
-              <div className="text-center sm:text-right">
+              </motion.div>
+              <div>
                 <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">
                   {data.creator.name}
                 </h1>
@@ -162,17 +168,15 @@ export default function CreatorDetailPage() {
               </div>
             </div>
 
-            <div className="flex items-center justify-center gap-2">
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => setShowAddEarningModal(true)}
-                className="flex items-center gap-2 px-4 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium shadow-lg shadow-emerald-600/20 hover:bg-emerald-700 transition-colors"
-              >
-                <Plus size={16} strokeWidth={2.5} />
-                <span>הוסף הכנסה</span>
-              </motion.button>
-            </div>
+            <motion.button
+              whileHover={{ scale: 1.02, y: -1 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => setShowAddEarningModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl text-sm font-medium shadow-lg shadow-emerald-600/25 hover:shadow-emerald-600/40 transition-all duration-200"
+            >
+              <Plus size={16} strokeWidth={2.5} />
+              <span>הוסף הכנסה</span>
+            </motion.button>
           </div>
         </motion.div>
 
@@ -218,25 +222,22 @@ export default function CreatorDetailPage() {
           <div className="lg:col-span-2 space-y-6">
             {/* Companies */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.3}>
+              <AgencyCard delay={0.3} noPadding>
                 <div className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center">
-                        <Building2 size={18} className="text-violet-600" strokeWidth={2} />
-                      </div>
-                      <div className="text-center sm:text-right">
-                        <h2 className="font-semibold text-neutral-900">חברות</h2>
-                        <p className="text-xs text-neutral-400">{data.companies.length} חברות</p>
-                      </div>
-                    </div>
-                  </div>
+                  <AgencyCardHeader
+                    icon={Building2}
+                    iconColor="text-violet-600"
+                    iconBgColor="bg-gradient-to-br from-violet-100 to-violet-50"
+                    title="חברות"
+                    subtitle={`${data.companies.length} חברות`}
+                  />
 
                   {data.companies.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Building2 size={48} className="text-neutral-300 mx-auto mb-4" />
-                      <p className="text-neutral-600 text-center">אין חברות רשומות ליוצר זה</p>
-                    </div>
+                    <AgencyEmptyState
+                      icon={Building2}
+                      title="אין חברות רשומות"
+                      description="כאשר היוצר יוסיף חברות לחשבון שלו, תוכל לראות אותן כאן."
+                    />
                   ) : (
                     <div className="space-y-3">
                       {data.companies.map((company, index) => {
@@ -244,110 +245,100 @@ export default function CreatorDetailPage() {
                         const BrandIcon = brandPreset?.icon || Building2
 
                         return (
-                          <motion.div
-                            key={company.id}
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: 0.1 * index }}
-                            className="flex items-center justify-between p-3 bg-neutral-50 rounded-xl"
-                          >
-                            <div className="flex items-center gap-3">
-                              <div className={`p-2 rounded-lg ${brandPreset?.bgColor || 'bg-neutral-100'}`}>
-                                <BrandIcon size={16} className={brandPreset?.color || 'text-neutral-500'} />
+                          <AgencyRow key={company.id} index={index}>
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <div className={`p-2.5 rounded-xl ${brandPreset?.bgColor || 'bg-neutral-100'}`}>
+                                  <BrandIcon size={16} className={brandPreset?.color || 'text-neutral-500'} />
+                                </div>
+                                <div>
+                                  <p className="font-semibold text-neutral-900">{company.name}</p>
+                                  <p className="text-xs text-neutral-500">
+                                    {company.status === 'ACTIVE' ? 'פעילה' : 'בארכיון'}
+                                  </p>
+                                </div>
                               </div>
-                              <div className="text-center sm:text-right">
-                                <p className="font-medium text-neutral-900">{company.name}</p>
-                                <p className="text-xs text-neutral-500">
-                                  {company.status === 'ACTIVE' ? 'פעילה' : 'בארכיון'}
-                                </p>
-                              </div>
+                              {company.monthlyRetainer && (
+                                <span className="text-sm font-semibold text-emerald-600">
+                                  {formatCurrency(company.monthlyRetainer, company.currency || 'ILS')}
+                                </span>
+                              )}
                             </div>
-                            {company.monthlyRetainer && (
-                              <span className="text-sm font-semibold text-emerald-600">
-                                {formatCurrency(company.monthlyRetainer, company.currency || 'ILS')}
-                              </span>
-                            )}
-                          </motion.div>
+                          </AgencyRow>
                         )
                       })}
                     </div>
                   )}
                 </div>
-              </PremiumCard>
+              </AgencyCard>
             </motion.div>
 
             {/* Earnings History */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.35}>
+              <AgencyCard delay={0.35} noPadding>
                 <div className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center justify-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center">
-                        <DollarSign size={18} className="text-emerald-600" strokeWidth={2} />
-                      </div>
-                      <div className="text-center sm:text-right">
-                        <h2 className="font-semibold text-neutral-900">היסטוריית הכנסות</h2>
-                        <p className="text-xs text-neutral-400">{data.earnings.length} רשומות</p>
-                      </div>
-                    </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => setShowAddEarningModal(true)}
-                      className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-                    >
-                      <Plus size={18} className="text-neutral-500" strokeWidth={2} />
-                    </motion.button>
-                  </div>
+                  <AgencyCardHeader
+                    icon={DollarSign}
+                    iconColor="text-emerald-600"
+                    iconBgColor="bg-gradient-to-br from-emerald-100 to-emerald-50"
+                    title="היסטוריית הכנסות"
+                    subtitle={`${data.earnings.length} רשומות`}
+                    action={
+                      <motion.button
+                        whileHover={{ scale: 1.1 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={() => setShowAddEarningModal(true)}
+                        className="p-2 hover:bg-neutral-100 rounded-xl transition-colors"
+                      >
+                        <Plus size={18} className="text-neutral-500" strokeWidth={2} />
+                      </motion.button>
+                    }
+                  />
 
                   {data.earnings.length === 0 ? (
-                    <div className="text-center py-8">
-                      <DollarSign size={48} className="text-neutral-300 mx-auto mb-4" />
-                      <p className="text-neutral-600 mb-4 text-center">עדיין אין רשומות הכנסה</p>
-                      <button
-                        onClick={() => setShowAddEarningModal(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
-                      >
-                        <Plus size={16} />
-                        הוסף הכנסה ראשונה
-                      </button>
-                    </div>
+                    <AgencyEmptyState
+                      icon={DollarSign}
+                      title="עדיין אין רשומות הכנסה"
+                      description="הוסף רשומות הכנסה כדי לעקוב אחרי הביצועים הפיננסיים של היוצר."
+                      action={{
+                        label: 'הוסף הכנסה ראשונה',
+                        onClick: () => setShowAddEarningModal(true),
+                        icon: Plus,
+                      }}
+                      variant="premium"
+                    />
                   ) : (
-                    <div className="space-y-3 max-h-96 overflow-y-auto">
+                    <div className="space-y-3 max-h-96 overflow-y-auto scrollbar-hide">
                       {data.earnings.slice(0, 20).map((entry, index) => (
-                        <motion.div
-                          key={entry.id}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: 0.05 * index }}
-                          className="flex items-center justify-between p-3 bg-neutral-50 rounded-xl"
-                        >
-                          <div className="text-center sm:text-right">
-                            <p className="font-medium text-neutral-900">
-                              {formatEarnings(entry.amount, entry.currency)}
-                            </p>
-                            <div className="flex items-center gap-2 text-xs text-neutral-500">
-                              <span>
-                                {new Date(entry.earnedOn).toLocaleDateString('he-IL', {
-                                  day: 'numeric',
-                                  month: 'short',
-                                  year: 'numeric',
-                                })}
-                              </span>
-                              {entry.companyName && (
-                                <>
-                                  <span>•</span>
-                                  <span>{entry.companyName}</span>
-                                </>
-                              )}
+                        <AgencyRow key={entry.id} index={index}>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <p className="font-semibold text-neutral-900">
+                                {formatEarnings(entry.amount, entry.currency)}
+                              </p>
+                              <div className="flex items-center gap-2 text-xs text-neutral-500">
+                                <span>
+                                  {new Date(entry.earnedOn).toLocaleDateString('he-IL', {
+                                    day: 'numeric',
+                                    month: 'short',
+                                    year: 'numeric',
+                                  })}
+                                </span>
+                                {entry.companyName && (
+                                  <>
+                                    <span>•</span>
+                                    <span>{entry.companyName}</span>
+                                  </>
+                                )}
+                              </div>
                             </div>
+                            {entry.notes && (
+                              <span className="text-xs text-neutral-400 max-w-32 truncate">
+                                {entry.notes}
+                              </span>
+                            )}
                           </div>
-                          {entry.notes && (
-                            <span className="text-xs text-neutral-400 max-w-32 truncate">
-                              {entry.notes}
-                            </span>
-                          )}
-                        </motion.div>
+                        </AgencyRow>
                       ))}
                     </div>
                   )}
@@ -355,49 +346,52 @@ export default function CreatorDetailPage() {
                   {/* Monthly Breakdown */}
                   {data.monthlyEarningsBreakdown.length > 0 && (
                     <div className="mt-6 pt-6 border-t border-neutral-100">
-                      <h3 className="text-sm font-semibold text-neutral-700 mb-4 text-center">
+                      <h3 className="text-sm font-semibold text-neutral-700 mb-4">
                         סיכום חודשי
                       </h3>
                       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                         {data.monthlyEarningsBreakdown.slice(0, 6).map((month) => (
-                          <div key={month.month} className="p-3 bg-neutral-50 rounded-xl text-center">
+                          <motion.div
+                            key={month.month}
+                            whileHover={{ scale: 1.02 }}
+                            className="p-3 bg-gradient-to-br from-neutral-50 to-white rounded-xl border border-neutral-100"
+                          >
                             <p className="text-xs text-neutral-500">
                               {getMonthName(new Date(month.month + '-01'))}
                             </p>
                             <p className="font-semibold text-emerald-600">
                               {formatEarnings(month.total)}
                             </p>
-                          </div>
+                          </motion.div>
                         ))}
                       </div>
                     </div>
                   )}
                 </div>
-              </PremiumCard>
+              </AgencyCard>
             </motion.div>
           </div>
 
-          {/* Right Column - Activity */}
+          {/* Right Column - Activity & Quick Actions */}
           <div className="space-y-6">
             {/* Recent Activity */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.4}>
+              <AgencyCard delay={0.4} noPadding>
                 <div className="p-5 sm:p-6">
-                  <div className="flex items-center justify-center gap-3 mb-5">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center">
-                      <Clock size={18} className="text-purple-600" strokeWidth={2} />
-                    </div>
-                    <div className="text-center">
-                      <h2 className="font-semibold text-neutral-900">פעילות אחרונה</h2>
-                      <p className="text-xs text-neutral-400">עדכונים אחרונים</p>
-                    </div>
-                  </div>
+                  <AgencyCardHeader
+                    icon={Clock}
+                    iconColor="text-purple-600"
+                    iconBgColor="bg-gradient-to-br from-purple-100 to-purple-50"
+                    title="פעילות אחרונה"
+                    subtitle="עדכונים אחרונים"
+                  />
 
                   {data.recentActivity.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Clock size={48} className="text-neutral-300 mx-auto mb-4" />
-                      <p className="text-neutral-600 text-center">אין פעילות אחרונה</p>
-                    </div>
+                    <AgencyEmptyState
+                      icon={Clock}
+                      title="אין פעילות אחרונה"
+                      description="כאשר היוצר יבצע פעולות, הן יופיעו כאן."
+                    />
                   ) : (
                     <div className="space-y-2">
                       {data.recentActivity.slice(0, 10).map((event, index) => {
@@ -410,10 +404,10 @@ export default function CreatorDetailPage() {
                             initial={{ opacity: 0, x: 10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: 0.05 * index }}
-                            className="flex items-start gap-3 p-2.5 hover:bg-neutral-50 rounded-lg transition-colors"
+                            className="flex items-start gap-3 p-2.5 hover:bg-neutral-50 rounded-xl transition-colors"
                           >
                             <div className="text-lg flex-shrink-0">{config.icon}</div>
-                            <div className="flex-1 min-w-0 text-center sm:text-right">
+                            <div className="flex-1 min-w-0">
                               <p className="text-xs font-medium text-neutral-900 truncate">
                                 {event.entityName || config.getTitle({ ...event, type: event.type as any, userId: '', createdAt: event.createdAt })}
                               </p>
@@ -427,25 +421,25 @@ export default function CreatorDetailPage() {
                     </div>
                   )}
                 </div>
-              </PremiumCard>
+              </AgencyCard>
             </motion.div>
 
             {/* Quick Actions */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.45}>
+              <AgencyCard delay={0.45} noPadding>
                 <div className="p-5 sm:p-6">
-                  <h3 className="font-semibold text-neutral-900 mb-4 text-center">פעולות מהירות</h3>
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => setShowAddEarningModal(true)}
-                      className="w-full flex items-center justify-center gap-3 p-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl transition-colors"
-                    >
-                      <DollarSign size={18} />
-                      <span className="font-medium">הוסף רשומת הכנסה</span>
-                    </button>
-                  </div>
+                  <h3 className="font-semibold text-neutral-900 mb-4">פעולות מהירות</h3>
+                  <motion.button
+                    onClick={() => setShowAddEarningModal(true)}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full flex items-center justify-center gap-3 p-3.5 bg-gradient-to-r from-emerald-50 to-green-50 hover:from-emerald-100 hover:to-green-100 text-emerald-700 rounded-xl transition-all duration-200 border border-emerald-200/50"
+                  >
+                    <DollarSign size={18} />
+                    <span className="font-medium">הוסף רשומת הכנסה</span>
+                  </motion.button>
                 </div>
-              </PremiumCard>
+              </AgencyCard>
             </motion.div>
           </div>
         </div>
@@ -505,34 +499,42 @@ function AddEarningModal({ companies, onClose, onSubmit }: AddEarningModalProps)
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white rounded-2xl shadow-xl max-w-md w-full"
+        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+        transition={{ duration: 0.2 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-neutral-900 text-center flex-1">
-              הוספת רשומת הכנסה
-            </h2>
-            <button
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-green-100 flex items-center justify-center">
+                <DollarSign size={18} className="text-emerald-600" />
+              </div>
+              <h2 className="text-xl font-bold text-neutral-900">
+                הוספת רשומת הכנסה
+              </h2>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onClose}
-              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-neutral-100 rounded-xl transition-colors"
             >
               <X size={20} className="text-neutral-500" />
-            </button>
+            </motion.button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Amount & Currency */}
             <div className="grid grid-cols-3 gap-3">
               <div className="col-span-2">
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5 text-center">
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                   סכום
                 </label>
                 <input
@@ -543,17 +545,17 @@ function AddEarningModal({ companies, onClose, onSubmit }: AddEarningModalProps)
                   min="0"
                   step="0.01"
                   required
-                  className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500 text-center"
+                  className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5 text-center">
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                   מטבע
                 </label>
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500 text-center"
+                  className="w-full px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200"
                 >
                   {CURRENCY_OPTIONS_DATA.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -566,7 +568,7 @@ function AddEarningModal({ companies, onClose, onSubmit }: AddEarningModalProps)
 
             {/* Date */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5 text-center">
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                 תאריך
               </label>
               <input
@@ -574,20 +576,20 @@ function AddEarningModal({ companies, onClose, onSubmit }: AddEarningModalProps)
                 value={earnedOn}
                 onChange={(e) => setEarnedOn(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500 text-center"
+                className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200"
               />
             </div>
 
             {/* Company */}
             {companies.length > 0 && (
               <div>
-                <label className="block text-sm font-medium text-neutral-700 mb-1.5 text-center">
+                <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                   חברה (אופציונלי)
                 </label>
                 <select
                   value={companyId}
                   onChange={(e) => setCompanyId(e.target.value)}
-                  className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500 text-center"
+                  className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-200"
                 >
                   <option value="">ללא חברה ספציפית</option>
                   {companies.map((company) => (
@@ -601,7 +603,7 @@ function AddEarningModal({ companies, onClose, onSubmit }: AddEarningModalProps)
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5 text-center">
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                 הערות (אופציונלי)
               </label>
               <textarea
@@ -609,15 +611,17 @@ function AddEarningModal({ companies, onClose, onSubmit }: AddEarningModalProps)
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="פרטים נוספים על ההכנסה..."
                 rows={2}
-                className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500 resize-none text-center"
+                className="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 resize-none transition-all duration-200"
               />
             </div>
 
             {/* Submit */}
-            <button
+            <motion.button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 bg-emerald-600 text-white rounded-xl font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className="w-full py-3 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl font-semibold shadow-lg shadow-emerald-600/25 hover:shadow-emerald-600/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -630,7 +634,7 @@ function AddEarningModal({ companies, onClose, onSubmit }: AddEarningModalProps)
                   הוסף הכנסה
                 </>
               )}
-            </button>
+            </motion.button>
           </form>
         </div>
       </motion.div>

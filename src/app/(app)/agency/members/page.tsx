@@ -10,16 +10,14 @@ import {
   UserMinus,
   ChevronRight,
   Mail,
-  Check,
-  Clock,
   X,
   Loader2,
   AlertTriangle,
-  Copy,
   ExternalLink,
+  Sparkles,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
-import PremiumCard from '@/components/app/PremiumCard'
+import { AgencyCard, AgencyCardHeader, AgencyRow, AgencyEmptyState } from '@/components/app/agency/AgencyCard'
 import { MAX_CREATORS_PER_AGENCY, STATUS_CONFIGS } from '@/types/agency'
 import type { AgencyMembership } from '@/types/agency'
 import { toast } from 'sonner'
@@ -139,10 +137,16 @@ export default function AgencyMembersPage() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 size={32} className="text-accent-600 animate-spin" />
-          <p className="text-sm text-neutral-500 text-center">טוען חברי הסוכנות...</p>
-        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+            <Loader2 size={24} className="text-blue-600 animate-spin" />
+          </div>
+          <p className="text-sm text-neutral-500">טוען חברי הסוכנות...</p>
+        </motion.div>
       </div>
     )
   }
@@ -165,14 +169,14 @@ export default function AgencyMembersPage() {
         <motion.div variants={itemVariants} className="mb-8">
           <Link
             href="/agency"
-            className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 mb-4"
+            className="inline-flex items-center gap-2 text-sm text-neutral-500 hover:text-neutral-700 mb-4 transition-colors"
           >
             <ChevronRight size={16} />
             חזרה לדשבורד
           </Link>
 
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="text-center sm:text-right">
+            <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">
                 ניהול יוצרים
               </h1>
@@ -182,11 +186,11 @@ export default function AgencyMembersPage() {
             </div>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={{ scale: 1.02, y: -1 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowInviteModal(true)}
               disabled={activeMembers.length >= MAX_CREATORS_PER_AGENCY}
-              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-accent-600 text-white rounded-xl text-sm font-medium shadow-lg shadow-accent-600/20 hover:bg-accent-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 px-4 py-2.5 bg-gradient-to-r from-accent-600 to-violet-600 text-white rounded-xl text-sm font-medium shadow-lg shadow-accent-600/25 hover:shadow-accent-600/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none"
             >
               <UserPlus size={16} strokeWidth={2.5} />
               <span>הזמן יוצר</span>
@@ -195,60 +199,63 @@ export default function AgencyMembersPage() {
         </motion.div>
 
         {/* Capacity Warning */}
-        {activeMembers.length >= MAX_CREATORS_PER_AGENCY && (
-          <motion.div variants={itemVariants} className="mb-6">
-            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-              <div className="flex items-start gap-3">
-                <AlertTriangle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="text-center sm:text-right">
-                  <p className="font-medium text-amber-800">
-                    הגעת למגבלת היוצרים
-                  </p>
-                  <p className="text-sm text-amber-600 mt-1">
-                    יש לך {activeMembers.length} יוצרים מתוך {MAX_CREATORS_PER_AGENCY} המותרים.
-                    צור קשר לשדרוג החבילה.
-                  </p>
+        <AnimatePresence>
+          {activeMembers.length >= MAX_CREATORS_PER_AGENCY && (
+            <motion.div
+              variants={itemVariants}
+              initial="hidden"
+              animate="show"
+              exit="hidden"
+              className="mb-6"
+            >
+              <div className="bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                    <AlertTriangle size={18} className="text-amber-600" />
+                  </div>
+                  <div>
+                    <p className="font-semibold text-amber-800">
+                      הגעת למגבלת היוצרים
+                    </p>
+                    <p className="text-sm text-amber-600 mt-1">
+                      יש לך {activeMembers.length} יוצרים מתוך {MAX_CREATORS_PER_AGENCY} המותרים.
+                      צור קשר לשדרוג החבילה.
+                    </p>
+                  </div>
                 </div>
               </div>
-            </div>
-          </motion.div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Active Members */}
         <motion.div variants={itemVariants} className="mb-6">
-          <PremiumCard delay={0.2}>
+          <AgencyCard delay={0.2} noPadding>
             <div className="p-5 sm:p-6">
-              <div className="flex items-center justify-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                  <Users size={18} className="text-blue-600" strokeWidth={2} />
-                </div>
-                <div className="text-center">
-                  <h2 className="font-semibold text-neutral-900">יוצרים פעילים</h2>
-                  <p className="text-xs text-neutral-400">{activeMembers.length} יוצרים</p>
-                </div>
-              </div>
+              <AgencyCardHeader
+                icon={Users}
+                iconColor="text-blue-600"
+                iconBgColor="bg-gradient-to-br from-blue-100 to-blue-50"
+                title="יוצרים פעילים"
+                subtitle={`${activeMembers.length} יוצרים`}
+              />
 
               {activeMembers.length === 0 ? (
-                <div className="text-center py-8">
-                  <Users size={48} className="text-neutral-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-bold text-neutral-900 mb-2 text-center">
-                    עדיין אין יוצרים
-                  </h3>
-                  <p className="text-neutral-600 mb-6 text-center">
-                    הזמן יוצרים לסוכנות שלך כדי להתחיל לנהל אותם
-                  </p>
-                  <button
-                    onClick={() => setShowInviteModal(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 text-white rounded-xl font-bold hover:bg-accent-700 transition-colors"
-                  >
-                    <UserPlus size={20} />
-                    הזמן יוצר ראשון
-                  </button>
-                </div>
+                <AgencyEmptyState
+                  icon={Users}
+                  title="עדיין אין יוצרים בסוכנות"
+                  description="הזמן יוצרים לסוכנות שלך כדי לנהל את כל ההכנסות, החברות והביצועים שלהם במקום אחד מרכזי."
+                  action={{
+                    label: 'הזמן את היוצר הראשון',
+                    onClick: () => setShowInviteModal(true),
+                    icon: UserPlus,
+                  }}
+                  variant="premium"
+                />
               ) : (
                 <div className="space-y-3">
                   {activeMembers.map((member, index) => (
-                    <MemberRow
+                    <MemberCard
                       key={member.id}
                       member={member}
                       index={index}
@@ -258,38 +265,38 @@ export default function AgencyMembersPage() {
                 </div>
               )}
             </div>
-          </PremiumCard>
+          </AgencyCard>
         </motion.div>
 
         {/* Removed Members */}
-        {removedMembers.length > 0 && (
-          <motion.div variants={itemVariants}>
-            <PremiumCard delay={0.3}>
-              <div className="p-5 sm:p-6">
-                <div className="flex items-center justify-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center">
-                    <UserMinus size={18} className="text-neutral-500" strokeWidth={2} />
-                  </div>
-                  <div className="text-center">
-                    <h2 className="font-semibold text-neutral-700">יוצרים שהוסרו</h2>
-                    <p className="text-xs text-neutral-400">{removedMembers.length} יוצרים</p>
-                  </div>
-                </div>
+        <AnimatePresence>
+          {removedMembers.length > 0 && (
+            <motion.div variants={itemVariants}>
+              <AgencyCard delay={0.3} noPadding>
+                <div className="p-5 sm:p-6">
+                  <AgencyCardHeader
+                    icon={UserMinus}
+                    iconColor="text-neutral-500"
+                    iconBgColor="bg-gradient-to-br from-neutral-100 to-neutral-50"
+                    title="יוצרים שהוסרו"
+                    subtitle={`${removedMembers.length} יוצרים`}
+                  />
 
-                <div className="space-y-3">
-                  {removedMembers.map((member, index) => (
-                    <MemberRow
-                      key={member.id}
-                      member={member}
-                      index={index}
-                      isRemoved
-                    />
-                  ))}
+                  <div className="space-y-3">
+                    {removedMembers.map((member, index) => (
+                      <MemberCard
+                        key={member.id}
+                        member={member}
+                        index={index}
+                        isRemoved
+                      />
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </PremiumCard>
-          </motion.div>
-        )}
+              </AgencyCard>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Invite Modal */}
@@ -316,75 +323,73 @@ export default function AgencyMembersPage() {
   )
 }
 
-interface MemberRowProps {
+interface MemberCardProps {
   member: MemberWithDetails
   index: number
   isRemoved?: boolean
   onRemove?: () => void
 }
 
-function MemberRow({ member, index, isRemoved, onRemove }: MemberRowProps) {
+function MemberCard({ member, index, isRemoved, onRemove }: MemberCardProps) {
   const name = member.creator?.name || member.inviteEmail?.split('@')[0] || 'יוצר'
   const email = member.creator?.email || member.inviteEmail || ''
   const statusConfig = STATUS_CONFIGS[member.status]
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.05 * index }}
-      className={`flex items-center justify-between p-4 rounded-xl ${
-        isRemoved ? 'bg-neutral-50/50' : 'bg-neutral-50 hover:bg-neutral-100'
-      } transition-colors`}
-    >
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-          isRemoved
-            ? 'bg-neutral-200'
-            : 'bg-gradient-to-br from-accent-100 to-violet-100'
-        }`}>
-          <span className={`text-sm font-bold ${isRemoved ? 'text-neutral-500' : 'text-accent-700'}`}>
-            {name.charAt(0).toUpperCase()}
-          </span>
-        </div>
-        <div className="text-center sm:text-right">
-          <p className={`font-medium ${isRemoved ? 'text-neutral-500' : 'text-neutral-900'}`}>
-            {name}
-          </p>
-          <div className="flex items-center gap-2">
-            <p className="text-xs text-neutral-500">{email}</p>
-            <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded ${statusConfig.bgColor} ${statusConfig.color}`}>
-              {statusConfig.label}
+    <AgencyRow index={index} className={isRemoved ? 'opacity-60' : ''}>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <motion.div
+            whileHover={!isRemoved ? { scale: 1.05 } : undefined}
+            className={`w-11 h-11 rounded-xl flex items-center justify-center ${
+              isRemoved
+                ? 'bg-neutral-200'
+                : 'bg-gradient-to-br from-accent-100 to-violet-100'
+            }`}
+          >
+            <span className={`text-sm font-bold ${isRemoved ? 'text-neutral-500' : 'text-accent-700'}`}>
+              {name.charAt(0).toUpperCase()}
             </span>
+          </motion.div>
+          <div>
+            <div className="flex items-center gap-2">
+              <p className={`font-semibold ${isRemoved ? 'text-neutral-500' : 'text-neutral-900'}`}>
+                {name}
+              </p>
+              <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${statusConfig.bgColor} ${statusConfig.color}`}>
+                {statusConfig.label}
+              </span>
+            </div>
+            <p className="text-xs text-neutral-500">{email}</p>
           </div>
         </div>
-      </div>
 
-      <div className="flex items-center gap-2">
-        {member.status === 'active' && member.creator && (
-          <Link href={`/agency/creators/${member.creator.id}`}>
+        <div className="flex items-center gap-2">
+          {member.status === 'active' && member.creator && (
+            <Link href={`/agency/creators/${member.creator.id}`}>
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                className="p-2.5 hover:bg-white rounded-xl transition-all duration-200"
+              >
+                <ExternalLink size={16} className="text-accent-600" />
+              </motion.button>
+            </Link>
+          )}
+
+          {!isRemoved && onRemove && (
             <motion.button
-              whileHover={{ scale: 1.05 }}
+              whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
-              className="p-2 hover:bg-white rounded-lg transition-colors"
+              onClick={onRemove}
+              className="p-2.5 hover:bg-red-50 rounded-xl transition-all duration-200"
             >
-              <ExternalLink size={16} className="text-accent-600" />
+              <UserMinus size={16} className="text-red-500" />
             </motion.button>
-          </Link>
-        )}
-
-        {!isRemoved && onRemove && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={onRemove}
-            className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-          >
-            <UserMinus size={16} className="text-red-500" />
-          </motion.button>
-        )}
+          )}
+        </div>
       </div>
-    </motion.div>
+    </AgencyRow>
   )
 }
 
@@ -415,32 +420,40 @@ function InviteModal({ onClose, onInvite }: InviteModalProps) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white rounded-2xl shadow-xl max-w-md w-full"
+        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+        transition={{ duration: 0.2 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-neutral-900 text-center flex-1">
-              הזמנת יוצר חדש
-            </h2>
-            <button
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-100 to-violet-100 flex items-center justify-center">
+                <UserPlus size={18} className="text-accent-600" />
+              </div>
+              <h2 className="text-xl font-bold text-neutral-900">
+                הזמנת יוצר חדש
+              </h2>
+            </div>
+            <motion.button
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onClose}
-              className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-neutral-100 rounded-xl transition-colors"
             >
               <X size={20} className="text-neutral-500" />
-            </button>
+            </motion.button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-neutral-700 mb-1.5 text-center">
+              <label className="block text-sm font-medium text-neutral-700 mb-1.5">
                 כתובת אימייל של היוצר
               </label>
               <div className="relative">
@@ -451,20 +464,22 @@ function InviteModal({ onClose, onInvite }: InviteModalProps) {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="creator@example.com"
                   required
-                  className="w-full pl-4 pr-10 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500 text-center"
+                  className="w-full pl-4 pr-10 py-3 bg-neutral-50 border border-neutral-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-accent-500/20 focus:border-accent-500 transition-all duration-200"
                   dir="ltr"
                 />
               </div>
-              <p className="text-xs text-neutral-500 mt-2 text-center">
+              <p className="text-xs text-neutral-500 mt-2">
                 אם היוצר כבר רשום במערכת, הוא יתווסף אוטומטית.
                 אחרת, הוא יקבל הזמנה להצטרף.
               </p>
             </div>
 
-            <button
+            <motion.button
               type="submit"
               disabled={isSubmitting || !email}
-              className="w-full py-3 bg-accent-600 text-white rounded-xl font-semibold hover:bg-accent-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              whileHover={{ scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
+              className="w-full py-3 bg-gradient-to-r from-accent-600 to-violet-600 text-white rounded-xl font-semibold shadow-lg shadow-accent-600/25 hover:shadow-accent-600/40 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
             >
               {isSubmitting ? (
                 <>
@@ -477,7 +492,7 @@ function InviteModal({ onClose, onInvite }: InviteModalProps) {
                   שלח הזמנה
                 </>
               )}
-            </button>
+            </motion.button>
           </form>
         </div>
       </motion.div>
@@ -506,20 +521,25 @@ function RemoveConfirmModal({ member, onClose, onConfirm }: RemoveConfirmModalPr
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        className="bg-white rounded-2xl shadow-xl max-w-sm w-full"
+        initial={{ scale: 0.95, opacity: 0, y: 20 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.95, opacity: 0, y: 20 }}
+        transition={{ duration: 0.2 }}
+        className="bg-white rounded-2xl shadow-2xl max-w-sm w-full"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-6 text-center">
-          <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
-            <AlertTriangle size={32} className="text-red-500" />
-          </div>
+          <motion.div
+            initial={{ scale: 0.8 }}
+            animate={{ scale: 1 }}
+            className="w-16 h-16 rounded-2xl bg-gradient-to-br from-red-100 to-red-50 flex items-center justify-center mx-auto mb-5"
+          >
+            <AlertTriangle size={28} className="text-red-500" />
+          </motion.div>
 
           <h2 className="text-xl font-bold text-neutral-900 mb-2">
             הסרת יוצר מהסוכנות
@@ -531,15 +551,19 @@ function RemoveConfirmModal({ member, onClose, onConfirm }: RemoveConfirmModalPr
           </p>
 
           <div className="flex gap-3">
-            <button
+            <motion.button
               onClick={onClose}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               className="flex-1 py-2.5 bg-neutral-100 text-neutral-700 rounded-xl font-medium hover:bg-neutral-200 transition-colors"
             >
               ביטול
-            </button>
-            <button
+            </motion.button>
+            <motion.button
               onClick={handleConfirm}
               disabled={isRemoving}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               className="flex-1 py-2.5 bg-red-500 text-white rounded-xl font-medium hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
             >
               {isRemoving ? (
@@ -550,7 +574,7 @@ function RemoveConfirmModal({ member, onClose, onConfirm }: RemoveConfirmModalPr
               ) : (
                 'הסר יוצר'
               )}
-            </button>
+            </motion.button>
           </div>
         </div>
       </motion.div>

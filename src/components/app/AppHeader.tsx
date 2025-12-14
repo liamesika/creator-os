@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
-import { Bell, Search, LogOut, User, Settings, ChevronDown, Menu, Sparkles } from 'lucide-react'
+import { Bell, Search, LogOut, User, Settings, ChevronDown, Menu, Sparkles, Building2 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useRouter } from 'next/navigation'
 import { useDemoModeStore } from '@/stores/demoModeStore'
@@ -51,6 +51,8 @@ export default function AppHeader({ sidebarCollapsed }: AppHeaderProps) {
       .slice(0, 2)
   }
 
+  const isAgency = user?.accountType === 'agency'
+
   const HeaderContent = () => (
     <div className="h-full px-4 sm:px-6 flex items-center justify-between">
       {/* Mobile menu button */}
@@ -61,7 +63,7 @@ export default function AppHeader({ sidebarCollapsed }: AppHeaderProps) {
         <Menu size={24} />
       </button>
 
-      {/* Mobile logo + Demo badge */}
+      {/* Mobile logo + Demo/Agency badge */}
       <div className="lg:hidden absolute left-1/2 -translate-x-1/2 flex items-center gap-2">
         <Logo size="sm" />
         {isDemo && (
@@ -70,9 +72,15 @@ export default function AppHeader({ sidebarCollapsed }: AppHeaderProps) {
             הדגמה
           </span>
         )}
+        {isAgency && !isDemo && (
+          <span className="px-2 py-0.5 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-xs font-semibold rounded-full flex items-center gap-1">
+            <Building2 size={10} />
+            סוכנות
+          </span>
+        )}
       </div>
 
-      {/* Search (desktop) + Demo badge */}
+      {/* Search (desktop) + Demo/Agency badge */}
       <div className="hidden lg:flex items-center gap-4 flex-1 max-w-md">
         <div className="relative w-full">
           <Search
@@ -89,6 +97,12 @@ export default function AppHeader({ sidebarCollapsed }: AppHeaderProps) {
           <span className="px-3 py-1.5 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 text-sm font-semibold rounded-full flex items-center gap-1.5 whitespace-nowrap">
             <Sparkles size={14} />
             מצב הדגמה
+          </span>
+        )}
+        {isAgency && !isDemo && (
+          <span className="px-3 py-1.5 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 text-sm font-semibold rounded-full flex items-center gap-1.5 whitespace-nowrap">
+            <Building2 size={14} />
+            חשבון סוכנות
           </span>
         )}
       </div>
