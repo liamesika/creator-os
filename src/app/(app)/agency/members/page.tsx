@@ -362,7 +362,7 @@ interface MemberCardProps {
 function MemberCard({ member, index, isRemoved, onRemove }: MemberCardProps) {
   const name = member.creator?.name || member.inviteEmail?.split('@')[0] || 'יוצר'
   const email = member.creator?.email || member.inviteEmail || ''
-  const statusConfig = STATUS_CONFIGS[member.status]
+  const statusConfig = STATUS_CONFIGS[member.status] || STATUS_CONFIGS.active
 
   return (
     <AgencyRow index={index} className={isRemoved ? 'opacity-60' : ''}>
