@@ -38,20 +38,20 @@ export default function HomePage() {
     },
     {
       icon: Target,
-      title: 'מעקב יעדים',
-      description: 'הגדרת יעדים שבועיים ועקיבה אחר התקדמות',
+      title: 'פורטל לקוחות',
+      description: 'שיתוף תוכן לאישור עם לקוחות בקישור אחד',
       color: 'from-green-500 to-emerald-500',
     },
     {
       icon: LineChart,
-      title: 'ציר פעילות',
-      description: 'כל מה שקורה במערכת במקום אחד, תמיד בשליטה',
+      title: 'מעקב תוצרים',
+      description: 'ניהול משלוחים חודשיים ומעקב התקדמות',
       color: 'from-indigo-500 to-purple-500',
     },
     {
       icon: CheckCircle,
-      title: 'ניהול משימות',
-      description: 'משימות מקושרות לאירועים עם תזכורות ומעקב',
+      title: 'מרכז התראות',
+      description: 'קבלו עדכונים על אישורים, משימות וחידושי חוזה',
       color: 'from-pink-500 to-rose-500',
     },
   ]

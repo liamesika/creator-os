@@ -182,17 +182,6 @@ export default function DashboardPage() {
                   </motion.button>
                 </Link>
               ))}
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.45 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-neutral-900 text-white rounded-xl text-sm font-medium shadow-lg shadow-neutral-900/20 hover:bg-neutral-800 transition-colors"
-              >
-                <Plus size={16} strokeWidth={2.5} />
-                <span className="hidden sm:inline">חדש</span>
-              </motion.button>
             </div>
           </div>
         </motion.div>

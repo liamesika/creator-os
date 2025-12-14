@@ -61,8 +61,8 @@ export const PRICING_CONFIG: Record<PlanTier, PricingPlan> = {
     name: 'Premium',
     nameHebrew: 'פרימיום',
     description: 'עבור יוצרים מקצועיים',
-    monthlyPrice: 49,
-    annualPrice: 490, // ~17% discount
+    monthlyPrice: 79,
+    annualPrice: 790, // ~17% discount
     annualDiscount: 17,
     currency: 'ILS',
     features: [
@@ -71,8 +71,10 @@ export const PRICING_CONFIG: Record<PlanTier, PricingPlan> = {
       'משימות ללא הגבלה',
       'תבניות לוח שנה מתקדמות',
       'יצירת תוכן AI ללא הגבלה',
-      'סקירה שבועית מלאה',
-      'ציר פעילות מלא',
+      'פורטל לקוחות לאישורים',
+      'מעקב תוצרים חודשיים',
+      'מרכז התראות מלא',
+      'סקירה חודשית מפורטת',
       'תמיכה מועדפת',
     ],
     limitations: [],
