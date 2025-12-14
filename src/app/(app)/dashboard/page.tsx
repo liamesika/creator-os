@@ -28,6 +28,9 @@ import { useAuth } from '@/context/AuthContext'
 import { useCompaniesStore } from '@/stores/companiesStore'
 import { useCalendarStore } from '@/stores/calendarStore'
 import { useActivityStore } from '@/stores/activityStore'
+import { useGoalsStore } from '@/stores/goalsStore'
+import { useTasksStore } from '@/stores/tasksStore'
+import { getTodayDateString } from '@/types/goal'
 import { CATEGORY_PRESETS } from '@/types/calendar'
 import { BRAND_TYPE_PRESETS, formatCurrency } from '@/types/company'
 import { ACTIVITY_CONFIGS } from '@/types/activity'
@@ -103,6 +106,8 @@ export default function DashboardPage() {
   const { events: activityEvents, fetchEvents } = useActivityStore()
   const { health, isLoading: healthLoading } = useHealthScore()
   const { insights, isLoading: insightsLoading } = useInsights({ scope: 'creator' })
+  const { goals, getGoalForDate } = useGoalsStore()
+  const { tasks, getTodayTasks, getOverdueTasks } = useTasksStore()
 
   useEffect(() => {
     if (user?.id) {
@@ -122,6 +127,15 @@ export default function DashboardPage() {
 
   // Recent activity (last 5)
   const recentActivity = activityEvents.slice(0, 5)
+
+  // Today's goals
+  const todayGoal = getGoalForDate(getTodayDateString())
+  const todayGoalItems = todayGoal?.items || []
+
+  // Today's tasks and overdue
+  const todayTasks = getTodayTasks()
+  const overdueTasks = getOverdueTasks()
+  const upcomingTasks = [...overdueTasks, ...todayTasks.filter(t => t.status !== 'DONE')].slice(0, 5)
 
   const getCompanyName = (companyId: string | undefined | null): string => {
     if (!companyId) return ''
@@ -358,34 +372,74 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h2 className="font-semibold text-neutral-900">המטרות של היום</h2>
-                        <p className="text-xs text-neutral-400">הגדר 1-3 מטרות</p>
+                        <p className="text-xs text-neutral-400">
+                          {todayGoalItems.length > 0
+                            ? `${todayGoalItems.filter(g => g.status === 'DONE').length}/${todayGoalItems.length} הושלמו`
+                            : 'הגדר 1-3 מטרות'
+                          }
+                        </p>
                       </div>
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-                    >
-                      <Plus size={18} className="text-neutral-500" strokeWidth={2} />
-                    </motion.button>
-                  </div>
-
-                  <div className="text-center py-8">
-                    <Target size={48} className="text-neutral-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-neutral-900 mb-2">
-                      עוד לא הוגדרו מטרות להיום
-                    </h3>
-                    <p className="text-neutral-600 mb-6">
-                      בחרי 1-3 מטרות כדי להתחיל חד
-                    </p>
-                    <Link
-                      href="/goals"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 text-white rounded-xl font-bold hover:bg-accent-700 transition-colors"
-                    >
-                      <Plus size={20} />
-                      הוסף מטרה
+                    <Link href="/goals">
+                      <motion.button
+                        whileHover={{ x: -2 }}
+                        className="flex items-center gap-1 text-sm text-accent-600 hover:text-accent-700"
+                      >
+                        כל המטרות
+                        <ChevronLeft size={16} />
+                      </motion.button>
                     </Link>
                   </div>
+
+                  {todayGoalItems.length === 0 ? (
+                    <div className="text-center py-8">
+                      <Target size={48} className="text-neutral-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-bold text-neutral-900 mb-2">
+                        עוד לא הוגדרו מטרות להיום
+                      </h3>
+                      <p className="text-neutral-600 mb-6">
+                        בחרי 1-3 מטרות כדי להתחיל חד
+                      </p>
+                      <Link
+                        href="/goals"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 text-white rounded-xl font-bold hover:bg-accent-700 transition-colors"
+                      >
+                        <Plus size={20} />
+                        הוסף מטרה
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {todayGoalItems.map((goal, index) => {
+                        const statusConfig = {
+                          DONE: { icon: '✅', bg: 'bg-emerald-50', text: 'text-emerald-700', label: 'הושלם' },
+                          PARTIAL: { icon: '🔄', bg: 'bg-amber-50', text: 'text-amber-700', label: 'חלקי' },
+                          NOT_DONE: { icon: '⏳', bg: 'bg-neutral-50', text: 'text-neutral-600', label: 'לא הושלם' },
+                        }
+                        const config = statusConfig[goal.status]
+
+                        return (
+                          <motion.div
+                            key={goal.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 * index }}
+                            className={`flex items-center gap-3 p-3 ${config.bg} rounded-xl`}
+                          >
+                            <span className="text-lg flex-shrink-0">{config.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <p className={`text-sm font-medium ${config.text} truncate`}>
+                                {goal.title}
+                              </p>
+                            </div>
+                            <span className={`text-xs ${config.text} font-medium flex-shrink-0`}>
+                              {config.label}
+                            </span>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               </PremiumCard>
             </motion.div>
@@ -401,34 +455,94 @@ export default function DashboardPage() {
                       </div>
                       <div>
                         <h2 className="font-semibold text-neutral-900">משימות להיום</h2>
-                        <p className="text-xs text-neutral-400">0 משימות פתוחות</p>
+                        <p className="text-xs text-neutral-400">
+                          {upcomingTasks.length > 0
+                            ? `${upcomingTasks.length} משימות פתוחות${overdueTasks.length > 0 ? ` (${overdueTasks.length} באיחור)` : ''}`
+                            : '0 משימות פתוחות'
+                          }
+                        </p>
                       </div>
                     </div>
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
-                    >
-                      <Plus size={18} className="text-neutral-500" strokeWidth={2} />
-                    </motion.button>
-                  </div>
-
-                  <div className="text-center py-8">
-                    <CheckSquare size={48} className="text-neutral-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-neutral-900 mb-2">
-                      היום עדיין ריק
-                    </h3>
-                    <p className="text-neutral-600 mb-6">
-                      נוסיף משימה ראשונה ונבנה שגרה
-                    </p>
-                    <Link
-                      href="/tasks"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors"
-                    >
-                      <Plus size={20} />
-                      הוסף משימה
+                    <Link href="/tasks">
+                      <motion.button
+                        whileHover={{ x: -2 }}
+                        className="flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700"
+                      >
+                        כל המשימות
+                        <ChevronLeft size={16} />
+                      </motion.button>
                     </Link>
                   </div>
+
+                  {upcomingTasks.length === 0 ? (
+                    <div className="text-center py-8">
+                      <CheckSquare size={48} className="text-neutral-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-bold text-neutral-900 mb-2">
+                        היום עדיין ריק
+                      </h3>
+                      <p className="text-neutral-600 mb-6">
+                        נוסיף משימה ראשונה ונבנה שגרה
+                      </p>
+                      <Link
+                        href="/tasks"
+                        className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors"
+                      >
+                        <Plus size={20} />
+                        הוסף משימה
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {upcomingTasks.map((task, index) => {
+                        const isOverdue = overdueTasks.some(t => t.id === task.id)
+                        const statusConfig = {
+                          TODO: { icon: '📋', bg: 'bg-neutral-50', text: 'text-neutral-700' },
+                          DOING: { icon: '🔄', bg: 'bg-blue-50', text: 'text-blue-700' },
+                          DONE: { icon: '✅', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+                        }
+                        const priorityConfig = {
+                          HIGH: { label: 'גבוה', color: 'text-red-600 bg-red-50' },
+                          MEDIUM: { label: 'בינוני', color: 'text-amber-600 bg-amber-50' },
+                          LOW: { label: 'נמוך', color: 'text-neutral-500 bg-neutral-100' },
+                        }
+                        const config = statusConfig[task.status]
+                        const priorityStyle = priorityConfig[task.priority]
+                        const companyName = getCompanyName(task.companyId)
+
+                        return (
+                          <motion.div
+                            key={task.id}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 * index }}
+                            className={`flex items-center gap-3 p-3 ${isOverdue ? 'bg-red-50 border border-red-200' : config.bg} rounded-xl`}
+                          >
+                            <span className="text-lg flex-shrink-0">{isOverdue ? '⚠️' : config.icon}</span>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className={`text-sm font-medium ${isOverdue ? 'text-red-700' : config.text} truncate`}>
+                                  {task.title}
+                                </p>
+                                {companyName && (
+                                  <span className="text-[10px] font-medium text-violet-600 bg-violet-100 px-1.5 py-0.5 rounded flex-shrink-0">
+                                    {companyName}
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${priorityStyle.color}`}>
+                                  {priorityStyle.label}
+                                </span>
+                                {isOverdue && (
+                                  <span className="text-[10px] text-red-600 font-medium">באיחור</span>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        )
+                      })}
+                    </div>
+                  )}
                 </div>
               </PremiumCard>
             </motion.div>
