@@ -10,14 +10,24 @@ import {
   Target,
   Building2,
   Sparkles,
+  TrendingUp,
+  Users,
 } from 'lucide-react'
+import { useAuth } from '@/context/AuthContext'
 
-const navItems = [
+// Creator mobile nav items
+const creatorNavItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'דשבורד', color: 'accent' },
   { href: '/ai-content', icon: Sparkles, label: 'AI', color: 'purple' },
   { href: '/calendar', icon: CalendarDays, label: 'יומן', color: 'blue' },
   { href: '/tasks', icon: CheckSquare, label: 'משימות', color: 'green' },
   { href: '/goals', icon: Target, label: 'מטרות', color: 'orange' },
+]
+
+// Agency mobile nav items
+const agencyNavItems = [
+  { href: '/agency', icon: TrendingUp, label: 'דשבורד', color: 'accent' },
+  { href: '/agency/members', icon: Users, label: 'יוצרים', color: 'blue' },
 ]
 
 const colorClasses: Record<string, { active: string; dot: string }> = {
@@ -31,12 +41,20 @@ const colorClasses: Record<string, { active: string; dot: string }> = {
 
 export default function MobileNav() {
   const pathname = usePathname()
+  const { user } = useAuth()
+
+  // Select nav items based on account type
+  const isAgency = user?.accountType === 'agency'
+  const navItems = isAgency ? agencyNavItems : creatorNavItems
 
   return (
     <nav className="mobile-nav lg:hidden backdrop-blur-xl bg-white/90 border-t border-neutral-100/80">
       <div className="flex items-center justify-around px-2">
         {navItems.map((item) => {
-          const isActive = pathname === item.href
+          // For agency routes, check if current path starts with the nav item path
+          const isActive = item.href === '/agency'
+            ? pathname === '/agency' || pathname.startsWith('/agency/creators')
+            : pathname === item.href || pathname.startsWith(item.href + '/')
           const colors = colorClasses[item.color]
 
           return (

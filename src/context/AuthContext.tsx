@@ -11,6 +11,7 @@ interface User {
   email: string
   avatar?: string
   plan?: 'free' | 'premium'
+  accountType?: 'creator' | 'agency'
 }
 
 interface AuthContextType {
@@ -114,6 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: profile.name || 'משתמש',
           email: profile.email || '',
           plan: profile.plan || 'free' as const,
+          accountType: profile.account_type || 'creator' as const,
         }
         setUser(userData)
         setCurrentUserId(userData.id)

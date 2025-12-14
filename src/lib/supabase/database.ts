@@ -6,6 +6,13 @@ import type { DailyGoal } from '@/types/goal'
 import type { AIGeneratedContent, AIGenerationInput } from '@/types/ai-content'
 import type { ActivityEvent, ActivityType } from '@/types/activity'
 import type { WeeklyReview } from '@/types/weekly-review'
+import type {
+  AgencyMembership,
+  EarningsEntry,
+  AgencyCreatorStats,
+  AgencyDashboardStats,
+  CreatorDetailData,
+} from '@/types/agency'
 
 export class DatabaseService {
   private supabase = createClient()
@@ -575,6 +582,417 @@ export class DatabaseService {
         whatWorked: data.what_worked,
         improveNext: data.improve_next,
       },
+      createdAt: new Date(data.created_at),
+      updatedAt: new Date(data.updated_at),
+    }
+  }
+
+  // Agency Methods
+
+  // Get agency dashboard stats
+  async getAgencyDashboardStats(agencyId: string): Promise<AgencyDashboardStats> {
+    // Get creator stats from the view
+    const { data: creatorStats, error: statsError } = await this.supabase
+      .from('agency_creator_stats')
+      .select('*')
+      .eq('agency_id', agencyId)
+
+    if (statsError) throw statsError
+
+    const creators = (creatorStats || []).map(this.mapCreatorStatsFromDB)
+
+    // Calculate totals
+    const totalMonthlyEarnings = creators.reduce((sum, c) => sum + c.monthlyEarnings, 0)
+    const totalYearlyEarnings = creators.reduce((sum, c) => sum + c.yearlyEarnings, 0)
+    const totalActiveCompanies = creators.reduce((sum, c) => sum + c.activeCompanyCount, 0)
+
+    return {
+      totalMonthlyEarnings,
+      totalYearlyEarnings,
+      totalCreators: creators.length,
+      totalActiveCompanies,
+      creators,
+    }
+  }
+
+  // Get agency members
+  async getAgencyMembers(agencyId: string): Promise<AgencyMembership[]> {
+    const { data, error } = await this.supabase
+      .from('agency_memberships')
+      .select('*')
+      .eq('agency_id', agencyId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return (data || []).map(this.mapMembershipFromDB)
+  }
+
+  // Get active agency members count
+  async getActiveMembersCount(agencyId: string): Promise<number> {
+    const { count, error } = await this.supabase
+      .from('agency_memberships')
+      .select('*', { count: 'exact', head: true })
+      .eq('agency_id', agencyId)
+      .eq('status', 'active')
+
+    if (error) throw error
+    return count || 0
+  }
+
+  // Invite creator to agency
+  async inviteCreatorToAgency(
+    agencyId: string,
+    email: string
+  ): Promise<AgencyMembership> {
+    // Check if user exists
+    const { data: existingUser } = await this.supabase
+      .from('user_profiles')
+      .select('id')
+      .eq('email', email)
+      .single()
+
+    const insertData: any = {
+      agency_id: agencyId,
+      role: 'creator',
+      status: existingUser ? 'active' : 'invited',
+    }
+
+    if (existingUser) {
+      insertData.creator_user_id = existingUser.id
+    } else {
+      insertData.invite_email = email
+    }
+
+    const { data, error } = await this.supabase
+      .from('agency_memberships')
+      .insert(insertData)
+      .select()
+      .single()
+
+    if (error) throw error
+    return this.mapMembershipFromDB(data)
+  }
+
+  // Remove creator from agency
+  async removeCreatorFromAgency(membershipId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('agency_memberships')
+      .update({ status: 'removed' })
+      .eq('id', membershipId)
+
+    if (error) throw error
+  }
+
+  // Delete membership completely
+  async deleteMembership(membershipId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('agency_memberships')
+      .delete()
+      .eq('id', membershipId)
+
+    if (error) throw error
+  }
+
+  // Get earnings for a creator
+  async getCreatorEarnings(
+    creatorId: string,
+    startDate?: Date,
+    endDate?: Date
+  ): Promise<EarningsEntry[]> {
+    let query = this.supabase
+      .from('earnings_entries')
+      .select(`
+        *,
+        companies:company_id (name)
+      `)
+      .eq('creator_user_id', creatorId)
+      .order('earned_on', { ascending: false })
+
+    if (startDate) {
+      query = query.gte('earned_on', startDate.toISOString().split('T')[0])
+    }
+    if (endDate) {
+      query = query.lte('earned_on', endDate.toISOString().split('T')[0])
+    }
+
+    const { data, error } = await query
+
+    if (error) throw error
+    return (data || []).map(this.mapEarningsFromDB)
+  }
+
+  // Create earnings entry
+  async createEarningsEntry(
+    creatorId: string,
+    entry: Omit<EarningsEntry, 'id' | 'createdAt' | 'updatedAt' | 'creatorUserId'>,
+    createdBy?: string
+  ): Promise<EarningsEntry> {
+    const { data, error } = await this.supabase
+      .from('earnings_entries')
+      .insert({
+        creator_user_id: creatorId,
+        company_id: entry.companyId,
+        amount: entry.amount,
+        currency: entry.currency,
+        earned_on: entry.earnedOn instanceof Date
+          ? entry.earnedOn.toISOString().split('T')[0]
+          : entry.earnedOn,
+        notes: entry.notes,
+        created_by: createdBy,
+      })
+      .select(`
+        *,
+        companies:company_id (name)
+      `)
+      .single()
+
+    if (error) throw error
+    return this.mapEarningsFromDB(data)
+  }
+
+  // Update earnings entry
+  async updateEarningsEntry(
+    entryId: string,
+    updates: Partial<Omit<EarningsEntry, 'id' | 'createdAt' | 'updatedAt' | 'creatorUserId'>>
+  ): Promise<EarningsEntry> {
+    const updateData: any = {}
+    if (updates.companyId !== undefined) updateData.company_id = updates.companyId
+    if (updates.amount !== undefined) updateData.amount = updates.amount
+    if (updates.currency !== undefined) updateData.currency = updates.currency
+    if (updates.earnedOn !== undefined) {
+      updateData.earned_on = updates.earnedOn instanceof Date
+        ? updates.earnedOn.toISOString().split('T')[0]
+        : updates.earnedOn
+    }
+    if (updates.notes !== undefined) updateData.notes = updates.notes
+
+    const { data, error } = await this.supabase
+      .from('earnings_entries')
+      .update(updateData)
+      .eq('id', entryId)
+      .select(`
+        *,
+        companies:company_id (name)
+      `)
+      .single()
+
+    if (error) throw error
+    return this.mapEarningsFromDB(data)
+  }
+
+  // Delete earnings entry
+  async deleteEarningsEntry(entryId: string): Promise<void> {
+    const { error } = await this.supabase
+      .from('earnings_entries')
+      .delete()
+      .eq('id', entryId)
+
+    if (error) throw error
+  }
+
+  // Get creator detail for agency view
+  async getCreatorDetailForAgency(
+    agencyId: string,
+    creatorId: string
+  ): Promise<CreatorDetailData | null> {
+    // Verify membership
+    const { data: membership } = await this.supabase
+      .from('agency_memberships')
+      .select('*')
+      .eq('agency_id', agencyId)
+      .eq('creator_user_id', creatorId)
+      .eq('status', 'active')
+      .single()
+
+    if (!membership) return null
+
+    // Get creator profile
+    const { data: creatorProfile } = await this.supabase
+      .from('user_profiles')
+      .select('id, name, email')
+      .eq('id', creatorId)
+      .single()
+
+    if (!creatorProfile) return null
+
+    // Get companies
+    const { data: companies } = await this.supabase
+      .from('companies')
+      .select('id, name, brand_type, status, payment_terms')
+      .eq('owner_uid', creatorId)
+
+    // Get earnings
+    const { data: earnings } = await this.supabase
+      .from('earnings_entries')
+      .select(`
+        *,
+        companies:company_id (name)
+      `)
+      .eq('creator_user_id', creatorId)
+      .order('earned_on', { ascending: false })
+      .limit(100)
+
+    // Get recent activity
+    const { data: activity } = await this.supabase
+      .from('activity_events')
+      .select('id, type, entity_name, created_at')
+      .eq('user_id', creatorId)
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    // Calculate monthly breakdown
+    const earningsData = (earnings || []).map(this.mapEarningsFromDB)
+    const monthlyBreakdown = this.calculateMonthlyBreakdown(earningsData)
+
+    return {
+      creator: {
+        id: creatorProfile.id,
+        name: creatorProfile.name || '',
+        email: creatorProfile.email || '',
+      },
+      companies: (companies || []).map((c: any) => ({
+        id: c.id,
+        name: c.name,
+        brandType: c.brand_type,
+        status: c.status,
+        monthlyRetainer: c.payment_terms?.monthlyRetainerAmount,
+        currency: c.payment_terms?.currency,
+      })),
+      earnings: earningsData,
+      monthlyEarningsBreakdown: monthlyBreakdown,
+      recentActivity: (activity || []).map((a: any) => ({
+        id: a.id,
+        type: a.type,
+        entityName: a.entity_name,
+        createdAt: new Date(a.created_at),
+      })),
+    }
+  }
+
+  // Get companies for a creator (agency view)
+  async getCreatorCompanies(creatorId: string): Promise<Company[]> {
+    const { data, error } = await this.supabase
+      .from('companies')
+      .select('*')
+      .eq('owner_uid', creatorId)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return this.mapCompaniesFromDB(data || [])
+  }
+
+  // Get calendar events for a creator (agency view)
+  async getCreatorCalendarEvents(creatorId: string): Promise<CalendarEvent[]> {
+    const { data, error } = await this.supabase
+      .from('calendar_events')
+      .select(`
+        *,
+        calendar_reminders (*),
+        calendar_linked_tasks (*)
+      `)
+      .eq('owner_uid', creatorId)
+      .order('date', { ascending: true })
+
+    if (error) throw error
+    return this.mapEventsFromDB(data || [])
+  }
+
+  // Get tasks for a creator (agency view)
+  async getCreatorTasks(creatorId: string): Promise<Task[]> {
+    const { data, error } = await this.supabase
+      .from('tasks')
+      .select('*')
+      .eq('owner_uid', creatorId)
+      .eq('archived', false)
+      .order('created_at', { ascending: false })
+
+    if (error) throw error
+    return this.mapTasksFromDB(data || [])
+  }
+
+  // Helper: Calculate monthly earnings breakdown
+  private calculateMonthlyBreakdown(earnings: EarningsEntry[]) {
+    const breakdown: Map<string, {
+      month: string
+      total: number
+      byCompany: Map<string, { companyId: string; companyName: string; amount: number }>
+    }> = new Map()
+
+    for (const entry of earnings) {
+      const date = new Date(entry.earnedOn)
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`
+
+      if (!breakdown.has(monthKey)) {
+        breakdown.set(monthKey, {
+          month: monthKey,
+          total: 0,
+          byCompany: new Map(),
+        })
+      }
+
+      const monthData = breakdown.get(monthKey)!
+      monthData.total += entry.amount
+
+      if (entry.companyId) {
+        const companyKey = entry.companyId
+        if (!monthData.byCompany.has(companyKey)) {
+          monthData.byCompany.set(companyKey, {
+            companyId: entry.companyId,
+            companyName: entry.companyName || 'לא ידוע',
+            amount: 0,
+          })
+        }
+        monthData.byCompany.get(companyKey)!.amount += entry.amount
+      }
+    }
+
+    return Array.from(breakdown.values())
+      .sort((a, b) => b.month.localeCompare(a.month))
+      .map((m) => ({
+        month: m.month,
+        total: m.total,
+        byCompany: Array.from(m.byCompany.values()),
+      }))
+  }
+
+  // Agency mapping helpers
+  private mapCreatorStatsFromDB(data: any): AgencyCreatorStats {
+    return {
+      agencyId: data.agency_id,
+      creatorUserId: data.creator_user_id,
+      creatorName: data.creator_name || '',
+      creatorEmail: data.creator_email || '',
+      companyCount: data.company_count || 0,
+      monthlyEarnings: parseFloat(data.monthly_earnings) || 0,
+      yearlyEarnings: parseFloat(data.yearly_earnings) || 0,
+      activeCompanyCount: data.active_company_count || 0,
+    }
+  }
+
+  private mapMembershipFromDB(data: any): AgencyMembership {
+    return {
+      id: data.id,
+      agencyId: data.agency_id,
+      creatorUserId: data.creator_user_id,
+      inviteEmail: data.invite_email,
+      role: data.role,
+      status: data.status,
+      createdAt: new Date(data.created_at),
+      updatedAt: new Date(data.updated_at),
+    }
+  }
+
+  private mapEarningsFromDB(data: any): EarningsEntry {
+    return {
+      id: data.id,
+      creatorUserId: data.creator_user_id,
+      companyId: data.company_id,
+      companyName: data.companies?.name,
+      amount: parseFloat(data.amount) || 0,
+      currency: data.currency,
+      earnedOn: new Date(data.earned_on),
+      notes: data.notes,
+      createdBy: data.created_by,
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at),
     }

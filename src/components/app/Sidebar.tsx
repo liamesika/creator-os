@@ -15,16 +15,26 @@ import {
   PanelLeftClose,
   PanelLeft,
   Building2,
+  Users,
+  TrendingUp,
 } from 'lucide-react'
 import Logo from '../Logo'
+import { useAuth } from '@/context/AuthContext'
 
-const navItems = [
+// Creator nav items
+const creatorNavItems = [
   { href: '/dashboard', icon: LayoutDashboard, label: 'דשבורד', color: 'accent' },
   { href: '/calendar', icon: CalendarDays, label: 'יומן', color: 'blue' },
   { href: '/companies', icon: Building2, label: 'חברות', color: 'violet' },
   { href: '/tasks', icon: CheckSquare, label: 'משימות', color: 'green' },
   { href: '/goals', icon: Target, label: 'מטרות', color: 'orange' },
   { href: '/ai', icon: Sparkles, label: 'תוכן AI', color: 'purple' },
+]
+
+// Agency nav items
+const agencyNavItems = [
+  { href: '/agency', icon: TrendingUp, label: 'דשבורד סוכנות', color: 'accent' },
+  { href: '/agency/members', icon: Users, label: 'ניהול יוצרים', color: 'blue' },
 ]
 
 const bottomNavItems = [
@@ -38,6 +48,11 @@ interface SidebarProps {
 
 export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
   const pathname = usePathname()
+  const { user } = useAuth()
+
+  // Select nav items based on account type
+  const isAgency = user?.accountType === 'agency'
+  const navItems = isAgency ? agencyNavItems : creatorNavItems
 
   const getActiveColors = (color: string, isActive: boolean) => {
     if (!isActive) return ''
@@ -91,7 +106,10 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
       {/* Navigation */}
       <nav className="flex-1 py-4 px-3 space-y-1.5 overflow-y-auto scrollbar-hide">
         {navItems.map((item, index) => {
-          const isActive = pathname === item.href
+          // For agency routes, check if current path starts with the nav item path
+          const isActive = item.href === '/agency'
+            ? pathname === '/agency' || pathname.startsWith('/agency/creators')
+            : pathname === item.href || pathname.startsWith(item.href + '/')
           return (
             <Link key={item.href} href={item.href}>
               <motion.div
