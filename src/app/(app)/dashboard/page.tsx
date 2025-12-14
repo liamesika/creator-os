@@ -272,9 +272,9 @@ export default function DashboardPage() {
         <div className="grid lg:grid-cols-3 gap-6">
           {/* Left Column - Today's Focus */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Brand Work Card */}
+            {/* Brand Work Card - Secondary tier */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.3}>
+              <PremiumCard delay={0.3} tier="secondary">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
@@ -298,22 +298,17 @@ export default function DashboardPage() {
                   </div>
 
                   {upcomingBrandEvents.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Building2 size={48} className="text-neutral-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-bold text-neutral-900 mb-2">
-                        אין אירועים מקושרים למותגים
-                      </h3>
-                      <p className="text-neutral-600 mb-6">
-                        קשר אירועים לחברות כדי לעקוב אחרי העבודה
-                      </p>
-                      <Link
-                        href="/companies"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-xl font-bold hover:bg-purple-700 transition-colors"
-                      >
-                        <Plus size={20} />
-                        הוסף חברה
-                      </Link>
-                    </div>
+                    <Link href="/companies">
+                      <PremiumEmptyState
+                        icon={Building2}
+                        title="אין אירועים מקושרים למותגים"
+                        description="קשר אירועים לחברות כדי לעקוב אחרי העבודה"
+                        subtitle="זה יהפוך את הניהול לקל יותר"
+                        actionLabel="הוסף חברה"
+                        onAction={() => {}}
+                        color="purple"
+                      />
+                    </Link>
                   ) : (
                     <div className="space-y-3">
                       {upcomingBrandEvents.map((event, index) => {
@@ -361,9 +356,9 @@ export default function DashboardPage() {
               </PremiumCard>
             </motion.div>
 
-            {/* Goals Card */}
+            {/* Goals Card - Primary tier (important daily item) */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.35}>
+              <PremiumCard delay={0.35} tier="primary">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
@@ -392,22 +387,17 @@ export default function DashboardPage() {
                   </div>
 
                   {todayGoalItems.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Target size={48} className="text-neutral-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-bold text-neutral-900 mb-2">
-                        עוד לא הוגדרו מטרות להיום
-                      </h3>
-                      <p className="text-neutral-600 mb-6">
-                        בחרי 1-3 מטרות כדי להתחיל חד
-                      </p>
-                      <Link
-                        href="/goals"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-accent-600 text-white rounded-xl font-bold hover:bg-accent-700 transition-colors"
-                      >
-                        <Plus size={20} />
-                        הוסף מטרה
-                      </Link>
-                    </div>
+                    <Link href="/goals">
+                      <PremiumEmptyState
+                        icon={Target}
+                        title="עוד לא הוגדרו מטרות להיום"
+                        description="בחרי 1-3 מטרות כדי להתחיל חד"
+                        subtitle="מטרות ברורות מייצרות יום ממוקד"
+                        actionLabel="הוסף מטרה"
+                        onAction={() => {}}
+                        color="accent"
+                      />
+                    </Link>
                   ) : (
                     <div className="space-y-2">
                       {todayGoalItems.map((goal, index) => {
@@ -444,9 +434,9 @@ export default function DashboardPage() {
               </PremiumCard>
             </motion.div>
 
-            {/* Tasks Card */}
+            {/* Tasks Card - Primary tier (important daily item) */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.4}>
+              <PremiumCard delay={0.4} tier="primary">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
@@ -475,22 +465,17 @@ export default function DashboardPage() {
                   </div>
 
                   {upcomingTasks.length === 0 ? (
-                    <div className="text-center py-8">
-                      <CheckSquare size={48} className="text-neutral-300 mx-auto mb-4" />
-                      <h3 className="text-lg font-bold text-neutral-900 mb-2">
-                        היום עדיין ריק
-                      </h3>
-                      <p className="text-neutral-600 mb-6">
-                        נוסיף משימה ראשונה ונבנה שגרה
-                      </p>
-                      <Link
-                        href="/tasks"
-                        className="inline-flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition-colors"
-                      >
-                        <Plus size={20} />
-                        הוסף משימה
-                      </Link>
-                    </div>
+                    <Link href="/tasks">
+                      <PremiumEmptyState
+                        icon={CheckSquare}
+                        title="היום עדיין ריק"
+                        description="נוסיף משימה ראשונה ונבנה שגרה"
+                        subtitle="התחלה קטנה מובילה להישגים גדולים"
+                        actionLabel="הוסף משימה"
+                        onAction={() => {}}
+                        color="green"
+                      />
+                    </Link>
                   ) : (
                     <div className="space-y-2">
                       {upcomingTasks.map((task, index) => {
@@ -550,7 +535,7 @@ export default function DashboardPage() {
 
           {/* Right Column - Calendar & Progress */}
           <div className="space-y-6">
-            {/* Health Score Card */}
+            {/* Health Score Card - Primary tier (signature element) */}
             {health && !healthLoading && (
               <motion.div variants={itemVariants}>
                 <HealthScoreCard
@@ -563,21 +548,23 @@ export default function DashboardPage() {
               </motion.div>
             )}
 
-            {/* Focus Mode CTA */}
+            {/* Focus Mode CTA - Primary tier equivalent */}
             <motion.div variants={itemVariants}>
               <Link href="/focus">
                 <motion.div
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="relative overflow-hidden bg-gradient-to-br from-indigo-600 to-violet-600 rounded-2xl p-5 cursor-pointer shadow-xl shadow-indigo-600/20"
+                  className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 rounded-2xl p-5 cursor-pointer shadow-[0_8px_32px_-8px_rgba(99,102,241,0.4),0_4px_16px_-4px_rgba(139,92,246,0.3)]"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+                  {/* Enhanced gradient overlays */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/5 pointer-events-none" />
+                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.15)_0%,_transparent_50%)] pointer-events-none" />
                   <div className="relative z-10 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">
-                      <Focus size={24} className="text-white" />
+                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
+                      <Focus size={24} className="text-white drop-shadow-sm" />
                     </div>
                     <div className="text-white">
-                      <h3 className="font-bold text-lg">מצב פוקוס</h3>
+                      <h3 className="font-bold text-lg tracking-tight">מצב פוקוס</h3>
                       <p className="text-white/80 text-sm">התחל את היום המרוכז שלך</p>
                     </div>
                     <ChevronLeft size={20} className="text-white/60 mr-auto" />
@@ -586,9 +573,9 @@ export default function DashboardPage() {
               </Link>
             </motion.div>
 
-            {/* Calendar Preview */}
+            {/* Calendar Preview - Secondary tier */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.45}>
+              <PremiumCard delay={0.45} tier="secondary">
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
@@ -610,30 +597,25 @@ export default function DashboardPage() {
                     </Link>
                   </div>
 
-                  <div className="text-center py-8">
-                    <CalendarDays size={48} className="text-neutral-300 mx-auto mb-4" />
-                    <h3 className="text-lg font-bold text-neutral-900 mb-2">
-                      אין אירועים קרובים
-                    </h3>
-                    <p className="text-neutral-600 mb-6">
-                      זה זמן טוב לתכנן קדימה
-                    </p>
-                    <Link
-                      href="/calendar"
-                      className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 transition-colors"
-                    >
-                      <Plus size={20} />
-                      הוסף אירוע
-                    </Link>
-                  </div>
+                  <Link href="/calendar">
+                    <PremiumEmptyState
+                      icon={CalendarDays}
+                      title="אין אירועים קרובים"
+                      description="זה זמן טוב לתכנן קדימה"
+                      subtitle="יומן מאורגן מפנה מקום ליצירתיות"
+                      actionLabel="הוסף אירוע"
+                      onAction={() => {}}
+                      color="blue"
+                    />
+                  </Link>
                 </div>
               </PremiumCard>
             </motion.div>
 
-            {/* Companies Overview */}
+            {/* Companies Overview - Tertiary tier */}
             {activeCompanies.length > 0 && (
               <motion.div variants={itemVariants}>
-                <PremiumCard delay={0.5}>
+                <PremiumCard delay={0.5} tier="tertiary">
                   <div className="p-5 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -685,10 +667,10 @@ export default function DashboardPage() {
               </motion.div>
             )}
 
-            {/* Expiring Contracts Warning */}
+            {/* Expiring Contracts Warning - Secondary tier (attention) */}
             {expiringContracts.length > 0 && (
               <motion.div variants={itemVariants}>
-                <PremiumCard delay={0.55}>
+                <PremiumCard delay={0.55} tier="secondary">
                   <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
                     <div className="flex items-start gap-3">
                       <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
@@ -713,10 +695,10 @@ export default function DashboardPage() {
               </motion.div>
             )}
 
-            {/* Recent Activity */}
+            {/* Recent Activity - Tertiary tier */}
             {recentActivity.length > 0 && (
               <motion.div variants={itemVariants}>
-                <PremiumCard delay={0.6}>
+                <PremiumCard delay={0.6} tier="tertiary">
                   <div className="p-5 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
@@ -772,9 +754,9 @@ export default function DashboardPage() {
               </motion.div>
             )}
 
-            {/* AI Tip */}
+            {/* AI Tip - Tertiary tier */}
             <motion.div variants={itemVariants}>
-              <PremiumCard delay={0.65}>
+              <PremiumCard delay={0.65} tier="tertiary">
                 <div className="p-5 bg-gradient-to-br from-accent-50/50 via-white to-violet-50/30">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-violet-500 flex items-center justify-center flex-shrink-0">
@@ -797,16 +779,18 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Mobile FAB */}
+      {/* Mobile FAB - Enhanced with premium styling */}
       <motion.button
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.6, type: 'spring' }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        className="sm:hidden fixed bottom-24 left-4 w-14 h-14 bg-neutral-900 text-white rounded-2xl shadow-xl shadow-neutral-900/30 flex items-center justify-center z-40"
+        initial={{ opacity: 0, scale: 0, rotate: -90 }}
+        animate={{ opacity: 1, scale: 1, rotate: 0 }}
+        transition={{ delay: 0.6, type: 'spring', stiffness: 200, damping: 15 }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
+        className="sm:hidden fixed bottom-24 left-4 w-14 h-14 bg-gradient-to-br from-neutral-800 to-neutral-900 text-white rounded-2xl shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3),0_4px_8px_-2px_rgba(0,0,0,0.2)] flex items-center justify-center z-40"
       >
-        <Plus size={24} strokeWidth={2} />
+        {/* Inner glow effect */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+        <Plus size={24} strokeWidth={2.5} className="relative z-10" />
       </motion.button>
     </motion.div>
   )
