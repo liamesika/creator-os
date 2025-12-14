@@ -333,8 +333,8 @@ function AgencyApprovalCard({
   onClick: () => void
   onStatusChange: (status: ApprovalStatus) => void
 }) {
-  const typeConfig = APPROVAL_TYPE_CONFIG[item.type]
-  const statusConfig = APPROVAL_STATUS_CONFIG[item.status]
+  const typeConfig = APPROVAL_TYPE_CONFIG[item.type] || APPROVAL_TYPE_CONFIG.other
+  const statusConfig = APPROVAL_STATUS_CONFIG[item.status] || APPROVAL_STATUS_CONFIG.pending
 
   return (
     <motion.div
@@ -350,7 +350,7 @@ function AgencyApprovalCard({
               typeConfig.color === 'blue' ? 'bg-blue-100' :
               typeConfig.color === 'violet' ? 'bg-violet-100' :
               typeConfig.color === 'pink' ? 'bg-pink-100' :
-              typeConfig.color === 'neutral' ? 'bg-neutral-200' :
+              typeConfig.color === 'neutral' || typeConfig.color === 'gray' ? 'bg-neutral-200' :
               'bg-neutral-100'
             }`}>
               {typeConfig.icon}
@@ -400,8 +400,8 @@ function AgencyApprovalDetailView({
   const [loadingComments, setLoadingComments] = useState(true)
   const [sendingComment, setSendingComment] = useState(false)
 
-  const typeConfig = APPROVAL_TYPE_CONFIG[item.type]
-  const statusConfig = APPROVAL_STATUS_CONFIG[item.status]
+  const typeConfig = APPROVAL_TYPE_CONFIG[item.type] || APPROVAL_TYPE_CONFIG.other
+  const statusConfig = APPROVAL_STATUS_CONFIG[item.status] || APPROVAL_STATUS_CONFIG.pending
 
   useEffect(() => {
     fetchComments()
@@ -452,7 +452,7 @@ function AgencyApprovalDetailView({
           typeConfig.color === 'blue' ? 'bg-blue-100' :
           typeConfig.color === 'violet' ? 'bg-violet-100' :
           typeConfig.color === 'pink' ? 'bg-pink-100' :
-          typeConfig.color === 'neutral' ? 'bg-neutral-200' :
+          typeConfig.color === 'neutral' || typeConfig.color === 'gray' ? 'bg-neutral-200' :
           'bg-neutral-100'
         }`}>
           {typeConfig.icon}
