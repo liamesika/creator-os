@@ -39,18 +39,21 @@ export default function CompanyCard({ company, onClick, delay = 0 }: CompanyCard
       whileTap={{ scale: 0.98 }}
       onClick={onClick}
       className={`
-        w-full text-right bg-white rounded-2xl border border-neutral-100
-        shadow-[0_2px_12px_-2px_rgba(0,0,0,0.06)]
-        hover:shadow-[0_8px_24px_-4px_rgba(0,0,0,0.1)]
-        transition-all duration-300 p-4 sm:p-5
+        w-full text-right bg-white rounded-2xl border border-neutral-100/80
+        shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08),0_2px_6px_-2px_rgba(0,0,0,0.04)]
+        hover:shadow-[0_12px_32px_-8px_rgba(0,0,0,0.12),0_4px_12px_-4px_rgba(0,0,0,0.06)]
+        transition-all duration-300 p-4 sm:p-5 relative overflow-hidden
         ${isArchived ? 'opacity-60' : ''}
       `}
     >
-      <div className="flex items-start gap-3">
-        {/* Brand icon */}
-        <div className={`p-2.5 rounded-xl ${brandPreset?.bgColor || 'bg-neutral-100'} flex-shrink-0`}>
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-neutral-50/40 rounded-2xl pointer-events-none" />
+
+      <div className="flex items-start gap-3 relative z-10">
+        {/* Brand icon - Enhanced premium styling */}
+        <div className={`p-2.5 rounded-xl bg-gradient-to-br ${brandPreset?.bgColor || 'from-neutral-100 to-neutral-50'} flex-shrink-0 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.08)]`}>
           {BrandIcon ? (
-            <BrandIcon size={20} className={brandPreset?.color} strokeWidth={1.5} />
+            <BrandIcon size={20} className={`${brandPreset?.color} drop-shadow-sm`} strokeWidth={1.5} />
           ) : (
             <div className="w-5 h-5 rounded-full bg-neutral-300" />
           )}

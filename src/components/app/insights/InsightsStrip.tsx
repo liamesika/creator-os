@@ -44,9 +44,11 @@ export function InsightsStrip({
       transition={{ delay, duration: 0.4 }}
       className={className}
     >
-      <div className="flex items-center gap-2 mb-3">
-        <Lightbulb size={16} className="text-amber-500" />
-        <span className="text-sm font-medium text-neutral-500">תובנות חכמות</span>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-amber-100 via-amber-50 to-white flex items-center justify-center shadow-[0_2px_6px_-2px_rgba(245,158,11,0.25)]">
+          <Lightbulb size={14} className="text-amber-600 drop-shadow-sm" />
+        </div>
+        <h2 className="text-sm font-semibold text-neutral-600 tracking-tight">תובנות חכמות</h2>
       </div>
       <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide snap-x snap-mandatory">
         {insights.slice(0, 3).map((insight, index) => (

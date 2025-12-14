@@ -307,48 +307,70 @@ export default function AgencyControlPageV2() {
 
         {/* Top row - Stats + Risk Radar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Stats overview */}
+          {/* Stats overview - Mobile horizontal scroll */}
           {controlData && (
-            <div className="lg:col-span-2 grid grid-cols-2 md:grid-cols-4 gap-4">
-              <PremiumCard delay={0}>
-                <div className="p-4 text-center">
-                  <Users size={24} className="text-violet-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-neutral-900">
-                    <AnimatedCounter value={controlData.overallStats.totalCreators} />
-                  </div>
-                  <div className="text-sm text-neutral-500">יוצרים</div>
-                </div>
-              </PremiumCard>
+            <div className="lg:col-span-2 relative">
+              {/* Fade indicators for mobile scroll */}
+              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-neutral-50 to-transparent z-10 pointer-events-none lg:hidden" />
+              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-neutral-50 to-transparent z-10 pointer-events-none lg:hidden" />
 
-              <PremiumCard delay={0.1}>
-                <div className="p-4 text-center bg-emerald-50/50 rounded-2xl">
-                  <CheckCircle2 size={24} className="text-emerald-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-emerald-700">
-                    <AnimatedCounter value={controlData.overallStats.calmCount} />
-                  </div>
-                  <div className="text-sm text-emerald-600">רגועים</div>
+              <div className="flex lg:grid lg:grid-cols-4 gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
+                <div className="flex-shrink-0 w-[140px] lg:w-auto snap-start">
+                  <PremiumCard delay={0}>
+                    <div className="p-4 text-center">
+                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-violet-100 via-violet-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(139,92,246,0.2)]">
+                        <Users size={18} className="text-violet-600 drop-shadow-sm" />
+                      </div>
+                      <div className="text-2xl font-bold text-neutral-900">
+                        <AnimatedCounter value={controlData.overallStats.totalCreators} />
+                      </div>
+                      <div className="text-sm text-neutral-500">יוצרים</div>
+                    </div>
+                  </PremiumCard>
                 </div>
-              </PremiumCard>
 
-              <PremiumCard delay={0.2}>
-                <div className="p-4 text-center bg-amber-50/50 rounded-2xl">
-                  <Clock size={24} className="text-amber-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-amber-700">
-                    <AnimatedCounter value={controlData.overallStats.busyCount} />
-                  </div>
-                  <div className="text-sm text-amber-600">עסוקים</div>
+                <div className="flex-shrink-0 w-[140px] lg:w-auto snap-start">
+                  <PremiumCard delay={0.1}>
+                    <div className="p-4 text-center bg-gradient-to-br from-emerald-50/80 to-white rounded-2xl">
+                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(16,185,129,0.2)]">
+                        <CheckCircle2 size={18} className="text-emerald-600 drop-shadow-sm" />
+                      </div>
+                      <div className="text-2xl font-bold text-emerald-700">
+                        <AnimatedCounter value={controlData.overallStats.calmCount} />
+                      </div>
+                      <div className="text-sm text-emerald-600">רגועים</div>
+                    </div>
+                  </PremiumCard>
                 </div>
-              </PremiumCard>
 
-              <PremiumCard delay={0.3}>
-                <div className="p-4 text-center bg-red-50/50 rounded-2xl">
-                  <Flame size={24} className="text-red-500 mx-auto mb-2" />
-                  <div className="text-2xl font-bold text-red-700">
-                    <AnimatedCounter value={controlData.overallStats.overloadedCount} />
-                  </div>
-                  <div className="text-sm text-red-600">עמוסים</div>
+                <div className="flex-shrink-0 w-[140px] lg:w-auto snap-start">
+                  <PremiumCard delay={0.2}>
+                    <div className="p-4 text-center bg-gradient-to-br from-amber-50/80 to-white rounded-2xl">
+                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-amber-100 via-amber-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(245,158,11,0.2)]">
+                        <Clock size={18} className="text-amber-600 drop-shadow-sm" />
+                      </div>
+                      <div className="text-2xl font-bold text-amber-700">
+                        <AnimatedCounter value={controlData.overallStats.busyCount} />
+                      </div>
+                      <div className="text-sm text-amber-600">עסוקים</div>
+                    </div>
+                  </PremiumCard>
                 </div>
-              </PremiumCard>
+
+                <div className="flex-shrink-0 w-[140px] lg:w-auto snap-start">
+                  <PremiumCard delay={0.3}>
+                    <div className="p-4 text-center bg-gradient-to-br from-red-50/80 to-white rounded-2xl">
+                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-red-100 via-red-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(239,68,68,0.2)]">
+                        <Flame size={18} className="text-red-600 drop-shadow-sm" />
+                      </div>
+                      <div className="text-2xl font-bold text-red-700">
+                        <AnimatedCounter value={controlData.overallStats.overloadedCount} />
+                      </div>
+                      <div className="text-sm text-red-600">עמוסים</div>
+                    </div>
+                  </PremiumCard>
+                </div>
+              </div>
             </div>
           )}
 

@@ -244,22 +244,30 @@ export default function TasksPage() {
             </p>
           </div>
 
-          {/* Desktop Add Button */}
-          <button
+          {/* Desktop Add Button - Premium styling */}
+          <motion.button
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => openCreateModal()}
-            className="hidden lg:flex items-center gap-2 px-6 py-3 bg-accent-600 text-white rounded-xl font-bold hover:bg-accent-700 transition-all shadow-lg shadow-accent-600/20"
+            className="hidden lg:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl font-semibold hover:from-emerald-700 hover:to-emerald-600 transition-all shadow-[0_4px_16px_-4px_rgba(16,185,129,0.4)]"
           >
-            <Plus size={20} />
+            <Plus size={20} strokeWidth={2.5} />
             משימה חדשה
-          </button>
+          </motion.button>
 
-          {/* Mobile Add Button */}
-          <button
+          {/* Mobile Add Button - Premium styling */}
+          <motion.button
+            initial={{ scale: 0, rotate: -90 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             onClick={() => openCreateModal()}
-            className="lg:hidden flex items-center justify-center w-12 h-12 bg-accent-600 text-white rounded-full shadow-lg hover:bg-accent-700 transition-all"
+            className="lg:hidden flex items-center justify-center w-12 h-12 bg-gradient-to-br from-neutral-800 to-neutral-900 text-white rounded-2xl shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3)] transition-all relative"
           >
-            <Plus size={24} />
-          </button>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+            <Plus size={24} strokeWidth={2.5} className="relative z-10" />
+          </motion.button>
         </div>
 
         {/* Search and Filter */}

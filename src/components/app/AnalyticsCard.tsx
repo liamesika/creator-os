@@ -30,51 +30,57 @@ export default function AnalyticsCard({
   chart,
   chartValue = 70,
 }: AnalyticsCardProps) {
+  // Enhanced color system with stronger visual presence
   const colorClasses = {
     accent: {
-      bg: 'bg-gradient-to-br from-accent-100 to-accent-50',
-      iconGlow: 'shadow-accent-200/50',
+      bg: 'bg-gradient-to-br from-accent-100 via-accent-50 to-white',
+      iconGlow: 'shadow-[0_4px_12px_-2px_rgba(168,85,247,0.25)]',
       icon: 'text-accent-600',
       ring: 'stroke-accent-500',
-      ringGlow: 'drop-shadow-[0_0_4px_rgba(168,85,247,0.3)]',
-      bar: 'bg-gradient-to-t from-accent-600 to-accent-400',
-      barGlow: 'shadow-accent-400/30',
+      ringGlow: 'drop-shadow-[0_0_6px_rgba(168,85,247,0.35)]',
+      bar: 'bg-gradient-to-t from-accent-600 via-accent-500 to-accent-400',
+      barGlow: 'shadow-[0_2px_8px_-2px_rgba(168,85,247,0.4)]',
+      cardAccent: 'ring-1 ring-accent-100/60',
     },
     green: {
-      bg: 'bg-gradient-to-br from-emerald-100 to-emerald-50',
-      iconGlow: 'shadow-emerald-200/50',
+      bg: 'bg-gradient-to-br from-emerald-100 via-emerald-50 to-white',
+      iconGlow: 'shadow-[0_4px_12px_-2px_rgba(16,185,129,0.25)]',
       icon: 'text-emerald-600',
       ring: 'stroke-emerald-500',
-      ringGlow: 'drop-shadow-[0_0_4px_rgba(16,185,129,0.3)]',
-      bar: 'bg-gradient-to-t from-emerald-600 to-emerald-400',
-      barGlow: 'shadow-emerald-400/30',
+      ringGlow: 'drop-shadow-[0_0_6px_rgba(16,185,129,0.35)]',
+      bar: 'bg-gradient-to-t from-emerald-600 via-emerald-500 to-emerald-400',
+      barGlow: 'shadow-[0_2px_8px_-2px_rgba(16,185,129,0.4)]',
+      cardAccent: 'ring-1 ring-emerald-100/60',
     },
     blue: {
-      bg: 'bg-gradient-to-br from-blue-100 to-blue-50',
-      iconGlow: 'shadow-blue-200/50',
+      bg: 'bg-gradient-to-br from-blue-100 via-blue-50 to-white',
+      iconGlow: 'shadow-[0_4px_12px_-2px_rgba(59,130,246,0.25)]',
       icon: 'text-blue-600',
       ring: 'stroke-blue-500',
-      ringGlow: 'drop-shadow-[0_0_4px_rgba(59,130,246,0.3)]',
-      bar: 'bg-gradient-to-t from-blue-600 to-blue-400',
-      barGlow: 'shadow-blue-400/30',
+      ringGlow: 'drop-shadow-[0_0_6px_rgba(59,130,246,0.35)]',
+      bar: 'bg-gradient-to-t from-blue-600 via-blue-500 to-blue-400',
+      barGlow: 'shadow-[0_2px_8px_-2px_rgba(59,130,246,0.4)]',
+      cardAccent: 'ring-1 ring-blue-100/60',
     },
     orange: {
-      bg: 'bg-gradient-to-br from-orange-100 to-orange-50',
-      iconGlow: 'shadow-orange-200/50',
+      bg: 'bg-gradient-to-br from-orange-100 via-orange-50 to-white',
+      iconGlow: 'shadow-[0_4px_12px_-2px_rgba(249,115,22,0.25)]',
       icon: 'text-orange-600',
       ring: 'stroke-orange-500',
-      ringGlow: 'drop-shadow-[0_0_4px_rgba(249,115,22,0.3)]',
-      bar: 'bg-gradient-to-t from-orange-600 to-orange-400',
-      barGlow: 'shadow-orange-400/30',
+      ringGlow: 'drop-shadow-[0_0_6px_rgba(249,115,22,0.35)]',
+      bar: 'bg-gradient-to-t from-orange-600 via-orange-500 to-orange-400',
+      barGlow: 'shadow-[0_2px_8px_-2px_rgba(249,115,22,0.4)]',
+      cardAccent: 'ring-1 ring-orange-100/60',
     },
     purple: {
-      bg: 'bg-gradient-to-br from-violet-100 to-violet-50',
-      iconGlow: 'shadow-violet-200/50',
+      bg: 'bg-gradient-to-br from-violet-100 via-violet-50 to-white',
+      iconGlow: 'shadow-[0_4px_12px_-2px_rgba(139,92,246,0.25)]',
       icon: 'text-violet-600',
       ring: 'stroke-violet-500',
-      ringGlow: 'drop-shadow-[0_0_4px_rgba(139,92,246,0.3)]',
-      bar: 'bg-gradient-to-t from-violet-600 to-violet-400',
-      barGlow: 'shadow-violet-400/30',
+      ringGlow: 'drop-shadow-[0_0_6px_rgba(139,92,246,0.35)]',
+      bar: 'bg-gradient-to-t from-violet-600 via-violet-500 to-violet-400',
+      barGlow: 'shadow-[0_2px_8px_-2px_rgba(139,92,246,0.4)]',
+      cardAccent: 'ring-1 ring-violet-100/60',
     },
   }
 
@@ -105,29 +111,32 @@ export default function AnalyticsCard({
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay, ease: [0.16, 1, 0.3, 1] }}
-      whileHover={{ y: -2, boxShadow: '0 12px 28px -8px rgba(0,0,0,0.12)' }}
-      className="relative bg-white rounded-2xl border border-neutral-100/80 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.08)] p-4 sm:p-5 transition-all duration-300"
+      whileHover={{ y: -3, boxShadow: '0 16px 32px -8px rgba(0,0,0,0.12)' }}
+      className={`relative bg-white rounded-2xl border border-neutral-100/80 shadow-[0_6px_20px_-4px_rgba(0,0,0,0.08)] p-4 sm:p-5 transition-all duration-300 ${classes.cardAccent}`}
     >
       {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-neutral-50/30 rounded-2xl pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-br from-white via-transparent to-neutral-50/40 rounded-2xl pointer-events-none" />
+
+      {/* Top accent line */}
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-neutral-200/60 to-transparent pointer-events-none" />
 
       <div className="relative z-10 flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          {/* Icon with enhanced styling */}
+          {/* Icon with enhanced styling - more premium presence */}
           <motion.div
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: delay + 0.1, type: 'spring', stiffness: 200 }}
-            className={`inline-flex p-2.5 rounded-xl ${classes.bg} mb-3 shadow-sm ${classes.iconGlow}`}
+            className={`inline-flex p-2.5 rounded-xl ${classes.bg} mb-3 ${classes.iconGlow}`}
           >
-            <Icon size={18} className={classes.icon} strokeWidth={2.5} />
+            <Icon size={18} className={`${classes.icon} drop-shadow-sm`} strokeWidth={2} />
           </motion.div>
 
-          {/* Label */}
-          <p className="text-xs font-semibold text-neutral-500 uppercase tracking-wide mb-1.5 truncate">{label}</p>
+          {/* Label - refined typography */}
+          <p className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider mb-1.5 truncate">{label}</p>
 
-          {/* Value with animated counter */}
-          <motion.p className="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tighter">
+          {/* Value with animated counter - bolder presence */}
+          <motion.p className="text-2xl sm:text-[28px] font-bold text-neutral-900 tracking-tight leading-none">
             {isNumeric ? displayValue : value}
           </motion.p>
 

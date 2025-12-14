@@ -247,12 +247,12 @@ export default function CalendarHeader({ onCreateEvent }: CalendarHeaderProps) {
           ))}
         </div>
 
-        {/* Create event button - Desktop */}
+        {/* Create event button - Desktop - Premium styling */}
         <motion.button
-          whileHover={{ scale: 1.02 }}
+          whileHover={{ scale: 1.02, y: -1 }}
           whileTap={{ scale: 0.98 }}
           onClick={onCreateEvent}
-          className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-accent-500/20 transition-colors"
+          className="hidden sm:flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white text-sm font-semibold rounded-xl shadow-[0_4px_16px_-4px_rgba(59,130,246,0.4)] transition-all"
         >
           <Plus size={18} strokeWidth={2.5} />
           אירוע חדש

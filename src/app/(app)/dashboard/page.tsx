@@ -200,59 +200,67 @@ export default function DashboardPage() {
           </div>
         </motion.div>
 
-        {/* Analytics Strip */}
+        {/* Analytics Strip - Premium horizontal carousel */}
         <motion.div variants={itemVariants} className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <BarChart3 size={18} className="text-neutral-400" strokeWidth={2} />
-            <h2 className="text-sm font-semibold text-neutral-500">סטטיסטיקות מהירות</h2>
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center">
+              <BarChart3 size={14} className="text-neutral-500" strokeWidth={2.5} />
+            </div>
+            <h2 className="text-sm font-semibold text-neutral-600 tracking-tight">סטטיסטיקות מהירות</h2>
           </div>
 
-          {/* Horizontal scroll on mobile */}
-          <div className="flex gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
-            <div className="flex-shrink-0 w-[200px] sm:w-auto sm:flex-1 snap-start">
-              <AnalyticsCard
-                icon={Flame}
-                label="עקביות שבועית"
-                value="5/7"
-                subValue="ימים פעילים"
-                color="orange"
-                chart="ring"
-                chartValue={71}
-                delay={0.1}
-              />
-            </div>
-            <div className="flex-shrink-0 w-[200px] sm:w-auto sm:flex-1 snap-start">
-              <AnalyticsCard
-                icon={Building2}
-                label="חברות פעילות"
-                value={activeCompanies.length.toString()}
-                subValue="חברות"
-                color="blue"
-                chart="bar"
-                chartValue={activeCompanies.length > 0 ? 80 : 20}
-                delay={0.15}
-              />
-            </div>
-            <div className="flex-shrink-0 w-[200px] sm:w-auto sm:flex-1 snap-start">
-              <AnalyticsCard
-                icon={AlertTriangle}
-                label="חוזים לחידוש"
-                value={expiringContracts.length.toString()}
-                subValue="ב-30 יום"
-                color={expiringContracts.length > 0 ? 'orange' : 'green'}
-                delay={0.2}
-              />
-            </div>
-            <div className="flex-shrink-0 w-[200px] sm:w-auto sm:flex-1 snap-start">
-              <AnalyticsCard
-                icon={Briefcase}
-                label="ריטיינרים חודשיים"
-                value={totalRetainers > 0 ? formatCurrency(totalRetainers, 'ILS') : '0'}
-                subValue="סה״כ"
-                color="purple"
-                chart="sparkline"
-                delay={0.25}
-              />
+          {/* Enhanced horizontal scroll with better mobile UX */}
+          <div className="relative">
+            {/* Fade indicators for scroll */}
+            <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-neutral-50 to-transparent z-10 pointer-events-none sm:hidden" />
+            <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-neutral-50 to-transparent z-10 pointer-events-none sm:hidden" />
+
+            <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
+              <div className="flex-shrink-0 w-[180px] sm:w-auto sm:flex-1 snap-start">
+                <AnalyticsCard
+                  icon={Flame}
+                  label="עקביות שבועית"
+                  value="5/7"
+                  subValue="ימים פעילים"
+                  color="orange"
+                  chart="ring"
+                  chartValue={71}
+                  delay={0.1}
+                />
+              </div>
+              <div className="flex-shrink-0 w-[180px] sm:w-auto sm:flex-1 snap-start">
+                <AnalyticsCard
+                  icon={Building2}
+                  label="חברות פעילות"
+                  value={activeCompanies.length.toString()}
+                  subValue="חברות"
+                  color="blue"
+                  chart="bar"
+                  chartValue={activeCompanies.length > 0 ? 80 : 20}
+                  delay={0.15}
+                />
+              </div>
+              <div className="flex-shrink-0 w-[180px] sm:w-auto sm:flex-1 snap-start">
+                <AnalyticsCard
+                  icon={AlertTriangle}
+                  label="חוזים לחידוש"
+                  value={expiringContracts.length.toString()}
+                  subValue="ב-30 יום"
+                  color={expiringContracts.length > 0 ? 'orange' : 'green'}
+                  delay={0.2}
+                />
+              </div>
+              <div className="flex-shrink-0 w-[180px] sm:w-auto sm:flex-1 snap-start">
+                <AnalyticsCard
+                  icon={Briefcase}
+                  label="ריטיינרים חודשיים"
+                  value={totalRetainers > 0 ? formatCurrency(totalRetainers, 'ILS') : '0'}
+                  subValue="סה״כ"
+                  color="purple"
+                  chart="sparkline"
+                  delay={0.25}
+                />
+              </div>
             </div>
           </div>
         </motion.div>
@@ -278,12 +286,12 @@ export default function DashboardPage() {
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center">
-                        <Building2 size={18} className="text-violet-600" strokeWidth={2} />
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-100 via-violet-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(139,92,246,0.2)]">
+                        <Building2 size={18} className="text-violet-600 drop-shadow-sm" strokeWidth={2} />
                       </div>
                       <div>
-                        <h2 className="font-semibold text-neutral-900">עבודה עם מותגים</h2>
-                        <p className="text-xs text-neutral-400">{companyEventsThisWeek.length} אירועים השבוע</p>
+                        <h2 className="font-semibold text-neutral-900 tracking-tight">עבודה עם מותגים</h2>
+                        <p className="text-xs text-neutral-500">{companyEventsThisWeek.length} אירועים השבוע</p>
                       </div>
                     </div>
                     <Link href="/companies">
@@ -362,12 +370,12 @@ export default function DashboardPage() {
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-100 to-accent-50 flex items-center justify-center">
-                        <Target size={18} className="text-accent-600" strokeWidth={2} />
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent-100 via-accent-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(168,85,247,0.2)]">
+                        <Target size={18} className="text-accent-600 drop-shadow-sm" strokeWidth={2} />
                       </div>
                       <div>
-                        <h2 className="font-semibold text-neutral-900">המטרות של היום</h2>
-                        <p className="text-xs text-neutral-400">
+                        <h2 className="font-semibold text-neutral-900 tracking-tight">המטרות של היום</h2>
+                        <p className="text-xs text-neutral-500">
                           {todayGoalItems.length > 0
                             ? `${todayGoalItems.filter(g => g.status === 'DONE').length}/${todayGoalItems.length} הושלמו`
                             : 'הגדר 1-3 מטרות'
@@ -437,15 +445,15 @@ export default function DashboardPage() {
             {/* Tasks Card - Primary tier (important daily item) */}
             <motion.div variants={itemVariants}>
               <PremiumCard delay={0.4} tier="primary">
-                <div className="p-5 sm:p-6">
+                <div className="p-5 sm:p-7">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-100 to-emerald-50 flex items-center justify-center">
-                        <CheckSquare size={18} className="text-emerald-600" strokeWidth={2} />
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(16,185,129,0.25)]">
+                        <CheckSquare size={18} className="text-emerald-600 drop-shadow-sm" strokeWidth={2} />
                       </div>
                       <div>
-                        <h2 className="font-semibold text-neutral-900">משימות להיום</h2>
-                        <p className="text-xs text-neutral-400">
+                        <h2 className="font-semibold text-neutral-900 tracking-tight">משימות להיום</h2>
+                        <p className="text-xs text-neutral-500">
                           {upcomingTasks.length > 0
                             ? `${upcomingTasks.length} משימות פתוחות${overdueTasks.length > 0 ? ` (${overdueTasks.length} באיחור)` : ''}`
                             : '0 משימות פתוחות'
@@ -579,8 +587,8 @@ export default function DashboardPage() {
                 <div className="p-5 sm:p-6">
                   <div className="flex items-center justify-between mb-5">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-100 to-blue-50 flex items-center justify-center">
-                        <CalendarDays size={18} className="text-blue-600" strokeWidth={2} />
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-100 via-blue-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(59,130,246,0.2)]">
+                        <CalendarDays size={18} className="text-blue-600 drop-shadow-sm" strokeWidth={2} />
                       </div>
                       <div>
                         <h2 className="font-semibold text-neutral-900">אירועים קרובים</h2>
@@ -619,8 +627,8 @@ export default function DashboardPage() {
                   <div className="p-5 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-100 to-violet-50 flex items-center justify-center">
-                          <Building2 size={18} className="text-violet-600" strokeWidth={2} />
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-100 via-violet-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(139,92,246,0.2)]">
+                          <Building2 size={18} className="text-violet-600 drop-shadow-sm" strokeWidth={2} />
                         </div>
                         <div>
                           <h2 className="font-semibold text-neutral-900">החברות שלי</h2>
@@ -673,8 +681,8 @@ export default function DashboardPage() {
                 <PremiumCard delay={0.55} tier="secondary">
                   <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
                     <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
-                        <AlertTriangle size={18} className="text-amber-600" strokeWidth={2} />
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-100 via-amber-50 to-white flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.25)]">
+                        <AlertTriangle size={18} className="text-amber-600 drop-shadow-sm" strokeWidth={2} />
                       </div>
                       <div>
                         <h3 className="font-semibold text-neutral-800 mb-1">חוזים לחידוש</h3>
@@ -702,8 +710,8 @@ export default function DashboardPage() {
                   <div className="p-5 sm:p-6">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-100 to-purple-50 flex items-center justify-center">
-                          <Clock size={18} className="text-purple-600" strokeWidth={2} />
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-100 via-purple-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(147,51,234,0.2)]">
+                          <Clock size={18} className="text-purple-600 drop-shadow-sm" strokeWidth={2} />
                         </div>
                         <div>
                           <h2 className="font-semibold text-neutral-900">פעילות אחרונה</h2>
@@ -759,8 +767,8 @@ export default function DashboardPage() {
               <PremiumCard delay={0.65} tier="tertiary">
                 <div className="p-5 bg-gradient-to-br from-accent-50/50 via-white to-violet-50/30">
                   <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-accent-500 to-violet-500 flex items-center justify-center flex-shrink-0">
-                      <Sparkles size={18} className="text-white" strokeWidth={2} />
+                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent-500 via-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-[0_4px_12px_-2px_rgba(139,92,246,0.35)]">
+                      <Sparkles size={18} className="text-white drop-shadow-sm" strokeWidth={2} />
                     </div>
                     <div>
                       <h3 className="font-semibold text-neutral-800 mb-1">טיפ מה-AI</h3>

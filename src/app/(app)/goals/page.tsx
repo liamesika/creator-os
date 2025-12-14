@@ -210,22 +210,30 @@ export default function GoalsPage() {
             <p className="text-neutral-600">התמקד ב-1-3 דברים חשובים כל יום</p>
           </div>
 
-          {/* Desktop Add Button */}
-          <button
+          {/* Desktop Add Button - Premium styling */}
+          <motion.button
+            whileHover={{ scale: 1.02, y: -1 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => openCreateModal(getTodayDateString())}
-            className="hidden lg:flex items-center gap-2 px-6 py-3 bg-accent-600 text-white rounded-xl font-bold hover:bg-accent-700 transition-all shadow-lg shadow-accent-600/20"
+            className="hidden lg:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-accent-600 to-accent-500 text-white rounded-xl font-semibold hover:from-accent-700 hover:to-accent-600 transition-all shadow-[0_4px_16px_-4px_rgba(168,85,247,0.4)]"
           >
-            <Plus size={20} />
+            <Plus size={20} strokeWidth={2.5} />
             הגדר מטרות להיום
-          </button>
+          </motion.button>
 
-          {/* Mobile Add Button */}
-          <button
+          {/* Mobile Add Button - Premium styling */}
+          <motion.button
+            initial={{ scale: 0, rotate: -90 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: 'spring', stiffness: 200, damping: 15 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.92 }}
             onClick={() => openCreateModal(getTodayDateString())}
-            className="lg:hidden flex items-center justify-center w-12 h-12 bg-accent-600 text-white rounded-full shadow-lg hover:bg-accent-700 transition-all"
+            className="lg:hidden flex items-center justify-center w-12 h-12 bg-gradient-to-br from-neutral-800 to-neutral-900 text-white rounded-2xl shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3)] transition-all relative"
           >
-            <Plus size={24} />
-          </button>
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+            <Plus size={24} strokeWidth={2.5} className="relative z-10" />
+          </motion.button>
         </div>
       </motion.div>
 
@@ -236,12 +244,14 @@ export default function GoalsPage() {
         transition={{ delay: 0.1 }}
         className="mb-8"
       >
-        <div className="dashboard-card">
+        <div className="bg-white rounded-2xl border border-neutral-200/70 shadow-[0_12px_40px_-8px_rgba(0,0,0,0.12),0_6px_20px_-6px_rgba(0,0,0,0.08)] p-6 sm:p-7">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
-              <Target className="text-accent-600" size={24} />
-              היום
-            </h2>
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent-100 via-accent-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(168,85,247,0.2)]">
+                <Target className="text-accent-600 drop-shadow-sm" size={18} strokeWidth={2} />
+              </div>
+              <h2 className="text-xl font-bold text-neutral-900 tracking-tight">היום</h2>
+            </div>
             {todayGoal && todayGoal.items.length > 0 && (
               <button
                 onClick={() => openReflectionModal(getTodayDateString())}
@@ -322,13 +332,15 @@ export default function GoalsPage() {
               <p className="text-neutral-600 mb-6">
                 התחל את היום עם 1-3 מטרות ברורות
               </p>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.02, y: -1 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => openCreateModal(getTodayDateString())}
-                className="px-6 py-3 bg-accent-600 text-white rounded-xl font-bold hover:bg-accent-700 transition-all inline-flex items-center gap-2"
+                className="px-6 py-3 bg-gradient-to-r from-accent-600 to-accent-500 text-white rounded-xl font-semibold hover:from-accent-700 hover:to-accent-600 transition-all inline-flex items-center gap-2 shadow-[0_4px_16px_-4px_rgba(168,85,247,0.4)]"
               >
-                <Plus size={20} />
+                <Plus size={20} strokeWidth={2.5} />
                 להגדיר מטרות
-              </button>
+              </motion.button>
             </div>
           )}
         </div>

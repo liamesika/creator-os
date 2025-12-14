@@ -69,12 +69,12 @@ export default function CompaniesPage() {
             </p>
           </div>
 
-          {/* Desktop CTA */}
+          {/* Desktop CTA - Premium styling */}
           <motion.button
-            whileHover={{ scale: 1.02 }}
+            whileHover={{ scale: 1.02, y: -1 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => openCreateModal()}
-            className="hidden sm:flex items-center gap-2 px-4 py-2.5 bg-accent-600 hover:bg-accent-700 text-white text-sm font-medium rounded-xl shadow-lg shadow-accent-500/20 transition-colors"
+            className="hidden sm:flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-accent-600 to-accent-500 hover:from-accent-700 hover:to-accent-600 text-white text-sm font-semibold rounded-xl shadow-[0_4px_16px_-4px_rgba(168,85,247,0.4)] transition-all"
           >
             <Plus size={18} strokeWidth={2.5} />
             חברה חדשה
@@ -175,17 +175,19 @@ export default function CompaniesPage() {
         </AnimatePresence>
       </div>
 
-      {/* Mobile FAB */}
+      {/* Mobile FAB - Premium styling */}
       <motion.button
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.3, type: 'spring', stiffness: 300, damping: 20 }}
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
+        initial={{ scale: 0, opacity: 0, rotate: -90 }}
+        animate={{ scale: 1, opacity: 1, rotate: 0 }}
+        transition={{ delay: 0.3, type: 'spring', stiffness: 200, damping: 15 }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={{ scale: 0.92 }}
         onClick={() => openCreateModal()}
-        className="sm:hidden fixed bottom-24 left-6 w-14 h-14 bg-accent-600 hover:bg-accent-700 text-white rounded-full shadow-lg shadow-accent-500/30 flex items-center justify-center z-40"
+        className="sm:hidden fixed bottom-24 left-4 w-14 h-14 bg-gradient-to-br from-neutral-800 to-neutral-900 text-white rounded-2xl shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3),0_4px_8px_-2px_rgba(0,0,0,0.2)] flex items-center justify-center z-40"
       >
-        <Plus size={24} strokeWidth={2.5} />
+        {/* Inner glow effect */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+        <Plus size={24} strokeWidth={2.5} className="relative z-10" />
       </motion.button>
 
       {/* Create/Edit Company Modal */}
