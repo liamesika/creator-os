@@ -17,6 +17,9 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { db } from '@/lib/supabase/database'
+import { useAgencyDemoStore } from '@/stores/agencyDemoStore'
+import { getAgencyDemoCreatorDetail } from '@/lib/agency-demo-data'
+import { showDemoActionToast } from '@/components/app/AgencyDemoBanner'
 import { AgencyCard, AgencyCardHeader, AgencyRow, AgencyEmptyState } from '@/components/app/agency/AgencyCard'
 import AnalyticsCard from '@/components/app/AnalyticsCard'
 import { formatEarnings, getMonthName } from '@/types/agency'
@@ -57,22 +60,69 @@ export default function CreatorDetailPage() {
   const router = useRouter()
   const params = useParams()
   const creatorId = params.creatorId as string
+  const { isAgencyDemo } = useAgencyDemoStore()
 
   const [data, setData] = useState<CreatorDetailData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [showAddEarningModal, setShowAddEarningModal] = useState(false)
 
   useEffect(() => {
-    if (user?.accountType !== 'agency') {
+    // In demo mode, skip account type check
+    if (!isAgencyDemo && user?.accountType !== 'agency') {
       router.push('/dashboard')
       return
     }
     if (creatorId) {
       loadCreatorData()
     }
-  }, [user, creatorId, router])
+  }, [user, creatorId, router, isAgencyDemo])
 
   const loadCreatorData = async () => {
+    // In demo mode, use demo data
+    if (isAgencyDemo) {
+      setIsLoading(true)
+      await new Promise(resolve => setTimeout(resolve, 400))
+
+      const demoData = getAgencyDemoCreatorDetail(creatorId)
+      if (!demoData) {
+        router.push('/agency')
+        return
+      }
+
+      // Transform demo data to match CreatorDetailData structure
+      setData({
+        creator: {
+          id: demoData.creatorUserId,
+          name: demoData.creatorName,
+          email: demoData.creatorEmail,
+        },
+        companies: demoData.companies.map((c: any) => ({
+          id: c.id,
+          name: c.name,
+          status: c.status,
+          monthlyRetainer: c.monthlyRetainer,
+          currency: 'ILS',
+        })),
+        earnings: demoData.earningsTrend.map((e: any, i: number) => ({
+          id: `demo-earning-${i}`,
+          creatorUserId: creatorId,
+          amount: e.amount,
+          currency: 'ILS',
+          earnedOn: new Date(),
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })),
+        monthlyEarningsBreakdown: demoData.earningsTrend.map((e: any, i: number) => ({
+          month: `2024-${String(i + 1).padStart(2, '0')}`,
+          total: e.amount,
+          byCompany: [],
+        })),
+        recentActivity: [],
+      })
+      setIsLoading(false)
+      return
+    }
+
     if (!user?.id || !creatorId) return
     try {
       setIsLoading(true)
@@ -91,6 +141,13 @@ export default function CreatorDetailPage() {
   }
 
   const handleAddEarning = async (entry: Omit<EarningsEntry, 'id' | 'createdAt' | 'updatedAt' | 'creatorUserId'>) => {
+    // Block in demo mode
+    if (isAgencyDemo) {
+      showDemoActionToast('הוספת רשומת הכנסה')
+      setShowAddEarningModal(false)
+      return
+    }
+
     try {
       await db.createEarningsEntry(creatorId, entry, user?.id)
       toast.success('רשומת הכנסה נוספה בהצלחה')

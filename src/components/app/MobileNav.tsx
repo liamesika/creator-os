@@ -14,6 +14,7 @@ import {
   Sliders,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useAgencyDemoStore } from '@/stores/agencyDemoStore'
 
 // Creator mobile nav items (5 key items for mobile - prioritized)
 const creatorNavItems = [
@@ -45,9 +46,10 @@ const colorClasses: Record<string, { active: string; dot: string }> = {
 export default function MobileNav() {
   const pathname = usePathname()
   const { user } = useAuth()
+  const { isAgencyDemo } = useAgencyDemoStore()
 
-  // Select nav items based on account type
-  const isAgency = user?.accountType === 'agency'
+  // Select nav items based on account type or agency demo mode
+  const isAgency = user?.accountType === 'agency' || isAgencyDemo
   const navItems = isAgency ? agencyNavItems : creatorNavItems
 
   return (

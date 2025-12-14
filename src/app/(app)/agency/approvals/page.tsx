@@ -14,6 +14,9 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { toast } from 'sonner'
+import { useAgencyDemoStore } from '@/stores/agencyDemoStore'
+import { getAgencyDemoApprovals, AGENCY_DEMO_CREATORS } from '@/lib/agency-demo-data'
+import { showDemoActionToast } from '@/components/app/AgencyDemoBanner'
 import PremiumCard from '@/components/app/PremiumCard'
 import PremiumEmptyState from '@/components/app/PremiumEmptyState'
 import BottomSheet from '@/components/ui/BottomSheet'
@@ -44,6 +47,7 @@ const STATUS_FILTERS: { value: FilterStatus; label: string }[] = [
 ]
 
 export default function AgencyApprovalsPage() {
+  const { isAgencyDemo } = useAgencyDemoStore()
   const [creators, setCreators] = useState<CreatorWithApprovals[]>([])
   const [loading, setLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
@@ -52,9 +56,51 @@ export default function AgencyApprovalsPage() {
 
   useEffect(() => {
     fetchAgencyApprovals()
-  }, [])
+  }, [isAgencyDemo])
 
   const fetchAgencyApprovals = async () => {
+    // In demo mode, use demo data
+    if (isAgencyDemo) {
+      setLoading(true)
+      await new Promise(resolve => setTimeout(resolve, 400))
+
+      const demoApprovals = getAgencyDemoApprovals()
+
+      // Group approvals by creator
+      const creatorsMap = new Map<string, CreatorWithApprovals>()
+      AGENCY_DEMO_CREATORS.forEach(creator => {
+        creatorsMap.set(creator.creatorUserId, {
+          id: creator.creatorUserId,
+          name: creator.creatorName,
+          approvals: [],
+        })
+      })
+
+      demoApprovals.forEach(approval => {
+        const creator = creatorsMap.get(approval.creatorId)
+        if (creator) {
+          creator.approvals.push({
+            id: approval.id,
+            creatorUserId: approval.creatorId,
+            companyId: 'demo-company',
+            title: approval.title,
+            type: approval.type,
+            status: approval.status as ApprovalStatus,
+            companyName: approval.companyName,
+            createdAt: approval.createdAt.toISOString(),
+            updatedAt: approval.createdAt.toISOString(),
+            dueOn: approval.dueDate?.toISOString(),
+            notes: approval.feedback,
+            commentsCount: Math.floor(Math.random() * 5),
+          })
+        }
+      })
+
+      setCreators(Array.from(creatorsMap.values()).filter(c => c.approvals.length > 0))
+      setLoading(false)
+      return
+    }
+
     try {
       // First get all agency members
       const membersRes = await fetch('/api/agency/members')
@@ -115,6 +161,12 @@ export default function AgencyApprovalsPage() {
   }, [creators])
 
   const handleStatusChange = async (itemId: string, creatorId: string, newStatus: ApprovalStatus) => {
+    // Block in demo mode
+    if (isAgencyDemo) {
+      showDemoActionToast('עדכון סטטוס אישור')
+      return
+    }
+
     try {
       const res = await fetch(`/api/approvals/${itemId}/status`, {
         method: 'POST',

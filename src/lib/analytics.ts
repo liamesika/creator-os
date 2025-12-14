@@ -11,12 +11,14 @@
 
 export type AnalyticsEvent =
   | 'demo_activated'
+  | 'agency_demo_activated'
   | 'contact_submitted'
   | 'pricing_viewed'
   | 'pricing_agencies_viewed'
 
 export interface AnalyticsData {
   demoActivations: number
+  agencyDemoActivations: number
   contactSubmissions: number
   pricingViews: number
   agencyPricingViews: number
@@ -29,6 +31,7 @@ function getAnalytics(): AnalyticsData {
   if (typeof window === 'undefined') {
     return {
       demoActivations: 0,
+      agencyDemoActivations: 0,
       contactSubmissions: 0,
       pricingViews: 0,
       agencyPricingViews: 0,
@@ -40,6 +43,7 @@ function getAnalytics(): AnalyticsData {
   if (!stored) {
     return {
       demoActivations: 0,
+      agencyDemoActivations: 0,
       contactSubmissions: 0,
       pricingViews: 0,
       agencyPricingViews: 0,
@@ -63,6 +67,10 @@ export function trackEvent(event: AnalyticsEvent) {
     case 'demo_activated':
       data.demoActivations++
       console.log('📊 Analytics: Demo activated')
+      break
+    case 'agency_demo_activated':
+      data.agencyDemoActivations++
+      console.log('📊 Analytics: Agency demo activated')
       break
     case 'contact_submitted':
       data.contactSubmissions++
@@ -91,6 +99,7 @@ export function resetAnalytics() {
 
   const data: AnalyticsData = {
     demoActivations: 0,
+    agencyDemoActivations: 0,
     contactSubmissions: 0,
     pricingViews: 0,
     agencyPricingViews: 0,

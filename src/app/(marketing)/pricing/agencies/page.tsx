@@ -3,8 +3,8 @@
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
-import { Users, CheckCircle, Mail } from 'lucide-react'
-import DemoButton from '@/components/marketing/DemoButton'
+import { Users, CheckCircle, Mail, Play } from 'lucide-react'
+import AgencyDemoButton from '@/components/marketing/AgencyDemoButton'
 import { AGENCY_CONFIG } from '@/config/pricing'
 import { useSalesModeStore } from '@/stores/salesModeStore'
 import { trackEvent } from '@/lib/analytics'
@@ -149,15 +149,19 @@ export default function AgencyPricingPage() {
                 : 'נציג את המערכת ונבנה פתרון מותאם לסוכנות'}
             </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-              <Link
-                href="/contact?type=agency"
-                className="px-8 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-              >
-                <Mail size={20} />
-                <span>{salesMode ? 'בקשו פגישה' : 'השאירו פרטים'}</span>
-              </Link>
-              <DemoButton size="lg" />
+            {/* Primary CTA - Agency Demo */}
+            <div className="flex flex-col items-center justify-center gap-6 mb-8">
+              <AgencyDemoButton />
+
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Link
+                  href="/contact?type=agency"
+                  className="px-6 py-3 rounded-xl bg-white border-2 border-purple-200 hover:border-purple-300 text-purple-700 font-semibold transition-all hover:shadow-md flex items-center gap-2"
+                >
+                  <Mail size={18} />
+                  <span>{salesMode ? 'בקשו פגישה' : 'השאירו פרטים'}</span>
+                </Link>
+              </div>
             </div>
 
             <p className="text-sm text-gray-600">

@@ -27,6 +27,8 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
+import { useAgencyDemoStore } from '@/stores/agencyDemoStore'
+import { getAgencyDemoControlData, getAgencyDemoInsights } from '@/lib/agency-demo-data'
 import { HealthBadge } from '@/components/app/HealthScoreCard'
 import PremiumCard from '@/components/app/PremiumCard'
 import { AnimatedCounter, AnimatedPercentage } from '@/components/app/experience'
@@ -96,6 +98,7 @@ export default function AgencyControlPageV2() {
   const [insights, setInsights] = useState<InsightDisplay[]>([])
   const [selectedDay, setSelectedDay] = useState<{ date: string; creator: AgencyCreatorWeekData; dayData: DayLoad } | null>(null)
   const { user } = useAuth()
+  const { isAgencyDemo } = useAgencyDemoStore()
 
   // Calculate week dates
   const getWeekDates = (offset: number) => {
@@ -119,6 +122,16 @@ export default function AgencyControlPageV2() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true)
+
+      // In demo mode, use demo data directly
+      if (isAgencyDemo) {
+        await new Promise(resolve => setTimeout(resolve, 400))
+        setControlData(getAgencyDemoControlData(weekDates))
+        setInsights(getAgencyDemoInsights())
+        setIsLoading(false)
+        return
+      }
+
       try {
         const startDate = weekDates[0].toISOString().split('T')[0]
         const endDate = weekDates[6].toISOString().split('T')[0]
@@ -147,7 +160,7 @@ export default function AgencyControlPageV2() {
     }
 
     fetchData()
-  }, [weekOffset])
+  }, [weekOffset, isAgencyDemo])
 
   // Compute risk radar
   const riskItems = useMemo((): RiskItem[] => {
@@ -201,7 +214,8 @@ export default function AgencyControlPageV2() {
     ]
   }, [controlData])
 
-  if (user?.accountType !== 'agency') {
+  // In demo mode, skip account type check
+  if (!isAgencyDemo && user?.accountType !== 'agency') {
     return (
       <div className="min-h-screen flex items-center justify-center" dir="rtl">
         <div className="text-center">

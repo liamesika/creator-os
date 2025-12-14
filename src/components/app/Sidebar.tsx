@@ -47,15 +47,19 @@ const bottomNavItems = [
 interface SidebarProps {
   isCollapsed: boolean
   onToggle: () => void
+  isAgencyDemo?: boolean
 }
 
-export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ isCollapsed, onToggle, isAgencyDemo = false }: SidebarProps) {
   const pathname = usePathname()
   const { user } = useAuth()
 
-  // Select nav items based on account type
-  const isAgency = user?.accountType === 'agency'
+  // Select nav items based on account type OR agency demo mode
+  const isAgency = user?.accountType === 'agency' || isAgencyDemo
   const navItems = isAgency ? agencyNavItems : creatorNavItems
+
+  // In agency demo mode, hide settings
+  const showBottomNav = !isAgencyDemo
 
   const getActiveColors = (color: string, isActive: boolean) => {
     if (!isActive) return ''
@@ -167,7 +171,7 @@ export default function Sidebar({ isCollapsed, onToggle }: SidebarProps) {
 
       {/* Bottom section */}
       <div className="py-4 px-3 border-t border-neutral-100/80 space-y-1.5">
-        {bottomNavItems.map((item) => {
+        {showBottomNav && bottomNavItems.map((item) => {
           const isActive = pathname === item.href
           return (
             <Link key={item.href} href={item.href}>

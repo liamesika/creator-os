@@ -17,6 +17,9 @@ import {
   Sparkles,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
+import { useAgencyDemoStore } from '@/stores/agencyDemoStore'
+import { getAgencyDemoMembers } from '@/lib/agency-demo-data'
+import { showDemoActionToast } from '@/components/app/AgencyDemoBanner'
 import { AgencyCard, AgencyCardHeader, AgencyRow, AgencyEmptyState } from '@/components/app/agency/AgencyCard'
 import { MAX_CREATORS_PER_AGENCY, STATUS_CONFIGS } from '@/types/agency'
 import type { AgencyMembership } from '@/types/agency'
@@ -53,20 +56,31 @@ interface MemberWithDetails extends AgencyMembership {
 export default function AgencyMembersPage() {
   const { user } = useAuth()
   const router = useRouter()
+  const { isAgencyDemo } = useAgencyDemoStore()
   const [members, setMembers] = useState<MemberWithDetails[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [memberToRemove, setMemberToRemove] = useState<MemberWithDetails | null>(null)
 
   useEffect(() => {
-    if (user?.accountType !== 'agency') {
+    // In demo mode, skip account type check
+    if (!isAgencyDemo && user?.accountType !== 'agency') {
       router.push('/dashboard')
       return
     }
     loadMembers()
-  }, [user, router])
+  }, [user, router, isAgencyDemo])
 
   const loadMembers = async () => {
+    // In demo mode, use demo data
+    if (isAgencyDemo) {
+      setIsLoading(true)
+      await new Promise(resolve => setTimeout(resolve, 400))
+      setMembers(getAgencyDemoMembers())
+      setIsLoading(false)
+      return
+    }
+
     try {
       setIsLoading(true)
       const response = await fetch('/api/agency/members')
@@ -82,6 +96,13 @@ export default function AgencyMembersPage() {
   }
 
   const handleInvite = async (email: string) => {
+    // Block in demo mode
+    if (isAgencyDemo) {
+      showDemoActionToast('הזמנת יוצר')
+      setShowInviteModal(false)
+      return false
+    }
+
     try {
       const response = await fetch('/api/agency/members', {
         method: 'POST',
@@ -108,6 +129,13 @@ export default function AgencyMembersPage() {
   }
 
   const handleRemove = async (membershipId: string) => {
+    // Block in demo mode
+    if (isAgencyDemo) {
+      showDemoActionToast('הסרת יוצר')
+      setMemberToRemove(null)
+      return
+    }
+
     try {
       const response = await fetch('/api/agency/members', {
         method: 'DELETE',
@@ -151,7 +179,8 @@ export default function AgencyMembersPage() {
     )
   }
 
-  if (user?.accountType !== 'agency') {
+  // In demo mode, skip account type check
+  if (!isAgencyDemo && user?.accountType !== 'agency') {
     return null
   }
 

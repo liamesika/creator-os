@@ -20,6 +20,8 @@ import {
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { db } from '@/lib/supabase/database'
+import { useAgencyDemoStore } from '@/stores/agencyDemoStore'
+import { getAgencyDemoDashboardStats, getAgencyDemoInsights } from '@/lib/agency-demo-data'
 import { AgencyCard, AgencyCardHeader, AgencyRow, AgencyEmptyState } from '@/components/app/agency/AgencyCard'
 import {
   EarningsTrendChart,
@@ -56,21 +58,36 @@ const itemVariants = {
 export default function AgencyDashboardPage() {
   const { user } = useAuth()
   const router = useRouter()
+  const { isAgencyDemo } = useAgencyDemoStore()
   const [stats, setStats] = useState<AgencyDashboardStats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [dateFilter, setDateFilter] = useState<'month' | 'quarter' | 'year'>('month')
-  const { insights } = useInsights({ scope: 'agency' })
+  const { insights: realInsights } = useInsights({ scope: 'agency' })
+
+  // Use demo insights in demo mode
+  const insights = isAgencyDemo ? getAgencyDemoInsights() : realInsights
 
   useEffect(() => {
-    if (user?.accountType !== 'agency') {
+    // In demo mode, skip account type check
+    if (!isAgencyDemo && user?.accountType !== 'agency') {
       router.push('/dashboard')
       return
     }
     loadDashboardStats()
-  }, [user, router])
+  }, [user, router, isAgencyDemo])
 
   const loadDashboardStats = async () => {
+    // In demo mode, use demo data
+    if (isAgencyDemo) {
+      setIsLoading(true)
+      // Simulate loading delay for realistic UX
+      await new Promise(resolve => setTimeout(resolve, 500))
+      setStats(getAgencyDemoDashboardStats())
+      setIsLoading(false)
+      return
+    }
+
     if (!user?.id) return
     try {
       setIsLoading(true)
@@ -109,7 +126,8 @@ export default function AgencyDashboardPage() {
     )
   }
 
-  if (user?.accountType !== 'agency') {
+  // In demo mode, skip account type check
+  if (!isAgencyDemo && user?.accountType !== 'agency') {
     return null
   }
 
