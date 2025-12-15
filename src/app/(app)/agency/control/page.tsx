@@ -24,6 +24,8 @@ import {
   Eye,
   X,
   Calendar,
+  ArrowLeft,
+  Zap,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useAuth } from '@/context/AuthContext'
@@ -231,58 +233,156 @@ export default function AgencyControlPageV2() {
   today.setHours(0, 0, 0, 0)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-indigo-50" dir="rtl">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-neutral-200/50 sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/agency" className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
-                <ChevronLeft size={20} className="text-neutral-500" />
-              </Link>
-              <div>
-                <div className="flex items-center gap-2">
-                  <div className="w-10 h-10 bg-gradient-to-br from-violet-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg shadow-violet-500/25">
-                    <Grid3X3 size={20} className="text-white" />
-                  </div>
-                  <div>
-                    <h1 className="font-bold text-neutral-900">לוח בקרה V2</h1>
-                    <p className="text-xs text-neutral-500">ניהול מתקדם לסוכנות</p>
-                  </div>
-                </div>
-              </div>
-            </div>
+    <div className="min-h-screen" dir="rtl">
+      {/* Background */}
+      <div className="fixed inset-0 bg-gradient-to-b from-neutral-50 via-white to-neutral-50/80 pointer-events-none" />
 
-            {/* Week navigation */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setWeekOffset(prev => prev - 1)}
-                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+      <div className="relative max-w-7xl mx-auto">
+        {/* HERO SECTION - Control Center Command */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative overflow-hidden py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 mb-6"
+        >
+          {/* Gradient background - violet theme */}
+          <div className="absolute inset-0 bg-gradient-to-br from-violet-600 via-purple-600 to-indigo-700" />
+
+          {/* Abstract decorative elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.2 }}
+              className="absolute -top-32 -right-32 w-80 h-80 sm:w-[400px] sm:h-[400px] rounded-full bg-gradient-to-br from-white/10 via-white/5 to-transparent blur-3xl"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.4 }}
+              className="absolute -bottom-24 -left-24 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-indigo-400/20 via-violet-400/10 to-transparent blur-2xl"
+            />
+            {/* Grid overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
+          </div>
+
+          <div className="relative z-10 text-center">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm mb-6"
+            >
+              <Zap size={14} className="text-amber-300" />
+              <span className="text-sm font-medium text-white/80">ניהול מתקדם</span>
+            </motion.div>
+
+            {/* Main Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-3 sm:mb-4"
+            >
+              מרכז בקרה
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-base sm:text-lg text-white/60 mb-8 sm:mb-10"
+            >
+              תמונת מצב שבועית של כל היוצרים בסוכנות
+            </motion.p>
+
+            {/* Quick Stats Row */}
+            {controlData && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="flex items-center justify-center gap-8 sm:gap-16 mb-8 sm:mb-10"
               >
-                <ChevronRight size={20} className="text-neutral-500" />
-              </button>
+                <div className="text-center">
+                  <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">{controlData.overallStats.totalCreators}</p>
+                  <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">יוצרים</p>
+                </div>
+                <div className="w-px h-12 bg-white/20" />
+                <div className="text-center">
+                  <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-300">{controlData.overallStats.calmCount}</p>
+                  <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">רגועים</p>
+                </div>
+                <div className="hidden sm:block w-px h-12 bg-white/20" />
+                <div className="hidden sm:block text-center">
+                  <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-amber-300">{controlData.overallStats.busyCount}</p>
+                  <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">עסוקים</p>
+                </div>
+                <div className="hidden sm:block w-px h-12 bg-white/20" />
+                <div className="hidden sm:block text-center">
+                  <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-red-300">{controlData.overallStats.overloadedCount}</p>
+                  <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">עמוסים</p>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Week Navigation */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="flex items-center justify-center gap-3"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setWeekOffset(prev => prev - 1)}
+                className="p-3 bg-white/10 backdrop-blur-sm rounded-xl text-white hover:bg-white/20 transition-colors"
+              >
+                <ChevronRight size={20} />
+              </motion.button>
               <button
                 onClick={() => setWeekOffset(0)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`px-5 py-3 rounded-xl text-sm font-semibold transition-all ${
                   weekOffset === 0
-                    ? 'bg-violet-100 text-violet-700'
-                    : 'text-neutral-500 hover:bg-neutral-100'
+                    ? 'bg-white text-violet-700 shadow-lg shadow-black/25'
+                    : 'bg-white/10 text-white hover:bg-white/20'
                 }`}
               >
-                השבוע
+                השבוע הנוכחי
               </button>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setWeekOffset(prev => prev + 1)}
-                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                className="p-3 bg-white/10 backdrop-blur-sm rounded-xl text-white hover:bg-white/20 transition-colors"
               >
-                <ChevronLeft size={20} className="text-neutral-500" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+                <ChevronLeft size={20} />
+              </motion.button>
+            </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
+            {/* Back to Agency Link */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="mt-6"
+            >
+              <Link
+                href="/agency"
+                className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+              >
+                <ArrowLeft size={16} />
+                <span>חזרה לדשבורד</span>
+              </Link>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* Rest of content */}
+        <div className="px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Agency Insights Strip */}
         {insights.length > 0 && (
           <div className="flex gap-3 overflow-x-auto pb-2">
@@ -319,75 +419,8 @@ export default function AgencyControlPageV2() {
           </div>
         )}
 
-        {/* Top row - Stats + Risk Radar */}
+        {/* Risk Radar */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Stats overview - Mobile horizontal scroll */}
-          {controlData && (
-            <div className="lg:col-span-2 relative">
-              {/* Fade indicators for mobile scroll */}
-              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-neutral-50 to-transparent z-10 pointer-events-none lg:hidden" />
-              <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-neutral-50 to-transparent z-10 pointer-events-none lg:hidden" />
-
-              <div className="flex lg:grid lg:grid-cols-4 gap-4 overflow-x-auto scrollbar-hide pb-2 -mx-4 px-4 lg:mx-0 lg:px-0 snap-x snap-mandatory">
-                <div className="flex-shrink-0 w-[140px] lg:w-auto snap-start">
-                  <PremiumCard delay={0}>
-                    <div className="p-4 text-center">
-                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-violet-100 via-violet-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(139,92,246,0.2)]">
-                        <Users size={18} className="text-violet-600 drop-shadow-sm" />
-                      </div>
-                      <div className="text-2xl font-bold text-neutral-900">
-                        <AnimatedCounter value={controlData.overallStats.totalCreators} />
-                      </div>
-                      <div className="text-sm text-neutral-500">יוצרים</div>
-                    </div>
-                  </PremiumCard>
-                </div>
-
-                <div className="flex-shrink-0 w-[140px] lg:w-auto snap-start">
-                  <PremiumCard delay={0.1}>
-                    <div className="p-4 text-center bg-gradient-to-br from-emerald-50/80 to-white rounded-2xl">
-                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(16,185,129,0.2)]">
-                        <CheckCircle2 size={18} className="text-emerald-600 drop-shadow-sm" />
-                      </div>
-                      <div className="text-2xl font-bold text-emerald-700">
-                        <AnimatedCounter value={controlData.overallStats.calmCount} />
-                      </div>
-                      <div className="text-sm text-emerald-600">רגועים</div>
-                    </div>
-                  </PremiumCard>
-                </div>
-
-                <div className="flex-shrink-0 w-[140px] lg:w-auto snap-start">
-                  <PremiumCard delay={0.2}>
-                    <div className="p-4 text-center bg-gradient-to-br from-amber-50/80 to-white rounded-2xl">
-                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-amber-100 via-amber-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(245,158,11,0.2)]">
-                        <Clock size={18} className="text-amber-600 drop-shadow-sm" />
-                      </div>
-                      <div className="text-2xl font-bold text-amber-700">
-                        <AnimatedCounter value={controlData.overallStats.busyCount} />
-                      </div>
-                      <div className="text-sm text-amber-600">עסוקים</div>
-                    </div>
-                  </PremiumCard>
-                </div>
-
-                <div className="flex-shrink-0 w-[140px] lg:w-auto snap-start">
-                  <PremiumCard delay={0.3}>
-                    <div className="p-4 text-center bg-gradient-to-br from-red-50/80 to-white rounded-2xl">
-                      <div className="w-10 h-10 mx-auto mb-2 rounded-xl bg-gradient-to-br from-red-100 via-red-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(239,68,68,0.2)]">
-                        <Flame size={18} className="text-red-600 drop-shadow-sm" />
-                      </div>
-                      <div className="text-2xl font-bold text-red-700">
-                        <AnimatedCounter value={controlData.overallStats.overloadedCount} />
-                      </div>
-                      <div className="text-sm text-red-600">עמוסים</div>
-                    </div>
-                  </PremiumCard>
-                </div>
-              </div>
-            </div>
-          )}
-
           {/* Risk Radar */}
           <PremiumCard delay={0.4}>
             <div className="p-4">
@@ -678,6 +711,7 @@ export default function AgencyControlPageV2() {
             </div>
             <span className="text-neutral-600">עמוס (7+)</span>
           </div>
+        </div>
         </div>
       </div>
 

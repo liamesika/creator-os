@@ -23,6 +23,7 @@ import {
   AlertTriangle,
   Briefcase,
   Focus,
+  ArrowLeft,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useCompaniesStore } from '@/stores/companiesStore'
@@ -153,117 +154,110 @@ export default function DashboardPage() {
       {/* Subtle background gradient */}
       <div className="fixed inset-0 bg-gradient-to-b from-neutral-50 via-white to-neutral-50/80 pointer-events-none" />
 
-      <div className="relative p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-        {/* Top Section - Greeting & Quick Actions */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            {/* Greeting */}
-            <div className="flex items-center gap-4">
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-                className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-100 via-orange-100 to-amber-50 flex items-center justify-center shadow-sm"
-              >
-                <GreetingIcon size={26} className="text-amber-600" strokeWidth={1.5} />
-              </motion.div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">
-                  {getGreeting()}, {firstName}
-                </h1>
-                <p className="text-neutral-500 text-sm mt-0.5">{formatDate()}</p>
+      <div className="relative max-w-7xl mx-auto">
+        {/* HERO SECTION - Emotional Entry Point */}
+        <motion.section
+          variants={itemVariants}
+          className="relative overflow-hidden py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 mb-6"
+        >
+          {/* Abstract background elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute -top-40 -right-40 w-80 h-80 sm:w-[500px] sm:h-[500px] rounded-full bg-gradient-to-br from-accent-200/30 via-violet-200/20 to-transparent blur-3xl" />
+            <div className="absolute -bottom-32 -left-32 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-amber-200/25 via-orange-200/15 to-transparent blur-2xl" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-2xl max-h-96 rounded-full bg-gradient-to-r from-blue-100/10 via-violet-100/10 to-accent-100/10 blur-3xl" />
+          </div>
+
+          <div className="relative z-10 text-center">
+            {/* Greeting Icon Badge */}
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
+              className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-amber-100 via-orange-100 to-amber-50 shadow-lg shadow-amber-500/20 mb-6 sm:mb-8"
+            >
+              <GreetingIcon size={32} className="text-amber-600 sm:w-10 sm:h-10" strokeWidth={1.5} />
+            </motion.div>
+
+            {/* Main Greeting - Large Typography */}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 tracking-tight leading-[1.1] mb-3 sm:mb-4"
+            >
+              {getGreeting()}, {firstName}
+            </motion.h1>
+
+            {/* Date subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.35 }}
+              className="text-base sm:text-lg text-neutral-500 mb-8 sm:mb-10"
+            >
+              {formatDate()}
+            </motion.p>
+
+            {/* Quick Stats Row - Signature Element */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.45 }}
+              className="flex items-center justify-center gap-8 sm:gap-16 mb-8 sm:mb-10"
+            >
+              <div className="text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900">{activeCompanies.length}</p>
+                <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1">חברות פעילות</p>
               </div>
-            </div>
+              <div className="w-px h-12 bg-neutral-200" />
+              <div className="text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-600">
+                  {totalRetainers > 0 ? formatCurrency(totalRetainers, 'ILS') : '₪0'}
+                </p>
+                <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1">ריטיינר חודשי</p>
+              </div>
+              <div className="hidden sm:block w-px h-12 bg-neutral-200" />
+              <div className="hidden sm:block text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-violet-600">
+                  {todayGoalItems.filter(g => g.status === 'DONE').length}/{todayGoalItems.length || 0}
+                </p>
+                <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1">מטרות היום</p>
+              </div>
+            </motion.div>
 
             {/* Quick Actions */}
-            <div className="flex items-center gap-2">
-              {[
-                { icon: CalendarDays, label: 'אירוע', color: 'bg-blue-50 text-blue-600 hover:bg-blue-100', href: '/calendar' },
-                { icon: Building2, label: 'חברה', color: 'bg-violet-50 text-violet-600 hover:bg-violet-100', href: '/companies' },
-                { icon: Target, label: 'מטרה', color: 'bg-accent-50 text-accent-600 hover:bg-accent-100', href: '/goals' },
-              ].map((action, i) => (
-                <Link key={action.label} href={action.href}>
-                  <motion.button
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.3 + i * 0.05 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className={`hidden sm:flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-colors ${action.color}`}
-                  >
-                    <action.icon size={16} strokeWidth={2} />
-                    <span>{action.label}</span>
-                  </motion.button>
-                </Link>
-              ))}
-            </div>
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.55 }}
+              className="flex items-center justify-center gap-3"
+            >
+              <Link href="/focus">
+                <motion.button
+                  whileHover={{ scale: 1.02, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="flex items-center gap-2 px-6 py-3 bg-neutral-900 text-white rounded-xl text-sm font-semibold shadow-lg shadow-neutral-900/25 hover:bg-neutral-800 transition-all"
+                >
+                  <Focus size={18} />
+                  <span>התחל מצב פוקוס</span>
+                </motion.button>
+              </Link>
+              <Link href="/calendar">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="hidden sm:flex items-center gap-2 px-5 py-3 bg-white text-neutral-700 rounded-xl text-sm font-semibold border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 transition-all"
+                >
+                  <CalendarDays size={18} />
+                  <span>פתח יומן</span>
+                </motion.button>
+              </Link>
+            </motion.div>
           </div>
-        </motion.div>
+        </motion.section>
 
-        {/* Analytics Strip - Premium horizontal carousel */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-neutral-100 to-neutral-50 flex items-center justify-center">
-              <BarChart3 size={14} className="text-neutral-500" strokeWidth={2.5} />
-            </div>
-            <h2 className="text-sm font-semibold text-neutral-600 tracking-tight">סטטיסטיקות מהירות</h2>
-          </div>
-
-          {/* Enhanced horizontal scroll with better mobile UX */}
-          <div className="relative">
-            {/* Fade indicators for scroll */}
-            <div className="absolute left-0 top-0 bottom-2 w-8 bg-gradient-to-r from-neutral-50 to-transparent z-10 pointer-events-none sm:hidden" />
-            <div className="absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-neutral-50 to-transparent z-10 pointer-events-none sm:hidden" />
-
-            <div className="flex gap-3 sm:gap-4 overflow-x-auto pb-2 -mx-4 px-4 sm:mx-0 sm:px-0 scrollbar-hide snap-x snap-mandatory">
-              <div className="flex-shrink-0 w-[180px] sm:w-auto sm:flex-1 snap-start">
-                <AnalyticsCard
-                  icon={Flame}
-                  label="עקביות שבועית"
-                  value="5/7"
-                  subValue="ימים פעילים"
-                  color="orange"
-                  chart="ring"
-                  chartValue={71}
-                  delay={0.1}
-                />
-              </div>
-              <div className="flex-shrink-0 w-[180px] sm:w-auto sm:flex-1 snap-start">
-                <AnalyticsCard
-                  icon={Building2}
-                  label="חברות פעילות"
-                  value={activeCompanies.length.toString()}
-                  subValue="חברות"
-                  color="blue"
-                  chart="bar"
-                  chartValue={activeCompanies.length > 0 ? 80 : 20}
-                  delay={0.15}
-                />
-              </div>
-              <div className="flex-shrink-0 w-[180px] sm:w-auto sm:flex-1 snap-start">
-                <AnalyticsCard
-                  icon={AlertTriangle}
-                  label="חוזים לחידוש"
-                  value={expiringContracts.length.toString()}
-                  subValue="ב-30 יום"
-                  color={expiringContracts.length > 0 ? 'orange' : 'green'}
-                  delay={0.2}
-                />
-              </div>
-              <div className="flex-shrink-0 w-[180px] sm:w-auto sm:flex-1 snap-start">
-                <AnalyticsCard
-                  icon={Briefcase}
-                  label="ריטיינרים חודשיים"
-                  value={totalRetainers > 0 ? formatCurrency(totalRetainers, 'ILS') : '0'}
-                  subValue="סה״כ"
-                  color="purple"
-                  chart="sparkline"
-                  delay={0.25}
-                />
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        {/* Rest of content with padding */}
+        <div className="px-4 sm:px-6 lg:px-8">
 
         {/* Insights Strip */}
         {insights.length > 0 && (
@@ -556,31 +550,6 @@ export default function DashboardPage() {
               </motion.div>
             )}
 
-            {/* Focus Mode CTA - Primary tier equivalent */}
-            <motion.div variants={itemVariants}>
-              <Link href="/focus">
-                <motion.div
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 rounded-2xl p-5 cursor-pointer shadow-[0_8px_32px_-8px_rgba(99,102,241,0.4),0_4px_16px_-4px_rgba(139,92,246,0.3)]"
-                >
-                  {/* Enhanced gradient overlays */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/5 pointer-events-none" />
-                  <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.15)_0%,_transparent_50%)] pointer-events-none" />
-                  <div className="relative z-10 flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-inner">
-                      <Focus size={24} className="text-white drop-shadow-sm" />
-                    </div>
-                    <div className="text-white">
-                      <h3 className="font-bold text-lg tracking-tight">מצב פוקוס</h3>
-                      <p className="text-white/80 text-sm">התחל את היום המרוכז שלך</p>
-                    </div>
-                    <ChevronLeft size={20} className="text-white/60 mr-auto" />
-                  </div>
-                </motion.div>
-              </Link>
-            </motion.div>
-
             {/* Calendar Preview - Secondary tier */}
             <motion.div variants={itemVariants}>
               <PremiumCard delay={0.45} tier="secondary">
@@ -784,6 +753,7 @@ export default function DashboardPage() {
               </PremiumCard>
             </motion.div>
           </div>
+        </div>
         </div>
       </div>
 

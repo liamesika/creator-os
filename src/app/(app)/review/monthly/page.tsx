@@ -15,6 +15,8 @@ import {
   Flame,
   Award,
   Zap,
+  ArrowLeft,
+  Sparkles,
 } from 'lucide-react'
 import Link from 'next/link'
 import { useTasksStore } from '@/stores/tasksStore'
@@ -77,51 +79,143 @@ export default function MonthlyReviewPage() {
   const isCurrentMonth = selectedMonth === today.getMonth() && selectedYear === today.getFullYear()
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50/50 via-white to-violet-50/50" dir="rtl">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-sm border-b border-neutral-200/50 sticky top-0 z-20">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Link href="/dashboard" className="p-2 hover:bg-neutral-100 rounded-lg transition-colors">
-                <ChevronLeft size={20} className="text-neutral-500" />
-              </Link>
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
-                  <BarChart3 size={20} className="text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-neutral-900">סיכום חודשי</h1>
-                  <p className="text-xs text-neutral-500">תובנות אוטומטיות על הביצועים שלך</p>
-                </div>
-              </div>
-            </div>
+    <div className="min-h-screen" dir="rtl">
+      {/* Background */}
+      <div className="fixed inset-0 bg-gradient-to-b from-neutral-50 via-white to-neutral-50/80 pointer-events-none" />
 
-            {/* Month navigation */}
-            <div className="flex items-center gap-2">
-              <button
+      <div className="relative max-w-4xl mx-auto">
+        {/* HERO SECTION - Monthly Review */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative overflow-hidden py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 mb-6"
+        >
+          {/* Gradient background - indigo theme */}
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-700" />
+
+          {/* Abstract decorative elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.2 }}
+              className="absolute -top-32 -right-32 w-80 h-80 sm:w-[400px] sm:h-[400px] rounded-full bg-gradient-to-br from-white/10 via-white/5 to-transparent blur-3xl"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.4 }}
+              className="absolute -bottom-24 -left-24 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-purple-400/20 via-indigo-400/10 to-transparent blur-2xl"
+            />
+            {/* Grid overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
+          </div>
+
+          <div className="relative z-10 text-center">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm mb-6"
+            >
+              <Sparkles size={14} className="text-amber-300" />
+              <span className="text-sm font-medium text-white/80">תובנות אוטומטיות</span>
+            </motion.div>
+
+            {/* Main Title */}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-3 sm:mb-4"
+            >
+              סיכום חודשי
+            </motion.h1>
+
+            {/* Month Label */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-xl sm:text-2xl text-white/80 font-semibold mb-8 sm:mb-10"
+            >
+              {reviewData.monthLabel}
+            </motion.p>
+
+            {/* Quick Stats Row */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex items-center justify-center gap-8 sm:gap-16 mb-8 sm:mb-10"
+            >
+              <div className="text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">{reviewData.stats.tasksCompleted}</p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">משימות שהושלמו</p>
+              </div>
+              <div className="w-px h-12 bg-white/20" />
+              <div className="text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-300">{reviewData.stats.taskCompletionRate}%</p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">שיעור השלמה</p>
+              </div>
+              <div className="hidden sm:block w-px h-12 bg-white/20" />
+              <div className="hidden sm:block text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-amber-300">{reviewData.stats.goalsAchieved}</p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">יעדים שהושגו</p>
+              </div>
+            </motion.div>
+
+            {/* Month Navigation */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="flex items-center justify-center gap-3"
+            >
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={goToPreviousMonth}
-                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors"
+                className="p-3 bg-white/10 backdrop-blur-sm rounded-xl text-white hover:bg-white/20 transition-colors"
               >
-                <ChevronRight size={20} className="text-neutral-500" />
-              </button>
-              <span className="font-semibold text-neutral-900 min-w-[120px] text-center">
+                <ChevronRight size={20} />
+              </motion.button>
+              <span className="px-5 py-3 bg-white text-indigo-700 rounded-xl text-sm font-semibold shadow-lg shadow-black/25 min-w-[140px]">
                 {reviewData.monthLabel}
               </span>
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={goToNextMonth}
                 disabled={isCurrentMonth}
-                className="p-2 hover:bg-neutral-100 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                className="p-3 bg-white/10 backdrop-blur-sm rounded-xl text-white hover:bg-white/20 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <ChevronLeft size={20} className="text-neutral-500" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+                <ChevronLeft size={20} />
+              </motion.button>
+            </motion.div>
 
-      {/* Content */}
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
+            {/* Back Link */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.6 }}
+              className="mt-6"
+            >
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 text-sm text-white/50 hover:text-white/80 transition-colors"
+              >
+                <ArrowLeft size={16} />
+                <span>חזרה לדשבורד</span>
+              </Link>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* Content */}
+        <div className="px-4 sm:px-6 lg:px-8 space-y-6">
         {/* Insights Strip */}
         {insights.length > 0 && (
           <InsightsStrip
@@ -349,6 +443,7 @@ export default function MonthlyReviewPage() {
             </p>
           </motion.div>
         )}
+        </div>
       </div>
     </div>
   )

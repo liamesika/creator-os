@@ -17,6 +17,8 @@ import {
   UserPlus,
   ArrowUpRight,
   Sparkles,
+  Settings2,
+  ArrowLeft,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { db } from '@/lib/supabase/database'
@@ -138,35 +140,126 @@ export default function AgencyDashboardPage() {
       animate="show"
       className="min-h-screen"
     >
+      {/* Subtle background gradient */}
       <div className="fixed inset-0 bg-gradient-to-b from-neutral-50 via-white to-neutral-50/80 pointer-events-none" />
 
-      <div className="relative p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto">
-        {/* Header */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">
-                דשבורד סוכנות
-              </h1>
-              <p className="text-neutral-500 text-sm mt-1">
-                סקירה כללית של הפעילות והביצועים
-              </p>
-            </div>
+      <div className="relative max-w-7xl mx-auto">
+        {/* HERO SECTION - Agency Command Center */}
+        <motion.section
+          variants={itemVariants}
+          className="relative overflow-hidden py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 mb-6"
+        >
+          {/* Dark gradient background for authority */}
+          <div className="absolute inset-0 bg-gradient-to-br from-neutral-900 via-neutral-800 to-neutral-900" />
 
-            <div className="flex items-center gap-2">
+          {/* Abstract decorative elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.2 }}
+              className="absolute -top-32 -right-32 w-80 h-80 sm:w-[400px] sm:h-[400px] rounded-full bg-gradient-to-br from-violet-500/20 via-purple-500/10 to-transparent blur-3xl"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.4 }}
+              className="absolute -bottom-24 -left-24 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-accent-500/15 via-blue-500/10 to-transparent blur-2xl"
+            />
+            {/* Subtle grid overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
+          </div>
+
+          <div className="relative z-10 text-center">
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm mb-6"
+            >
+              <Sparkles size={14} className="text-violet-400" />
+              <span className="text-sm font-medium text-white/80">מרכז שליטה</span>
+            </motion.div>
+
+            {/* Main Title - Large Typography */}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white tracking-tight leading-[1.1] mb-3 sm:mb-4"
+            >
+              דשבורד סוכנות
+            </motion.h1>
+
+            {/* Subtitle */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-base sm:text-lg text-white/60 mb-8 sm:mb-10"
+            >
+              סקירה כללית של הפעילות והביצועים
+            </motion.p>
+
+            {/* Quick Stats Row - Signature Element */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex items-center justify-center gap-8 sm:gap-16 mb-8 sm:mb-10"
+            >
+              <div className="text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">{stats?.totalCreators || 0}</p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">יוצרים</p>
+              </div>
+              <div className="w-px h-12 bg-white/20" />
+              <div className="text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-400">
+                  {formatEarnings(stats?.totalMonthlyEarnings || 0)}
+                </p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">הכנסות {currentMonth}</p>
+              </div>
+              <div className="hidden sm:block w-px h-12 bg-white/20" />
+              <div className="hidden sm:block text-center">
+                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-violet-400">{stats?.totalActiveCompanies || 0}</p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">חברות פעילות</p>
+              </div>
+            </motion.div>
+
+            {/* Quick Actions */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.5 }}
+              className="flex items-center justify-center gap-3"
+            >
               <Link href="/agency/members">
                 <motion.button
-                  whileHover={{ scale: 1.02, y: -1 }}
+                  whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 px-4 py-2.5 bg-neutral-900 text-white rounded-xl text-sm font-medium shadow-lg shadow-neutral-900/20 hover:bg-neutral-800 transition-all duration-200"
+                  className="flex items-center gap-2 px-6 py-3 bg-white text-neutral-900 rounded-xl text-sm font-semibold shadow-lg shadow-black/25 hover:bg-white/90 transition-all"
                 >
-                  <UserPlus size={16} strokeWidth={2.5} />
+                  <UserPlus size={18} />
                   <span>הוסף יוצר</span>
                 </motion.button>
               </Link>
-            </div>
+              <Link href="/agency/control">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="hidden sm:flex items-center gap-2 px-5 py-3 bg-white/10 text-white rounded-xl text-sm font-semibold backdrop-blur-sm border border-white/10 hover:bg-white/15 transition-all"
+                >
+                  <Settings2 size={18} />
+                  <span>מרכז בקרה</span>
+                </motion.button>
+              </Link>
+            </motion.div>
           </div>
-        </motion.div>
+        </motion.section>
+
+        {/* Rest of content with padding */}
+        <div className="px-4 sm:px-6 lg:px-8">
 
         {/* Insights Strip */}
         {insights.length > 0 && (
@@ -177,52 +270,6 @@ export default function AgencyDashboardPage() {
             />
           </motion.div>
         )}
-
-        {/* Stats Cards */}
-        <motion.div variants={itemVariants} className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart3 size={18} className="text-neutral-400" strokeWidth={2} />
-            <h2 className="text-sm font-semibold text-neutral-500">סיכום כללי</h2>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <AnalyticsCard
-              icon={DollarSign}
-              label={`הכנסות ${currentMonth}`}
-              value={formatEarnings(stats?.totalMonthlyEarnings || 0)}
-              subValue="חודש נוכחי"
-              color="green"
-              chart="sparkline"
-              delay={0.1}
-            />
-            <AnalyticsCard
-              icon={TrendingUp}
-              label="הכנסות שנתיות"
-              value={formatEarnings(stats?.totalYearlyEarnings || 0)}
-              subValue={new Date().getFullYear().toString()}
-              color="purple"
-              chart="bar"
-              chartValue={75}
-              delay={0.15}
-            />
-            <AnalyticsCard
-              icon={Users}
-              label="יוצרים"
-              value={(stats?.totalCreators || 0).toString()}
-              subValue="פעילים"
-              color="blue"
-              delay={0.2}
-            />
-            <AnalyticsCard
-              icon={Building2}
-              label="חברות פעילות"
-              value={(stats?.totalActiveCompanies || 0).toString()}
-              subValue="בכל היוצרים"
-              color="orange"
-              delay={0.25}
-            />
-          </div>
-        </motion.div>
 
         {/* Analytics Section - Only show if there are creators */}
         {stats && stats.creators.length > 0 && (
@@ -345,6 +392,7 @@ export default function AgencyDashboardPage() {
             </div>
           </AgencyCard>
         </motion.div>
+        </div>
       </div>
     </motion.div>
   )

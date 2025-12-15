@@ -14,6 +14,7 @@ import {
   CheckCircle,
   AlertCircle,
   User,
+  Sparkles,
 } from 'lucide-react'
 import type { PortalPublicPayload, ApprovalStatus } from '@/types/client-portal'
 import { APPROVAL_TYPE_CONFIG, APPROVAL_STATUS_CONFIG } from '@/types/client-portal'
@@ -113,87 +114,113 @@ export default function ClientPortalPage({ params }: PortalPageProps) {
   const totalDeliverables = portalData.deliverables.reduce((sum, d) => sum + d.quantity, 0)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50/50 via-white to-indigo-50/50" dir="rtl">
-      {/* Header */}
-      <div
-        className="py-8 px-4"
-        style={{ background: `linear-gradient(135deg, ${brandColor}15 0%, ${brandColor}05 100%)` }}
-      >
-        <div className="max-w-2xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-4 shadow-lg"
-            style={{ backgroundColor: brandColor }}
-          >
-            <User size={28} className="text-white" />
-          </motion.div>
+    <div className="min-h-screen" dir="rtl">
+      {/* Background */}
+      <div className="fixed inset-0 bg-gradient-to-b from-neutral-50 via-white to-neutral-50/80 pointer-events-none" />
 
-          <motion.h1
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-2xl font-bold text-neutral-900 mb-1"
-          >
-            {portalData.brandName || portalData.companyName}
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="text-neutral-500"
-          >
-            פורטל לקוח - {portalData.month}
-          </motion.p>
-        </div>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="max-w-2xl mx-auto px-4 -mt-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-white rounded-2xl shadow-lg p-4 grid grid-cols-3 gap-4"
+      <div className="relative max-w-2xl mx-auto">
+        {/* HERO SECTION - Client Portal */}
+        <motion.section
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="relative overflow-hidden py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 mb-6"
         >
-          <div className="text-center">
-            <div
-              className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center mb-2"
-              style={{ backgroundColor: `${brandColor}15` }}
-            >
-              <Check size={20} style={{ color: brandColor }} />
-            </div>
-            <p className="text-2xl font-bold text-neutral-900">{pendingApprovals.length}</p>
-            <p className="text-xs text-neutral-500">ממתינים לאישור</p>
+          {/* Dynamic gradient background based on brand color */}
+          <div
+            className="absolute inset-0"
+            style={{
+              background: `linear-gradient(135deg, ${brandColor} 0%, ${brandColor}dd 50%, ${brandColor}bb 100%)`,
+            }}
+          />
+
+          {/* Abstract decorative elements */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.2 }}
+              className="absolute -top-32 -right-32 w-80 h-80 sm:w-[400px] sm:h-[400px] rounded-full bg-gradient-to-br from-white/15 via-white/5 to-transparent blur-3xl"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1.2, delay: 0.4 }}
+              className="absolute -bottom-24 -left-24 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-white/10 via-white/5 to-transparent blur-2xl"
+            />
+            {/* Grid overlay */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:32px_32px]" />
           </div>
 
-          <div className="text-center">
-            <div
-              className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center mb-2"
-              style={{ backgroundColor: `${brandColor}15` }}
+          <div className="relative z-10 text-center">
+            {/* Brand Icon */}
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.1, type: 'spring', stiffness: 200 }}
+              className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-2xl sm:rounded-3xl bg-white/20 backdrop-blur-sm shadow-lg shadow-black/10 flex items-center justify-center mb-6"
             >
-              <Package size={20} style={{ color: brandColor }} />
-            </div>
-            <p className="text-2xl font-bold text-neutral-900">{deliveredCount}/{totalDeliverables}</p>
-            <p className="text-xs text-neutral-500">תוצרים נמסרו</p>
-          </div>
+              <User size={36} className="text-white sm:w-12 sm:h-12" strokeWidth={1.5} />
+            </motion.div>
 
-          <div className="text-center">
-            <div
-              className="w-12 h-12 mx-auto rounded-xl flex items-center justify-center mb-2"
-              style={{ backgroundColor: `${brandColor}15` }}
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.15 }}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 backdrop-blur-sm mb-4"
             >
-              <Calendar size={20} style={{ color: brandColor }} />
-            </div>
-            <p className="text-2xl font-bold text-neutral-900">{portalData.upcomingEvents.length}</p>
-            <p className="text-xs text-neutral-500">אירועים קרובים</p>
-          </div>
-        </motion.div>
-      </div>
+              <Sparkles size={14} className="text-white/70" />
+              <span className="text-sm font-medium text-white/80">פורטל לקוח</span>
+            </motion.div>
 
-      {/* Content */}
-      <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
+            {/* Brand Name - Large Typography */}
+            <motion.h1
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight leading-[1.1] mb-2"
+            >
+              {portalData.brandName || portalData.companyName}
+            </motion.h1>
+
+            {/* Month */}
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="text-lg sm:text-xl text-white/70 mb-8 sm:mb-10"
+            >
+              {portalData.month}
+            </motion.p>
+
+            {/* Quick Stats Row */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.4 }}
+              className="flex items-center justify-center gap-6 sm:gap-12"
+            >
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">{pendingApprovals.length}</p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">ממתינים לאישור</p>
+              </div>
+              <div className="w-px h-10 bg-white/20" />
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">{deliveredCount}/{totalDeliverables}</p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">תוצרים</p>
+              </div>
+              <div className="w-px h-10 bg-white/20" />
+              <div className="text-center">
+                <p className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white">{portalData.upcomingEvents.length}</p>
+                <p className="text-xs sm:text-sm text-white/50 font-medium mt-1">אירועים</p>
+              </div>
+            </motion.div>
+          </div>
+        </motion.section>
+
+        {/* Content */}
+        <div className="px-4 sm:px-6 lg:px-8 space-y-8">
         {/* Client Name Input */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -349,11 +376,12 @@ export default function ClientPortalPage({ params }: PortalPageProps) {
             </div>
           </motion.section>
         )}
-      </div>
 
-      {/* Footer */}
-      <div className="py-6 text-center text-xs text-neutral-400">
-        Powered by Creators OS
+        {/* Footer */}
+        <div className="py-6 text-center text-xs text-neutral-400">
+          Powered by Creators OS
+        </div>
+        </div>
       </div>
     </div>
   )
