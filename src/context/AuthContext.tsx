@@ -30,22 +30,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const supabase = createClient()
 
   useEffect(() => {
-    // Skip auth checks if using placeholder Supabase (demo mode)
-    const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL === 'https://placeholder.supabase.co'
-
-    if (isPlaceholder) {
-      // For demo mode, create a fake user
-      setUser({
-        id: 'demo-user',
-        name: 'משתמש הדגמה',
-        email: 'demo@creators-os.com',
-        plan: 'free',
-      })
-      setCurrentUserId('demo-user')
-      setIsLoading(false)
-      return
-    }
-
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
