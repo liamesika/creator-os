@@ -48,8 +48,14 @@ export default function MarketingHeader() {
             ))}
           </nav>
 
-          {/* Desktop CTA - Demo Button Only */}
+          {/* Desktop CTAs - Login + Demo */}
           <div className="hidden lg:flex items-center gap-4">
+            <Link
+              href="/login"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              התחברות
+            </Link>
             <DemoButton size="sm" />
           </div>
 
@@ -90,6 +96,13 @@ export default function MarketingHeader() {
                 </Link>
               ))}
               <div className="pt-3 space-y-3">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2 text-base font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  התחברות
+                </Link>
                 <DemoButton size="lg" onClick={() => setMobileMenuOpen(false)} />
               </div>
             </div>
