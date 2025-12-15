@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Menu, X } from 'lucide-react'
+import Link from 'next/link'
 import Logo from './Logo'
 
 const navLinks = [
@@ -60,26 +61,28 @@ export default function Navigation() {
 
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-3">
-              <motion.a
-                href="/login"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4, duration: 0.4 }}
-                className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
-              >
-                התחברות
-              </motion.a>
-              <motion.a
-                href="/signup"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5, duration: 0.4 }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="btn-primary text-sm py-2.5 px-5"
-              >
-                הרשמה
-              </motion.a>
+              <Link href="/login">
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.4, duration: 0.4 }}
+                  className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors cursor-pointer"
+                >
+                  התחברות
+                </motion.span>
+              </Link>
+              <Link href="/signup">
+                <motion.span
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5, duration: 0.4 }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="btn-primary text-sm py-2.5 px-5 inline-block cursor-pointer"
+                >
+                  הרשמה
+                </motion.span>
+              </Link>
             </div>
 
             {/* Mobile Menu Button */}
@@ -122,26 +125,26 @@ export default function Navigation() {
                     {link.label}
                   </motion.a>
                 ))}
-                <motion.a
-                  href="/login"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.4 }}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="text-xl font-medium text-neutral-700 hover:text-accent-600 transition-colors mt-4"
-                >
-                  התחברות
-                </motion.a>
-                <motion.a
-                  href="/signup"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.5 }}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className="btn-primary mt-2 text-center"
-                >
-                  הרשמה
-                </motion.a>
+                <Link href="/login" onClick={() => setIsMobileMenuOpen(false)}>
+                  <motion.span
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-xl font-medium text-neutral-700 hover:text-accent-600 transition-colors mt-4 block"
+                  >
+                    התחברות
+                  </motion.span>
+                </Link>
+                <Link href="/signup" onClick={() => setIsMobileMenuOpen(false)}>
+                  <motion.span
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.5 }}
+                    className="btn-primary mt-2 text-center block"
+                  >
+                    הרשמה
+                  </motion.span>
+                </Link>
               </div>
             </div>
           </motion.div>
