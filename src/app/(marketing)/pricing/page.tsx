@@ -132,10 +132,8 @@ export default function PricingPage() {
                   </div>
                 )}
 
-                <a
+                <Link
                   href={plan.ctaLink}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className={`
                     block w-full py-3 px-6 rounded-xl font-semibold text-center transition-all shadow-md hover:shadow-lg
                     ${plan.popular
@@ -145,7 +143,7 @@ export default function PricingPage() {
                   `}
                 >
                   {plan.cta}
-                </a>
+                </Link>
               </motion.div>
             ))}
           </div>

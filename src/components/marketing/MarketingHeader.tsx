@@ -49,8 +49,19 @@ export default function MarketingHeader() {
           </nav>
 
           {/* Desktop CTAs */}
-          <div className="hidden lg:flex items-center gap-3">
-            <DemoButton size="sm" />
+          <div className="hidden lg:flex items-center gap-4">
+            <Link
+              href="/login"
+              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              התחברות
+            </Link>
+            <Link
+              href="/signup"
+              className="px-5 py-2.5 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white text-sm font-semibold rounded-xl transition-all shadow-md hover:shadow-lg"
+            >
+              הרשמה
+            </Link>
           </div>
 
           {/* Mobile Menu Button */}
@@ -89,8 +100,21 @@ export default function MarketingHeader() {
                   {item.label}
                 </Link>
               ))}
-              <div className="pt-3">
-                <DemoButton size="md" className="w-full" />
+              <div className="pt-3 space-y-3">
+                <Link
+                  href="/login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-2 text-base font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                >
+                  התחברות
+                </Link>
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block w-full text-center px-5 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all shadow-md"
+                >
+                  הרשמה
+                </Link>
               </div>
             </div>
           </motion.div>
