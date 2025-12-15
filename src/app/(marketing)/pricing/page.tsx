@@ -150,7 +150,7 @@ export default function PricingPage() {
             ))}
           </div>
 
-          {/* Demo CTA */}
+          {/* Free Trial CTA */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -159,9 +159,28 @@ export default function PricingPage() {
             className="text-center p-6 rounded-2xl bg-gradient-to-br from-purple-50 to-pink-50 border border-purple-200 shadow-lg"
           >
             <Sparkles className="mx-auto mb-3 text-purple-600" size={28} />
-            <h3 className="text-xl font-bold mb-2 text-gray-900">רוצים לראות לפני שמתחילים?</h3>
+            <h3 className="text-xl font-bold mb-2 text-gray-900">מוכנים להתחיל?</h3>
             <p className="text-gray-600 mb-5">
-              נסו את מצב ההדגמה עם נתונים מלאים
+              התחילו ניסיון חינם והתנסו בכל התכונות
+            </p>
+            <Link
+              href="/signup"
+              className="inline-block px-8 py-3 rounded-xl font-semibold text-white bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all shadow-md hover:shadow-lg"
+            >
+              התחילו ניסיון חינם
+            </Link>
+          </motion.div>
+
+          {/* Demo CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.1 }}
+            className="text-center p-5 rounded-2xl bg-gray-50 border border-gray-200 mt-6"
+          >
+            <p className="text-gray-600 mb-3">
+              רוצים לראות לפני שמתחילים? נסו את מצב ההדגמה
             </p>
             <DemoButton size="lg" />
           </motion.div>

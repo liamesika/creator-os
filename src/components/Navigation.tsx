@@ -61,7 +61,16 @@ export default function Navigation() {
             {/* CTA Buttons */}
             <div className="hidden md:flex items-center gap-3">
               <motion.a
-                href="#join"
+                href="/login"
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4, duration: 0.4 }}
+                className="text-sm font-medium text-neutral-600 hover:text-neutral-900 transition-colors"
+              >
+                התחברות
+              </motion.a>
+              <motion.a
+                href="/signup"
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5, duration: 0.4 }}
@@ -69,7 +78,7 @@ export default function Navigation() {
                 whileTap={{ scale: 0.98 }}
                 className="btn-primary text-sm py-2.5 px-5"
               >
-                הצטרפות מוקדמת
+                הרשמה
               </motion.a>
             </div>
 
@@ -114,14 +123,24 @@ export default function Navigation() {
                   </motion.a>
                 ))}
                 <motion.a
-                  href="#join"
+                  href="/login"
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="btn-primary mt-4 text-center"
+                  className="text-xl font-medium text-neutral-700 hover:text-accent-600 transition-colors mt-4"
                 >
-                  הצטרפות מוקדמת
+                  התחברות
+                </motion.a>
+                <motion.a
+                  href="/signup"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="btn-primary mt-2 text-center"
+                >
+                  הרשמה
                 </motion.a>
               </div>
             </div>
