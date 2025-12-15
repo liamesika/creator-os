@@ -132,18 +132,35 @@ export default function PricingPage() {
                   </div>
                 )}
 
-                <Link
-                  href={plan.ctaLink}
-                  className={`
-                    block w-full py-3 px-6 rounded-xl font-semibold text-center transition-all shadow-md hover:shadow-lg
-                    ${plan.popular
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
-                      : 'bg-gray-900 hover:bg-gray-800 text-white'
-                    }
-                  `}
-                >
-                  {plan.cta}
-                </Link>
+                {plan.ctaLink.startsWith('http') ? (
+                  <a
+                    href={plan.ctaLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`
+                      block w-full py-3 px-6 rounded-xl font-semibold text-center transition-all shadow-md hover:shadow-lg
+                      ${plan.popular
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
+                        : 'bg-gray-900 hover:bg-gray-800 text-white'
+                      }
+                    `}
+                  >
+                    {plan.cta}
+                  </a>
+                ) : (
+                  <Link
+                    href={plan.ctaLink}
+                    className={`
+                      block w-full py-3 px-6 rounded-xl font-semibold text-center transition-all shadow-md hover:shadow-lg
+                      ${plan.popular
+                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white'
+                        : 'bg-gray-900 hover:bg-gray-800 text-white'
+                      }
+                    `}
+                  >
+                    {plan.cta}
+                  </Link>
+                )}
               </motion.div>
             ))}
           </div>

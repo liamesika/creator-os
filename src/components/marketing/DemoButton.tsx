@@ -10,12 +10,14 @@ interface DemoButtonProps {
   variant?: 'primary' | 'secondary'
   size?: 'sm' | 'md' | 'lg'
   className?: string
+  onClick?: () => void
 }
 
 export default function DemoButton({
   variant = 'primary',
   size = 'md',
-  className = ''
+  className = '',
+  onClick
 }: DemoButtonProps) {
   const router = useRouter()
   const { activateDemoMode } = useDemoModeStore()
@@ -25,6 +27,7 @@ export default function DemoButton({
     activateDemoMode()
     sessionStorage.setItem('creators-os-just-logged-in', 'true')
     sessionStorage.removeItem('creators-os-splash-seen')
+    onClick?.()
     router.push('/dashboard')
   }
 
