@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { createClient } from '@/lib/supabase/client'
 import { setCurrentUserId } from '@/lib/supabase/auth-helpers'
 import type { User as SupabaseUser } from '@supabase/supabase-js'
+import { clearAllStores } from '@/lib/store-reset'
 
 interface User {
   id: string
@@ -56,6 +57,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loadUserProfile = async (supabaseUser: SupabaseUser) => {
     try {
+      // Clear demo mode and all stores when a real user logs in
+      // This prevents demo data from leaking into real user sessions
+      clearAllStores()
+
       // Get or create user profile
       const { data: profile, error } = await supabase
         .from('user_profiles')
@@ -162,6 +167,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await supabase.auth.signOut()
     setUser(null)
     setCurrentUserId(null)
+    // Clear all stores to prevent data leakage between users/demo mode
+    clearAllStores()
   }
 
   return (

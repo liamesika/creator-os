@@ -46,8 +46,11 @@ export default function AppLayout({
       router.push('/login')
     }
 
-    // Re-populate demo data if demo mode is active but data was lost (page refresh)
-    if (isDemo) {
+    // Only re-populate demo data on page refresh if:
+    // 1. Demo mode is active (isDemo flag is set)
+    // 2. AND there's no real user logged in (to prevent contamination)
+    // When a real user is logged in, we should NOT populate demo data
+    if (isDemo && !user) {
       const { populateDemoData } = useDemoModeStore.getState()
       populateDemoData()
     }
