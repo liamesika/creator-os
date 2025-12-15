@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
 import {
@@ -24,6 +24,8 @@ import {
   Briefcase,
   Focus,
   ArrowLeft,
+  Heart,
+  Activity,
 } from 'lucide-react'
 import { useAuth } from '@/context/AuthContext'
 import { useCompaniesStore } from '@/stores/companiesStore'
@@ -31,7 +33,7 @@ import { useCalendarStore } from '@/stores/calendarStore'
 import { useActivityStore } from '@/stores/activityStore'
 import { useGoalsStore } from '@/stores/goalsStore'
 import { useTasksStore } from '@/stores/tasksStore'
-import { getTodayDateString } from '@/types/goal'
+import { getTodayDateString, formatGoalDate } from '@/types/goal'
 import { CATEGORY_PRESETS } from '@/types/calendar'
 import { BRAND_TYPE_PRESETS, formatCurrency } from '@/types/company'
 import { ACTIVITY_CONFIGS } from '@/types/activity'
@@ -70,6 +72,13 @@ const formatDate = () => {
     'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'
   ]
   return `יום ${days[date.getDay()]}, ${date.getDate()} ב${months[date.getMonth()]}`
+}
+
+// Get yesterday's date string
+const getYesterdayDateString = (): string => {
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+  return formatGoalDate(yesterday)
 }
 
 const containerVariants = {
@@ -133,10 +142,26 @@ export default function DashboardPage() {
   const todayGoal = getGoalForDate(getTodayDateString())
   const todayGoalItems = todayGoal?.items || []
 
+  // Yesterday's goals for summary
+  const yesterdayGoal = getGoalForDate(getYesterdayDateString())
+  const yesterdayGoalItems = yesterdayGoal?.items || []
+  const yesterdayCompletedCount = yesterdayGoalItems.filter(g => g.status === 'DONE').length
+  const yesterdayTotalCount = yesterdayGoalItems.length
+
   // Today's tasks and overdue
   const todayTasks = getTodayTasks()
   const overdueTasks = getOverdueTasks()
   const upcomingTasks = [...overdueTasks, ...todayTasks.filter(t => t.status !== 'DONE')].slice(0, 5)
+
+  // Calculate today's completion percentage
+  const todayCompletedGoals = todayGoalItems.filter(g => g.status === 'DONE').length
+  const todayTotalGoals = todayGoalItems.length
+  const todayCompletionPercent = todayTotalGoals > 0
+    ? Math.round((todayCompletedGoals / todayTotalGoals) * 100)
+    : 0
+
+  // Tasks due today count
+  const tasksDueToday = todayTasks.filter(t => t.status !== 'DONE').length + overdueTasks.length
 
   const getCompanyName = (companyId: string | undefined | null): string => {
     if (!companyId) return ''
@@ -154,114 +179,135 @@ export default function DashboardPage() {
       {/* Subtle background gradient */}
       <div className="fixed inset-0 bg-gradient-to-b from-neutral-50 via-white to-neutral-50/80 pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto">
-        {/* HERO SECTION - Emotional Entry Point */}
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+        {/* TOP BAR - Date + Subtle Greeting */}
+        <motion.div
+          variants={itemVariants}
+          className="flex items-center justify-between py-3 sm:py-4"
+        >
+          {/* Date - Primary */}
+          <div className="flex items-center gap-2">
+            <CalendarDays size={16} className="text-neutral-400" />
+            <span className="text-sm sm:text-base font-medium text-neutral-700">{formatDate()}</span>
+          </div>
+          {/* Greeting - Subtle, Secondary */}
+          <div className="flex items-center gap-1.5 text-neutral-400">
+            <GreetingIcon size={14} className="text-amber-500" />
+            <span className="text-xs sm:text-sm">{getGreeting()}, {firstName}</span>
+          </div>
+        </motion.div>
+
+        {/* DATA-FIRST HERO - Compact, Informative */}
         <motion.section
           variants={itemVariants}
-          className="relative overflow-hidden py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 mb-6"
+          className="bg-white rounded-xl sm:rounded-2xl border border-neutral-100 shadow-sm p-3 sm:p-4 mb-3 sm:mb-4"
         >
-          {/* Abstract background elements */}
-          <div className="absolute inset-0 overflow-hidden pointer-events-none">
-            <div className="absolute -top-40 -right-40 w-80 h-80 sm:w-[500px] sm:h-[500px] rounded-full bg-gradient-to-br from-accent-200/30 via-violet-200/20 to-transparent blur-3xl" />
-            <div className="absolute -bottom-32 -left-32 w-64 h-64 sm:w-80 sm:h-80 rounded-full bg-gradient-to-tr from-amber-200/25 via-orange-200/15 to-transparent blur-2xl" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full max-w-2xl max-h-96 rounded-full bg-gradient-to-r from-blue-100/10 via-violet-100/10 to-accent-100/10 blur-3xl" />
+          {/* Stats Grid - Mobile optimized 2x2 */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
+            {/* Tasks Due */}
+            <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg p-2.5 sm:p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5">
+                <CheckSquare size={12} className="text-red-500" />
+                <span className="text-[10px] sm:text-xs text-neutral-500">משימות להיום</span>
+              </div>
+              <p className="text-lg sm:text-xl font-bold text-neutral-900">{tasksDueToday}</p>
+              {overdueTasks.length > 0 && (
+                <p className="text-[10px] text-red-500 font-medium">{overdueTasks.length} באיחור</p>
+              )}
+            </div>
+
+            {/* Companies Today */}
+            <div className="bg-gradient-to-br from-violet-50 to-purple-50 rounded-lg p-2.5 sm:p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5">
+                <Building2 size={12} className="text-violet-500" />
+                <span className="text-[10px] sm:text-xs text-neutral-500">חברות פעילות</span>
+              </div>
+              <p className="text-lg sm:text-xl font-bold text-neutral-900">{activeCompanies.length}</p>
+              {companyEventsThisWeek.length > 0 && (
+                <p className="text-[10px] text-violet-500 font-medium">{companyEventsThisWeek.length} אירועים השבוע</p>
+              )}
+            </div>
+
+            {/* Completion % */}
+            <div className="bg-gradient-to-br from-emerald-50 to-green-50 rounded-lg p-2.5 sm:p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5">
+                <Target size={12} className="text-emerald-500" />
+                <span className="text-[10px] sm:text-xs text-neutral-500">התקדמות היום</span>
+              </div>
+              <p className="text-lg sm:text-xl font-bold text-emerald-600">{todayCompletionPercent}%</p>
+              <p className="text-[10px] text-neutral-400">{todayCompletedGoals}/{todayTotalGoals} מטרות</p>
+            </div>
+
+            {/* Health Status */}
+            <div className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-lg p-2.5 sm:p-3 text-center">
+              <div className="flex items-center justify-center gap-1 mb-0.5">
+                <Heart size={12} className="text-blue-500" />
+                <span className="text-[10px] sm:text-xs text-neutral-500">בריאות</span>
+              </div>
+              {health && !healthLoading ? (
+                <>
+                  <p className="text-lg sm:text-xl font-bold text-blue-600">{health.score}</p>
+                  <p className="text-[10px] text-neutral-400">{health.statusLabel}</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-lg sm:text-xl font-bold text-neutral-300">--</p>
+                  <p className="text-[10px] text-neutral-400">טוען...</p>
+                </>
+              )}
+            </div>
           </div>
 
-          <div className="relative z-10 text-center">
-            {/* Greeting Icon Badge */}
-            <motion.div
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ delay: 0.2, type: 'spring', stiffness: 200 }}
-              className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-gradient-to-br from-amber-100 via-orange-100 to-amber-50 shadow-lg shadow-amber-500/20 mb-6 sm:mb-8"
-            >
-              <GreetingIcon size={32} className="text-amber-600 sm:w-10 sm:h-10" strokeWidth={1.5} />
-            </motion.div>
-
-            {/* Main Greeting - Large Typography */}
-            <motion.h1
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-bold text-neutral-900 tracking-tight leading-[1.1] mb-3 sm:mb-4"
-            >
-              {getGreeting()}, {firstName}
-            </motion.h1>
-
-            {/* Date subtitle */}
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.35 }}
-              className="text-base sm:text-lg text-neutral-500 mb-8 sm:mb-10"
-            >
-              {formatDate()}
-            </motion.p>
-
-            {/* Quick Stats Row - Signature Element */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.45 }}
-              className="flex items-center justify-center gap-8 sm:gap-16 mb-8 sm:mb-10"
-            >
-              <div className="text-center">
-                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-neutral-900">{activeCompanies.length}</p>
-                <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1">חברות פעילות</p>
+          {/* Yesterday Summary - Compact */}
+          {yesterdayTotalCount > 0 && (
+            <div className="bg-neutral-50 rounded-lg px-3 py-2 mb-3 sm:mb-4">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] sm:text-xs text-neutral-400">אתמול:</span>
+                <span className="text-xs sm:text-sm font-medium text-neutral-600">
+                  {yesterdayCompletedCount}/{yesterdayTotalCount} מטרות הושלמו
+                  {yesterdayCompletedCount === yesterdayTotalCount && yesterdayTotalCount > 0 && (
+                    <span className="text-emerald-500 mr-1">✓</span>
+                  )}
+                </span>
               </div>
-              <div className="w-px h-12 bg-neutral-200" />
-              <div className="text-center">
-                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-emerald-600">
-                  {totalRetainers > 0 ? formatCurrency(totalRetainers, 'ILS') : '₪0'}
-                </p>
-                <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1">ריטיינר חודשי</p>
-              </div>
-              <div className="hidden sm:block w-px h-12 bg-neutral-200" />
-              <div className="hidden sm:block text-center">
-                <p className="text-3xl sm:text-4xl lg:text-5xl font-bold text-violet-600">
-                  {todayGoalItems.filter(g => g.status === 'DONE').length}/{todayGoalItems.length || 0}
-                </p>
-                <p className="text-xs sm:text-sm text-neutral-500 font-medium mt-1">מטרות היום</p>
-              </div>
-            </motion.div>
+            </div>
+          )}
 
-            {/* Quick Actions */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.55 }}
-              className="flex items-center justify-center gap-3"
-            >
-              <Link href="/focus">
-                <motion.button
-                  whileHover={{ scale: 1.02, y: -2 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="flex items-center gap-2 px-6 py-3 bg-neutral-900 text-white rounded-xl text-sm font-semibold shadow-lg shadow-neutral-900/25 hover:bg-neutral-800 transition-all"
-                >
-                  <Focus size={18} />
-                  <span>התחל מצב פוקוס</span>
-                </motion.button>
-              </Link>
-              <Link href="/calendar">
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="hidden sm:flex items-center gap-2 px-5 py-3 bg-white text-neutral-700 rounded-xl text-sm font-semibold border border-neutral-200 hover:border-neutral-300 hover:bg-neutral-50 transition-all"
-                >
-                  <CalendarDays size={18} />
-                  <span>פתח יומן</span>
-                </motion.button>
-              </Link>
-            </motion.div>
+          {/* Primary Actions - Prominent */}
+          <div className="flex gap-2">
+            <Link href="/calendar" className="flex-1">
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 bg-neutral-900 text-white rounded-lg text-xs sm:text-sm font-medium"
+              >
+                <CalendarDays size={14} />
+                <span>יומן</span>
+              </motion.button>
+            </Link>
+            <Link href="/focus" className="flex-1">
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 bg-violet-600 text-white rounded-lg text-xs sm:text-sm font-medium"
+              >
+                <Focus size={14} />
+                <span>פוקוס</span>
+              </motion.button>
+            </Link>
+            <Link href="/health" className="flex-1">
+              <motion.button
+                whileTap={{ scale: 0.98 }}
+                className="w-full flex items-center justify-center gap-1.5 px-3 py-2 sm:py-2.5 bg-white text-neutral-700 rounded-lg text-xs sm:text-sm font-medium border border-neutral-200"
+              >
+                <Activity size={14} />
+                <span>בריאות</span>
+              </motion.button>
+            </Link>
           </div>
         </motion.section>
 
-        {/* Rest of content with padding */}
-        <div className="px-4 sm:px-6 lg:px-8">
-
         {/* Insights Strip */}
         {insights.length > 0 && (
-          <motion.div variants={itemVariants} className="mb-8">
+          <motion.div variants={itemVariants} className="mb-3 sm:mb-4">
             <InsightsStrip
               insights={insights}
               loading={insightsLoading}
@@ -271,21 +317,21 @@ export default function DashboardPage() {
         )}
 
         {/* Main Content Grid */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid lg:grid-cols-3 gap-3 sm:gap-4">
           {/* Left Column - Today's Focus */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-3 sm:space-y-4">
             {/* Brand Work Card - Secondary tier */}
             <motion.div variants={itemVariants}>
               <PremiumCard delay={0.3} tier="secondary">
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-100 via-violet-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(139,92,246,0.2)]">
-                        <Building2 size={18} className="text-violet-600 drop-shadow-sm" strokeWidth={2} />
+                <div className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-violet-100 via-violet-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(139,92,246,0.2)]">
+                        <Building2 size={16} className="text-violet-600 drop-shadow-sm sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                       </div>
                       <div>
-                        <h2 className="font-semibold text-neutral-900 tracking-tight">עבודה עם מותגים</h2>
-                        <p className="text-xs text-neutral-500">{companyEventsThisWeek.length} אירועים השבוע</p>
+                        <h2 className="text-sm sm:text-base font-semibold text-neutral-900 tracking-tight">עבודה עם מותגים</h2>
+                        <p className="text-[10px] sm:text-xs text-neutral-500">{companyEventsThisWeek.length} אירועים השבוע</p>
                       </div>
                     </div>
                     <Link href="/companies">
@@ -361,15 +407,15 @@ export default function DashboardPage() {
             {/* Goals Card - Primary tier (important daily item) */}
             <motion.div variants={itemVariants}>
               <PremiumCard delay={0.35} tier="primary">
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent-100 via-accent-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(168,85,247,0.2)]">
-                        <Target size={18} className="text-accent-600 drop-shadow-sm" strokeWidth={2} />
+                <div className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-accent-100 via-accent-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(168,85,247,0.2)]">
+                        <Target size={16} className="text-accent-600 drop-shadow-sm sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                       </div>
                       <div>
-                        <h2 className="font-semibold text-neutral-900 tracking-tight">המטרות של היום</h2>
-                        <p className="text-xs text-neutral-500">
+                        <h2 className="text-sm sm:text-base font-semibold text-neutral-900 tracking-tight">המטרות של היום</h2>
+                        <p className="text-[10px] sm:text-xs text-neutral-500">
                           {todayGoalItems.length > 0
                             ? `${todayGoalItems.filter(g => g.status === 'DONE').length}/${todayGoalItems.length} הושלמו`
                             : 'הגדר 1-3 מטרות'
@@ -439,15 +485,15 @@ export default function DashboardPage() {
             {/* Tasks Card - Primary tier (important daily item) */}
             <motion.div variants={itemVariants}>
               <PremiumCard delay={0.4} tier="primary">
-                <div className="p-5 sm:p-7">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(16,185,129,0.25)]">
-                        <CheckSquare size={18} className="text-emerald-600 drop-shadow-sm" strokeWidth={2} />
+                <div className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-emerald-100 via-emerald-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(16,185,129,0.25)]">
+                        <CheckSquare size={16} className="text-emerald-600 drop-shadow-sm sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                       </div>
                       <div>
-                        <h2 className="font-semibold text-neutral-900 tracking-tight">משימות להיום</h2>
-                        <p className="text-xs text-neutral-500">
+                        <h2 className="text-sm sm:text-base font-semibold text-neutral-900 tracking-tight">משימות להיום</h2>
+                        <p className="text-[10px] sm:text-xs text-neutral-500">
                           {upcomingTasks.length > 0
                             ? `${upcomingTasks.length} משימות פתוחות${overdueTasks.length > 0 ? ` (${overdueTasks.length} באיחור)` : ''}`
                             : '0 משימות פתוחות'
@@ -536,7 +582,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Right Column - Calendar & Progress */}
-          <div className="space-y-6">
+          <div className="space-y-3 sm:space-y-4">
             {/* Health Score Card - Primary tier (signature element) */}
             {health && !healthLoading && (
               <motion.div variants={itemVariants}>
@@ -553,15 +599,15 @@ export default function DashboardPage() {
             {/* Calendar Preview - Secondary tier */}
             <motion.div variants={itemVariants}>
               <PremiumCard delay={0.45} tier="secondary">
-                <div className="p-5 sm:p-6">
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="flex items-center gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-100 via-blue-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(59,130,246,0.2)]">
-                        <CalendarDays size={18} className="text-blue-600 drop-shadow-sm" strokeWidth={2} />
+                <div className="p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-3 sm:mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-100 via-blue-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(59,130,246,0.2)]">
+                        <CalendarDays size={16} className="text-blue-600 drop-shadow-sm sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                       </div>
                       <div>
-                        <h2 className="font-semibold text-neutral-900">אירועים קרובים</h2>
-                        <p className="text-xs text-neutral-400">היום</p>
+                        <h2 className="text-sm sm:text-base font-semibold text-neutral-900">אירועים קרובים</h2>
+                        <p className="text-[10px] sm:text-xs text-neutral-400">היום</p>
                       </div>
                     </div>
                     <Link href="/calendar">
@@ -593,15 +639,15 @@ export default function DashboardPage() {
             {activeCompanies.length > 0 && (
               <motion.div variants={itemVariants}>
                 <PremiumCard delay={0.5} tier="tertiary">
-                  <div className="p-5 sm:p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-violet-100 via-violet-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(139,92,246,0.2)]">
-                          <Building2 size={18} className="text-violet-600 drop-shadow-sm" strokeWidth={2} />
+                  <div className="p-3 sm:p-4">
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-violet-100 via-violet-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(139,92,246,0.2)]">
+                          <Building2 size={16} className="text-violet-600 drop-shadow-sm sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                         </div>
                         <div>
-                          <h2 className="font-semibold text-neutral-900">החברות שלי</h2>
-                          <p className="text-xs text-neutral-400">{activeCompanies.length} חברות פעילות</p>
+                          <h2 className="text-sm sm:text-base font-semibold text-neutral-900">החברות שלי</h2>
+                          <p className="text-[10px] sm:text-xs text-neutral-400">{activeCompanies.length} חברות פעילות</p>
                         </div>
                       </div>
                     </div>
@@ -648,14 +694,14 @@ export default function DashboardPage() {
             {expiringContracts.length > 0 && (
               <motion.div variants={itemVariants}>
                 <PremiumCard delay={0.55} tier="secondary">
-                  <div className="p-5 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100">
-                    <div className="flex items-start gap-3">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-amber-100 via-amber-50 to-white flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.25)]">
-                        <AlertTriangle size={18} className="text-amber-600 drop-shadow-sm" strokeWidth={2} />
+                  <div className="p-3 sm:p-4 bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 rounded-lg sm:rounded-xl">
+                    <div className="flex items-start gap-2 sm:gap-3">
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-amber-100 via-amber-50 to-white flex items-center justify-center flex-shrink-0 shadow-[0_2px_8px_-2px_rgba(245,158,11,0.25)]">
+                        <AlertTriangle size={16} className="text-amber-600 drop-shadow-sm sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                       </div>
                       <div>
-                        <h3 className="font-semibold text-neutral-800 mb-1">חוזים לחידוש</h3>
-                        <p className="text-sm text-neutral-600 mb-3">
+                        <h3 className="text-sm sm:text-base font-semibold text-neutral-800 mb-0.5 sm:mb-1">חוזים לחידוש</h3>
+                        <p className="text-xs sm:text-sm text-neutral-600 mb-2 sm:mb-3">
                           {expiringContracts.length} חוזים פגים ב-30 יום הקרובים
                         </p>
                         <div className="space-y-1">
@@ -676,15 +722,15 @@ export default function DashboardPage() {
             {recentActivity.length > 0 && (
               <motion.div variants={itemVariants}>
                 <PremiumCard delay={0.6} tier="tertiary">
-                  <div className="p-5 sm:p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-3">
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-purple-100 via-purple-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(147,51,234,0.2)]">
-                          <Clock size={18} className="text-purple-600 drop-shadow-sm" strokeWidth={2} />
+                  <div className="p-3 sm:p-4">
+                    <div className="flex items-center justify-between mb-3 sm:mb-4">
+                      <div className="flex items-center gap-2 sm:gap-3">
+                        <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-purple-100 via-purple-50 to-white flex items-center justify-center shadow-[0_2px_8px_-2px_rgba(147,51,234,0.2)]">
+                          <Clock size={16} className="text-purple-600 drop-shadow-sm sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                         </div>
                         <div>
-                          <h2 className="font-semibold text-neutral-900">פעילות אחרונה</h2>
-                          <p className="text-xs text-neutral-400">עדכונים אחרונים</p>
+                          <h2 className="text-sm sm:text-base font-semibold text-neutral-900">פעילות אחרונה</h2>
+                          <p className="text-[10px] sm:text-xs text-neutral-400">עדכונים אחרונים</p>
                         </div>
                       </div>
                       <Link href="/activity">
@@ -734,14 +780,14 @@ export default function DashboardPage() {
             {/* AI Tip - Tertiary tier */}
             <motion.div variants={itemVariants}>
               <PremiumCard delay={0.65} tier="tertiary">
-                <div className="p-5 bg-gradient-to-br from-accent-50/50 via-white to-violet-50/30">
-                  <div className="flex items-start gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-accent-500 via-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-[0_4px_12px_-2px_rgba(139,92,246,0.35)]">
-                      <Sparkles size={18} className="text-white drop-shadow-sm" strokeWidth={2} />
+                <div className="p-3 sm:p-4 bg-gradient-to-br from-accent-50/50 via-white to-violet-50/30 rounded-lg sm:rounded-xl">
+                  <div className="flex items-start gap-2 sm:gap-3">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-accent-500 via-violet-500 to-purple-500 flex items-center justify-center flex-shrink-0 shadow-[0_4px_12px_-2px_rgba(139,92,246,0.35)]">
+                      <Sparkles size={16} className="text-white drop-shadow-sm sm:w-[18px] sm:h-[18px]" strokeWidth={2} />
                     </div>
                     <div>
-                      <h3 className="font-semibold text-neutral-800 mb-1">טיפ מה-AI</h3>
-                      <p className="text-sm text-neutral-600 leading-relaxed">
+                      <h3 className="text-sm sm:text-base font-semibold text-neutral-800 mb-0.5 sm:mb-1">טיפ מה-AI</h3>
+                      <p className="text-xs sm:text-sm text-neutral-600 leading-relaxed">
                         {activeCompanies.length === 0
                           ? 'הוסיפי את החברות והמותגים שאת עובדת איתם כדי לעקוב אחרי עבודה, חוזים ותשלומים.'
                           : 'זכרי לבדוק את תוקף החוזים שלך ולעדכן את תנאי התשלום כשצריך.'
@@ -754,21 +800,17 @@ export default function DashboardPage() {
             </motion.div>
           </div>
         </div>
-        </div>
       </div>
 
-      {/* Mobile FAB - Enhanced with premium styling */}
+      {/* Mobile FAB - Compact */}
       <motion.button
-        initial={{ opacity: 0, scale: 0, rotate: -90 }}
-        animate={{ opacity: 1, scale: 1, rotate: 0 }}
-        transition={{ delay: 0.6, type: 'spring', stiffness: 200, damping: 15 }}
-        whileHover={{ scale: 1.08 }}
+        initial={{ opacity: 0, scale: 0 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 0.5, type: 'spring', stiffness: 200, damping: 15 }}
         whileTap={{ scale: 0.92 }}
-        className="sm:hidden fixed bottom-24 left-4 w-14 h-14 bg-gradient-to-br from-neutral-800 to-neutral-900 text-white rounded-2xl shadow-[0_8px_24px_-4px_rgba(0,0,0,0.3),0_4px_8px_-2px_rgba(0,0,0,0.2)] flex items-center justify-center z-40"
+        className="sm:hidden fixed bottom-20 left-3 w-12 h-12 bg-neutral-900 text-white rounded-xl shadow-lg flex items-center justify-center z-40"
       >
-        {/* Inner glow effect */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
-        <Plus size={24} strokeWidth={2.5} className="relative z-10" />
+        <Plus size={20} strokeWidth={2.5} />
       </motion.button>
     </motion.div>
   )
