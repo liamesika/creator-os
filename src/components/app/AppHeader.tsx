@@ -34,9 +34,10 @@ export default function AppHeader({ sidebarCollapsed }: AppHeaderProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleLogout = () => {
-    logout()
-    router.push('/login')
+  const handleLogout = async () => {
+    setShowDropdown(false)
+    await logout()
+    router.replace('/login')
   }
 
   const getInitials = (name: string) => {

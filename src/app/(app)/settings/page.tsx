@@ -12,9 +12,9 @@ export default function SettingsPage() {
   const router = useRouter()
   const { isDemo, resetDemo, deactivateDemoMode } = useDemoModeStore()
 
-  const handleLogout = () => {
-    logout()
-    router.push('/login')
+  const handleLogout = async () => {
+    await logout()
+    router.replace('/login')
   }
 
   const handleResetDemo = () => {

@@ -19,7 +19,7 @@ export default function AppLayout({
 }: {
   children: React.ReactNode
 }) {
-  const { user, isLoading } = useAuth()
+  const { user, isLoading, isInitialized } = useAuth()
   const { isDemo } = useDemoModeStore()
   const { isAgencyDemo } = useAgencyDemoStore()
   const isDemoHydrated = useDemoModeHydration()
@@ -38,12 +38,12 @@ export default function AppLayout({
   const allStoresHydrated = isDemoHydrated && isAgencyDemoHydrated
 
   useEffect(() => {
-    // Wait for all stores to hydrate before checking auth
-    if (!allStoresHydrated) return
+    // Wait for auth to be fully initialized and all stores to hydrate before checking
+    if (!isInitialized || !allStoresHydrated) return
 
     // Allow access if user is logged in OR if any demo mode is active
-    if (!isLoading && !user && !isAnyDemoMode) {
-      router.push('/login')
+    if (!user && !isAnyDemoMode) {
+      router.replace('/login')
     }
 
     // Only re-populate demo data on page refresh if:
@@ -64,7 +64,7 @@ export default function AppLayout({
         router.push('/pricing/agencies')
       }
     }
-  }, [user, isLoading, isAnyDemoMode, allStoresHydrated, router, isAgencyDemo, isDemo, pathname])
+  }, [user, isLoading, isInitialized, isAnyDemoMode, allStoresHydrated, router, isAgencyDemo, isDemo, pathname])
 
   useEffect(() => {
     // Check if user just logged in or demo mode activated
@@ -90,8 +90,8 @@ export default function AppLayout({
     setTimeout(() => setAppReady(true), 100)
   }
 
-  // Wait for auth and all demo stores to be ready
-  if (isLoading || !allStoresHydrated) {
+  // Wait for auth to be fully initialized and all demo stores to be ready
+  if (!isInitialized || isLoading || !allStoresHydrated) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50">
         <div className="flex flex-col items-center gap-4">

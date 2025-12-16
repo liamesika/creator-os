@@ -61,10 +61,10 @@ export default function MobileMenuSheet({
     onClose()
   }
 
-  const handleLogout = () => {
-    logout()
-    router.push('/login')
+  const handleLogout = async () => {
     onClose()
+    await logout()
+    router.replace('/login')
   }
 
   const getInitials = (name: string) => {
