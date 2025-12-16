@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, AnimatePresence, PanInfo } from 'framer-motion'
 import { X } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -35,17 +35,50 @@ export default function BottomSheet({
   const sheetRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
+  // Lock body scroll when sheet is open - using position fixed to prevent iOS Safari issues
   useEffect(() => {
     if (isOpen) {
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.left = '0'
+      document.body.style.right = '0'
       document.body.style.overflow = 'hidden'
     } else {
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
       document.body.style.overflow = ''
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      }
     }
 
     return () => {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
       document.body.style.overflow = ''
     }
   }, [isOpen])
+
+  // Handle escape key
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isOpen) {
+        onClose()
+      }
+    },
+    [isOpen, onClose]
+  )
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [handleKeyDown])
 
   const handleDragEnd = (event: any, info: PanInfo) => {
     setIsDragging(false)
@@ -78,7 +111,8 @@ export default function BottomSheet({
     }
   }
 
-  const height = fullHeight ? '100vh' : `${currentSnapPoint * 100}vh`
+  // Use 100dvh for proper mobile viewport handling
+  const height = fullHeight ? '100dvh' : `${currentSnapPoint * 100}dvh`
 
   return (
     <AnimatePresence>
@@ -91,6 +125,7 @@ export default function BottomSheet({
             exit={{ opacity: 0 }}
             onClick={onClose}
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+            aria-hidden="true"
           />
 
           {/* Sheet */}
@@ -109,6 +144,9 @@ export default function BottomSheet({
             dragElastic={{ top: 0, bottom: 0.2 }}
             onDragStart={() => setIsDragging(true)}
             onDragEnd={handleDragEnd}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={title ? 'sheet-title' : undefined}
             className={cn(
               'fixed bottom-0 left-0 right-0 z-[101]',
               'bg-white rounded-t-3xl shadow-2xl',
@@ -117,22 +155,23 @@ export default function BottomSheet({
             )}
             style={{
               height,
-              maxHeight: '100vh',
+              maxHeight: '100dvh',
             }}
           >
             {/* Drag Handle */}
-            <div className="flex-shrink-0 pt-3 pb-2 px-4 flex justify-center">
+            <div className="flex-shrink-0 pt-3 pb-2 px-4 flex justify-center touch-none">
               <div className="w-12 h-1.5 bg-neutral-300 rounded-full" />
             </div>
 
             {/* Header */}
             {(title || showCloseButton) && (
               <div className="flex-shrink-0 px-6 pb-4 flex items-center justify-between border-b border-neutral-100">
-                <h2 className="text-xl font-bold text-neutral-900">{title}</h2>
+                <h2 id="sheet-title" className="text-xl font-bold text-neutral-900">{title}</h2>
                 {showCloseButton && (
                   <button
                     onClick={onClose}
                     className="p-2 rounded-full hover:bg-neutral-100 transition-colors"
+                    aria-label="Close sheet"
                   >
                     <X size={24} className="text-neutral-600" />
                   </button>
@@ -140,10 +179,10 @@ export default function BottomSheet({
               </div>
             )}
 
-            {/* Content */}
+            {/* Scrollable Content */}
             <div
               ref={contentRef}
-              className="flex-1 overflow-y-auto overscroll-contain"
+              className="flex-1 overflow-y-auto overscroll-contain touch-pan-y"
               style={{
                 WebkitOverflowScrolling: 'touch',
               }}
