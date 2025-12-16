@@ -150,10 +150,12 @@ export default function TaskFormSheet({
       title={editingTask ? 'עריכת משימה' : 'משימה חדשה'}
       fullHeight
     >
-      <form onSubmit={handleSubmit} className="p-6 space-y-6">
+      <form onSubmit={handleSubmit} className="flex flex-col h-full">
+        {/* Scrollable Content */}
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5">
         {/* Title */}
         <div>
-          <label className="block text-sm font-bold text-neutral-700 mb-2">
+          <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-1.5">
             כותרת <span className="text-red-500">*</span>
           </label>
           <input
@@ -161,38 +163,38 @@ export default function TaskFormSheet({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             placeholder="הזן כותרת למשימה..."
-            className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-right"
+            className="w-full px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-right text-sm sm:text-base"
             dir="rtl"
           />
         </div>
 
         {/* Description */}
         <div>
-          <label className="block text-sm font-bold text-neutral-700 mb-2">
+          <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-1.5">
             תיאור
           </label>
           <textarea
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="הוסף פרטים נוספים..."
-            rows={3}
-            className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-right resize-none"
+            rows={2}
+            className="w-full px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-right resize-none text-sm sm:text-base"
             dir="rtl"
           />
         </div>
 
         {/* Status */}
         <div>
-          <label className="block text-sm font-bold text-neutral-700 mb-3">
+          <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-2">
             סטטוס
           </label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {(['TODO', 'DOING', 'DONE'] as TaskStatus[]).map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => setStatus(s)}
-                className={`px-4 py-3 rounded-xl border-2 transition-all font-medium ${
+                className={`px-2 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border-2 transition-all font-medium text-xs sm:text-sm ${
                   status === s
                     ? 'border-accent-500 bg-accent-50 text-accent-700'
                     : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300'
@@ -208,23 +210,23 @@ export default function TaskFormSheet({
 
         {/* Priority */}
         <div>
-          <label className="block text-sm font-bold text-neutral-700 mb-3">
+          <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-2">
             עדיפות
           </label>
-          <div className="grid grid-cols-3 gap-3">
+          <div className="grid grid-cols-3 gap-2">
             {(['LOW', 'MEDIUM', 'HIGH'] as TaskPriority[]).map((p) => (
               <button
                 key={p}
                 type="button"
                 onClick={() => setPriority(p)}
-                className={`px-4 py-3 rounded-xl border-2 transition-all font-medium flex items-center justify-center gap-2 ${
+                className={`px-2 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border-2 transition-all font-medium flex items-center justify-center gap-1 sm:gap-2 text-xs sm:text-sm ${
                   priority === p
                     ? 'border-accent-500 bg-accent-50 text-accent-700'
                     : 'border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300'
                 }`}
               >
                 <Flag
-                  size={16}
+                  size={14}
                   className={
                     p === 'HIGH'
                       ? 'text-red-500'
@@ -240,37 +242,37 @@ export default function TaskFormSheet({
         </div>
 
         {/* Due Date and Time */}
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-4">
           <div>
-            <label className="block text-sm font-bold text-neutral-700 mb-2">
+            <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-1.5">
               תאריך יעד
             </label>
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all"
+              className="w-full px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-sm"
             />
           </div>
           <div>
-            <label className="block text-sm font-bold text-neutral-700 mb-2">
+            <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-1.5">
               שעה מתוכננת
             </label>
             <input
               type="time"
               value={scheduledAt}
               onChange={(e) => setScheduledAt(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all"
+              className="w-full px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-sm"
             />
           </div>
         </div>
 
         {/* Category */}
         <div>
-          <label className="block text-sm font-bold text-neutral-700 mb-3">
+          <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-2">
             קטגוריה
           </label>
-          <div className="grid grid-cols-3 gap-3 max-h-64 overflow-y-auto">
+          <div className="grid grid-cols-4 sm:grid-cols-3 gap-2 max-h-40 sm:max-h-64 overflow-y-auto">
             {categoryOptions.map((cat) => {
               const Icon = cat.icon
               return (
@@ -278,19 +280,19 @@ export default function TaskFormSheet({
                   key={cat.id}
                   type="button"
                   onClick={() => setCategory(cat.id)}
-                  className={`px-3 py-4 rounded-xl border-2 transition-all flex flex-col items-center gap-2 ${
+                  className={`px-2 py-2 sm:px-3 sm:py-4 rounded-lg sm:rounded-xl border-2 transition-all flex flex-col items-center gap-1 sm:gap-2 ${
                     category === cat.id
                       ? 'border-accent-500 bg-accent-50'
                       : 'border-neutral-200 bg-white hover:border-neutral-300'
                   }`}
                 >
                   <Icon
-                    size={24}
+                    size={18}
                     className={
                       category === cat.id ? 'text-accent-600' : 'text-neutral-600'
                     }
                   />
-                  <span className="text-xs font-medium text-center">
+                  <span className="text-[10px] sm:text-xs font-medium text-center leading-tight">
                     {cat.label}
                   </span>
                 </button>
@@ -301,13 +303,13 @@ export default function TaskFormSheet({
 
         {/* Company */}
         <div>
-          <label className="block text-sm font-bold text-neutral-700 mb-2">
+          <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-1.5">
             חברה / מותג
           </label>
           <select
             value={companyId || ''}
             onChange={(e) => setCompanyId(e.target.value || null)}
-            className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-right"
+            className="w-full px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-right text-sm"
             dir="rtl"
           >
             <option value="">ללא חברה</option>
@@ -321,13 +323,13 @@ export default function TaskFormSheet({
 
         {/* Event */}
         <div>
-          <label className="block text-sm font-bold text-neutral-700 mb-2">
+          <label className="block text-xs sm:text-sm font-bold text-neutral-700 mb-1.5">
             קישור לאירוע
           </label>
           <select
             value={eventId || ''}
             onChange={(e) => setEventId(e.target.value || null)}
-            className="w-full px-4 py-3 rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-right"
+            className="w-full px-3 py-2.5 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl border border-neutral-200 focus:border-accent-500 focus:ring-2 focus:ring-accent-100 transition-all text-right text-sm"
             dir="rtl"
           >
             <option value="">ללא אירוע</option>
@@ -339,26 +341,29 @@ export default function TaskFormSheet({
             ))}
           </select>
         </div>
+        </div>
 
-        {/* Actions */}
-        <div className="flex gap-3 pt-4 border-t border-neutral-100">
-          <button
-            type="button"
-            onClick={() => {
-              onClose()
-              resetForm()
-            }}
-            className="flex-1 px-6 py-4 rounded-xl border-2 border-neutral-200 text-neutral-700 font-bold hover:bg-neutral-50 transition-all"
-          >
-            ביטול
-          </button>
-          <button
-            type="submit"
-            className="flex-1 px-6 py-4 rounded-xl bg-accent-600 text-white font-bold hover:bg-accent-700 transition-all flex items-center justify-center gap-2"
-          >
-            <Save size={20} />
-            {editingTask ? 'שמירה' : 'יצירה'}
-          </button>
+        {/* Sticky Actions Footer */}
+        <div className="flex-shrink-0 p-4 sm:p-6 border-t border-neutral-100 bg-white safe-area-bottom">
+          <div className="flex gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                onClose()
+                resetForm()
+              }}
+              className="flex-1 px-4 py-3 sm:py-4 rounded-xl border-2 border-neutral-200 text-neutral-700 font-bold hover:bg-neutral-50 transition-all text-sm sm:text-base"
+            >
+              ביטול
+            </button>
+            <button
+              type="submit"
+              className="flex-1 px-4 py-3 sm:py-4 rounded-xl bg-accent-600 text-white font-bold hover:bg-accent-700 transition-all flex items-center justify-center gap-2 text-sm sm:text-base"
+            >
+              <Save size={18} />
+              {editingTask ? 'שמירה' : 'יצירה'}
+            </button>
+          </div>
         </div>
       </form>
     </BottomSheet>

@@ -581,8 +581,8 @@ export default function CreateEventModal({
               </div>
             </div>
 
-            {/* Footer */}
-            <div className="flex items-center justify-end gap-3 px-5 py-4 border-t border-neutral-100 bg-neutral-50/50">
+            {/* Footer - Sticky */}
+            <div className="flex-shrink-0 flex items-center justify-end gap-3 px-4 sm:px-5 py-3 sm:py-4 border-t border-neutral-100 bg-white safe-area-bottom">
               <button
                 onClick={onClose}
                 className="px-4 py-2.5 text-sm font-medium text-neutral-600 hover:bg-neutral-100 rounded-xl transition-colors"
