@@ -1,18 +1,11 @@
 import { db } from '@/lib/supabase/database'
-import { createClient } from '@/lib/supabase/client'
 
 export async function migrateLocalStorageToSupabase(userId: string): Promise<boolean> {
   try {
-    const supabase = createClient()
+    // Check if already migrated using the new db method
+    const alreadyMigrated = await db.checkMigrationStatus(userId)
 
-    // Check if already migrated
-    const { data: migrationStatus } = await supabase
-      .from('migration_status')
-      .select('*')
-      .eq('owner_uid', userId)
-      .single()
-
-    if (migrationStatus) {
+    if (alreadyMigrated) {
       console.log('Migration already completed')
       return true
     }
@@ -39,21 +32,25 @@ export async function migrateLocalStorageToSupabase(userId: string): Promise<boo
         const companies = parsed.state?.companies || []
 
         for (const company of companies) {
-          await db.createCompany(userId, {
-            name: company.name,
-            brandType: company.brandType,
-            contactName: company.contactName,
-            contactEmail: company.contactEmail,
-            contactPhone: company.contactPhone,
-            notes: company.notes,
-            contract: company.contract,
-            paymentTerms: company.paymentTerms,
-            status: company.status,
-          })
-          migratedCounts.companies++
+          try {
+            await db.createCompany(userId, {
+              name: company.name,
+              brandType: company.brandType,
+              contactName: company.contactName,
+              contactEmail: company.contactEmail,
+              contactPhone: company.contactPhone,
+              notes: company.notes,
+              contract: company.contract,
+              paymentTerms: company.paymentTerms,
+              status: company.status,
+            })
+            migratedCounts.companies++
+          } catch (err) {
+            console.warn('Failed to migrate company:', company.name, err)
+          }
         }
       } catch (error) {
-        console.error('Error migrating companies:', error)
+        console.error('Error parsing companies data:', error)
       }
     }
 
@@ -64,23 +61,27 @@ export async function migrateLocalStorageToSupabase(userId: string): Promise<boo
         const events = parsed.state?.events || []
 
         for (const event of events) {
-          await db.createCalendarEvent(userId, {
-            category: event.category,
-            title: event.title,
-            date: new Date(event.date),
-            startTime: event.startTime,
-            endTime: event.endTime,
-            isAllDay: event.isAllDay,
-            notes: event.notes,
-            companyId: event.companyId,
-            companyNameSnapshot: event.companyNameSnapshot,
-            reminders: event.reminders || [],
-            linkedTasks: event.linkedTasks || [],
-          })
-          migratedCounts.events++
+          try {
+            await db.createCalendarEvent(userId, {
+              category: event.category,
+              title: event.title,
+              date: new Date(event.date),
+              startTime: event.startTime,
+              endTime: event.endTime,
+              isAllDay: event.isAllDay,
+              notes: event.notes,
+              companyId: event.companyId,
+              companyNameSnapshot: event.companyNameSnapshot,
+              reminders: event.reminders || [],
+              linkedTasks: event.linkedTasks || [],
+            })
+            migratedCounts.events++
+          } catch (err) {
+            console.warn('Failed to migrate event:', event.title, err)
+          }
         }
       } catch (error) {
-        console.error('Error migrating calendar events:', error)
+        console.error('Error parsing calendar data:', error)
       }
     }
 
@@ -91,23 +92,27 @@ export async function migrateLocalStorageToSupabase(userId: string): Promise<boo
         const tasks = parsed.state?.tasks || []
 
         for (const task of tasks) {
-          await db.createTask(userId, {
-            title: task.title,
-            description: task.description,
-            status: task.status,
-            priority: task.priority,
-            dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
-            scheduledAt: task.scheduledAt,
-            companyId: task.companyId,
-            companyNameSnapshot: task.companyNameSnapshot,
-            eventId: task.eventId,
-            eventTitleSnapshot: task.eventTitleSnapshot,
-            category: task.category,
-          })
-          migratedCounts.tasks++
+          try {
+            await db.createTask(userId, {
+              title: task.title,
+              description: task.description,
+              status: task.status,
+              priority: task.priority,
+              dueDate: task.dueDate ? new Date(task.dueDate) : undefined,
+              scheduledAt: task.scheduledAt,
+              companyId: task.companyId,
+              companyNameSnapshot: task.companyNameSnapshot,
+              eventId: task.eventId,
+              eventTitleSnapshot: task.eventTitleSnapshot,
+              category: task.category,
+            })
+            migratedCounts.tasks++
+          } catch (err) {
+            console.warn('Failed to migrate task:', task.title, err)
+          }
         }
       } catch (error) {
-        console.error('Error migrating tasks:', error)
+        console.error('Error parsing tasks data:', error)
       }
     }
 
@@ -118,26 +123,27 @@ export async function migrateLocalStorageToSupabase(userId: string): Promise<boo
         const goals = parsed.state?.goals || []
 
         for (const goal of goals) {
-          await db.upsertGoal(userId, {
-            id: goal.id,
-            date: goal.date,
-            items: goal.items || [],
-            reflection: goal.reflection,
-            createdAt: new Date(goal.createdAt),
-            updatedAt: new Date(goal.updatedAt),
-          })
-          migratedCounts.goals++
+          try {
+            await db.upsertGoal(userId, {
+              id: goal.id,
+              date: goal.date,
+              items: goal.items || [],
+              reflection: goal.reflection,
+              createdAt: new Date(goal.createdAt),
+              updatedAt: new Date(goal.updatedAt),
+            })
+            migratedCounts.goals++
+          } catch (err) {
+            console.warn('Failed to migrate goal:', goal.date, err)
+          }
         }
       } catch (error) {
-        console.error('Error migrating goals:', error)
+        console.error('Error parsing goals data:', error)
       }
     }
 
     // Mark migration as complete
-    await supabase.from('migration_status').insert({
-      owner_uid: userId,
-      migration_data: migratedCounts,
-    })
+    await db.markMigrationComplete(userId, migratedCounts)
 
     console.log('Migration completed:', migratedCounts)
     return true

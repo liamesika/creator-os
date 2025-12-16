@@ -126,10 +126,8 @@ export default function TaskFormSheet({
 
     if (editingTask) {
       updateTask(editingTask.id, taskData)
-      toast.success('המשימה עודכנה בהצלחה')
     } else {
       createTask(taskData)
-      toast.success('המשימה נוצרה בהצלחה')
     }
 
     onClose()

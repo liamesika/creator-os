@@ -14,72 +14,142 @@ import type {
   CreatorDetailData,
 } from '@/types/agency'
 
+/**
+ * Validates that userId is a valid UUID string
+ * Prevents queries with undefined/null/empty user IDs
+ */
+function validateUserId(userId: string | null | undefined): string {
+  if (!userId || typeof userId !== 'string' || userId.trim() === '') {
+    throw new Error('Invalid user ID: User must be authenticated')
+  }
+  // Basic UUID format check
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  if (!uuidRegex.test(userId)) {
+    throw new Error('Invalid user ID format')
+  }
+  return userId
+}
+
+/**
+ * Validates required string field
+ */
+function validateRequired(value: any, fieldName: string): string {
+  if (!value || typeof value !== 'string' || value.trim() === '') {
+    throw new Error(`${fieldName} is required`)
+  }
+  return value.trim()
+}
+
+/**
+ * Cleans an object by removing undefined values
+ * Supabase doesn't accept undefined, so we convert to null or omit
+ */
+function cleanPayload<T extends Record<string, any>>(obj: T): Partial<T> {
+  const cleaned: Partial<T> = {}
+  for (const key in obj) {
+    if (obj[key] !== undefined) {
+      cleaned[key] = obj[key]
+    }
+  }
+  return cleaned
+}
+
 export class DatabaseService {
   private supabase = createClient()
 
   // Companies
   async getCompanies(userId: string) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('companies')
       .select('*')
-      .eq('owner_uid', userId)
+      .eq('owner_uid', validUserId)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('getCompanies error:', error)
+      throw new Error(`Failed to load companies: ${error.message}`)
+    }
     return this.mapCompaniesFromDB(data || [])
   }
 
   async createCompany(userId: string, company: Omit<Company, 'id' | 'createdAt' | 'updatedAt'>) {
+    const validUserId = validateUserId(userId)
+    const name = validateRequired(company.name, 'Company name')
+
+    const payload = cleanPayload({
+      owner_uid: validUserId,
+      name,
+      brand_type: company.brandType || null,
+      contact_name: company.contactName || null,
+      contact_email: company.contactEmail || null,
+      contact_phone: company.contactPhone || null,
+      notes: company.notes || null,
+      contract: company.contract || {},
+      payment_terms: company.paymentTerms || {},
+      status: company.status || 'ACTIVE',
+    })
+
     const { data, error } = await this.supabase
       .from('companies')
-      .insert({
-        owner_uid: userId,
-        name: company.name,
-        brand_type: company.brandType,
-        contact_name: company.contactName,
-        contact_email: company.contactEmail,
-        contact_phone: company.contactPhone,
-        notes: company.notes,
-        contract: company.contract,
-        payment_terms: company.paymentTerms,
-        status: company.status,
-      })
+      .insert(payload)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('createCompany error:', error)
+      throw new Error(`Failed to create company: ${error.message}`)
+    }
+    if (!data) {
+      throw new Error('Company created but no data returned')
+    }
     return this.mapCompanyFromDB(data)
   }
 
   async updateCompany(id: string, updates: Partial<Company>) {
+    if (!id) throw new Error('Company ID is required')
+
+    const payload = cleanPayload({
+      name: updates.name,
+      brand_type: updates.brandType,
+      contact_name: updates.contactName,
+      contact_email: updates.contactEmail,
+      contact_phone: updates.contactPhone,
+      notes: updates.notes,
+      contract: updates.contract,
+      payment_terms: updates.paymentTerms,
+      status: updates.status,
+    })
+
     const { data, error } = await this.supabase
       .from('companies')
-      .update({
-        name: updates.name,
-        brand_type: updates.brandType,
-        contact_name: updates.contactName,
-        contact_email: updates.contactEmail,
-        contact_phone: updates.contactPhone,
-        notes: updates.notes,
-        contract: updates.contract,
-        payment_terms: updates.paymentTerms,
-        status: updates.status,
-      })
+      .update(payload)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('updateCompany error:', error)
+      throw new Error(`Failed to update company: ${error.message}`)
+    }
     return this.mapCompanyFromDB(data)
   }
 
   async deleteCompany(id: string) {
+    if (!id) throw new Error('Company ID is required')
+
     const { error } = await this.supabase.from('companies').delete().eq('id', id)
-    if (error) throw error
+    if (error) {
+      console.error('deleteCompany error:', error)
+      throw new Error(`Failed to delete company: ${error.message}`)
+    }
   }
 
   // Calendar Events
   async getCalendarEvents(userId: string) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('calendar_events')
       .select(`
@@ -87,10 +157,13 @@ export class DatabaseService {
         calendar_reminders (*),
         calendar_linked_tasks (*)
       `)
-      .eq('owner_uid', userId)
+      .eq('owner_uid', validUserId)
       .order('date', { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      console.error('getCalendarEvents error:', error)
+      throw new Error(`Failed to load events: ${error.message}`)
+    }
     return this.mapEventsFromDB(data || [])
   }
 
@@ -98,81 +171,117 @@ export class DatabaseService {
     userId: string,
     event: Omit<CalendarEvent, 'id' | 'createdAt' | 'updatedAt'>
   ) {
+    const validUserId = validateUserId(userId)
+    const title = validateRequired(event.title, 'Event title')
+    const category = validateRequired(event.category, 'Event category')
+
+    const payload = cleanPayload({
+      owner_uid: validUserId,
+      category,
+      title,
+      date: event.date instanceof Date ? event.date.toISOString() : event.date,
+      start_time: event.startTime || null,
+      end_time: event.endTime || null,
+      is_all_day: event.isAllDay || false,
+      notes: event.notes || null,
+      company_id: event.companyId || null,
+      company_name_snapshot: event.companyNameSnapshot || null,
+    })
+
     const { data: eventData, error: eventError } = await this.supabase
       .from('calendar_events')
-      .insert({
-        owner_uid: userId,
-        category: event.category,
-        title: event.title,
-        date: event.date.toISOString(),
-        start_time: event.startTime,
-        end_time: event.endTime,
-        is_all_day: event.isAllDay,
-        notes: event.notes,
-        company_id: event.companyId,
-        company_name_snapshot: event.companyNameSnapshot,
-      })
+      .insert(payload)
       .select()
       .single()
 
-    if (eventError) throw eventError
-
-    // Insert reminders
-    if (event.reminders.length > 0) {
-      await this.supabase.from('calendar_reminders').insert(
-        event.reminders.map((r) => ({
-          event_id: eventData.id,
-          minutes_before: r.minutesBefore,
-          is_custom: r.isCustom,
-        }))
-      )
+    if (eventError) {
+      console.error('createCalendarEvent error:', eventError)
+      throw new Error(`Failed to create event: ${eventError.message}`)
+    }
+    if (!eventData) {
+      throw new Error('Event created but no data returned')
     }
 
-    // Insert linked tasks
-    if (event.linkedTasks.length > 0) {
-      await this.supabase.from('calendar_linked_tasks').insert(
-        event.linkedTasks.map((t) => ({
-          event_id: eventData.id,
-          title: t.title,
-          completed: t.completed,
-        }))
-      )
+    // Insert reminders if any
+    if (event.reminders && event.reminders.length > 0) {
+      const reminderPayloads = event.reminders.map((r) => ({
+        event_id: eventData.id,
+        minutes_before: r.minutesBefore,
+        is_custom: r.isCustom || false,
+      }))
+
+      const { error: reminderError } = await this.supabase
+        .from('calendar_reminders')
+        .insert(reminderPayloads)
+
+      if (reminderError) {
+        console.warn('Failed to create reminders:', reminderError)
+      }
+    }
+
+    // Insert linked tasks if any
+    if (event.linkedTasks && event.linkedTasks.length > 0) {
+      const taskPayloads = event.linkedTasks.map((t) => ({
+        event_id: eventData.id,
+        title: t.title,
+        completed: t.completed || false,
+      }))
+
+      const { error: taskError } = await this.supabase
+        .from('calendar_linked_tasks')
+        .insert(taskPayloads)
+
+      if (taskError) {
+        console.warn('Failed to create linked tasks:', taskError)
+      }
     }
 
     return this.mapEventFromDB(eventData)
   }
 
   async updateCalendarEvent(id: string, updates: Partial<CalendarEvent>) {
-    const updateData: any = {}
-    if (updates.category !== undefined) updateData.category = updates.category
-    if (updates.title !== undefined) updateData.title = updates.title
-    if (updates.date !== undefined) updateData.date = updates.date.toISOString()
-    if (updates.startTime !== undefined) updateData.start_time = updates.startTime
-    if (updates.endTime !== undefined) updateData.end_time = updates.endTime
-    if (updates.isAllDay !== undefined) updateData.is_all_day = updates.isAllDay
-    if (updates.notes !== undefined) updateData.notes = updates.notes
-    if (updates.companyId !== undefined) updateData.company_id = updates.companyId
-    if (updates.companyNameSnapshot !== undefined)
-      updateData.company_name_snapshot = updates.companyNameSnapshot
+    if (!id) throw new Error('Event ID is required')
+
+    const payload: Record<string, any> = {}
+    if (updates.category !== undefined) payload.category = updates.category
+    if (updates.title !== undefined) payload.title = updates.title
+    if (updates.date !== undefined) {
+      payload.date = updates.date instanceof Date ? updates.date.toISOString() : updates.date
+    }
+    if (updates.startTime !== undefined) payload.start_time = updates.startTime
+    if (updates.endTime !== undefined) payload.end_time = updates.endTime
+    if (updates.isAllDay !== undefined) payload.is_all_day = updates.isAllDay
+    if (updates.notes !== undefined) payload.notes = updates.notes
+    if (updates.companyId !== undefined) payload.company_id = updates.companyId
+    if (updates.companyNameSnapshot !== undefined) payload.company_name_snapshot = updates.companyNameSnapshot
 
     const { data, error } = await this.supabase
       .from('calendar_events')
-      .update(updateData)
+      .update(payload)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('updateCalendarEvent error:', error)
+      throw new Error(`Failed to update event: ${error.message}`)
+    }
     return this.mapEventFromDB(data)
   }
 
   async deleteCalendarEvent(id: string) {
+    if (!id) throw new Error('Event ID is required')
+
     const { error } = await this.supabase.from('calendar_events').delete().eq('id', id)
-    if (error) throw error
+    if (error) {
+      console.error('deleteCalendarEvent error:', error)
+      throw new Error(`Failed to delete event: ${error.message}`)
+    }
   }
 
   async toggleEventTaskCompletion(eventId: string, taskId: string) {
-    // Get current task
+    if (!eventId || !taskId) throw new Error('Event ID and Task ID are required')
+
     const { data: task } = await this.supabase
       .from('calendar_linked_tasks')
       .select('completed')
@@ -182,122 +291,203 @@ export class DatabaseService {
 
     if (!task) return
 
-    // Toggle
     const { error } = await this.supabase
       .from('calendar_linked_tasks')
       .update({ completed: !task.completed })
       .eq('id', taskId)
 
-    if (error) throw error
+    if (error) {
+      console.error('toggleEventTaskCompletion error:', error)
+      throw new Error(`Failed to toggle task: ${error.message}`)
+    }
   }
 
   // Tasks
   async getTasks(userId: string) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('tasks')
       .select('*')
-      .eq('owner_uid', userId)
+      .eq('owner_uid', validUserId)
       .eq('archived', false)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('getTasks error:', error)
+      throw new Error(`Failed to load tasks: ${error.message}`)
+    }
     return this.mapTasksFromDB(data || [])
   }
 
   async createTask(userId: string, task: Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'archived'>) {
+    const validUserId = validateUserId(userId)
+    const title = validateRequired(task.title, 'Task title')
+
+    const payload = cleanPayload({
+      owner_uid: validUserId,
+      title,
+      description: task.description || null,
+      status: task.status || 'TODO',
+      priority: task.priority || 'MEDIUM',
+      due_date: task.dueDate instanceof Date ? task.dueDate.toISOString() : task.dueDate || null,
+      scheduled_at: task.scheduledAt || null,
+      company_id: task.companyId || null,
+      company_name_snapshot: task.companyNameSnapshot || null,
+      event_id: task.eventId || null,
+      event_title_snapshot: task.eventTitleSnapshot || null,
+      category: task.category || null,
+      archived: false,
+    })
+
     const { data, error } = await this.supabase
       .from('tasks')
-      .insert({
-        owner_uid: userId,
-        title: task.title,
-        description: task.description,
-        status: task.status,
-        priority: task.priority,
-        due_date: task.dueDate?.toISOString(),
-        scheduled_at: task.scheduledAt,
-        company_id: task.companyId,
-        company_name_snapshot: task.companyNameSnapshot,
-        event_id: task.eventId,
-        event_title_snapshot: task.eventTitleSnapshot,
-        category: task.category,
-        archived: false,
-      })
+      .insert(payload)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('createTask error:', error)
+      throw new Error(`Failed to create task: ${error.message}`)
+    }
+    if (!data) {
+      throw new Error('Task created but no data returned')
+    }
     return this.mapTaskFromDB(data)
   }
 
   async updateTask(id: string, updates: Partial<Task>) {
-    const updateData: any = {}
-    if (updates.title !== undefined) updateData.title = updates.title
-    if (updates.description !== undefined) updateData.description = updates.description
-    if (updates.status !== undefined) updateData.status = updates.status
-    if (updates.priority !== undefined) updateData.priority = updates.priority
-    if (updates.dueDate !== undefined)
-      updateData.due_date = updates.dueDate?.toISOString()
-    if (updates.scheduledAt !== undefined) updateData.scheduled_at = updates.scheduledAt
-    if (updates.companyId !== undefined) updateData.company_id = updates.companyId
-    if (updates.companyNameSnapshot !== undefined)
-      updateData.company_name_snapshot = updates.companyNameSnapshot
-    if (updates.eventId !== undefined) updateData.event_id = updates.eventId
-    if (updates.eventTitleSnapshot !== undefined)
-      updateData.event_title_snapshot = updates.eventTitleSnapshot
-    if (updates.category !== undefined) updateData.category = updates.category
-    if (updates.archived !== undefined) updateData.archived = updates.archived
+    if (!id) throw new Error('Task ID is required')
+
+    const payload: Record<string, any> = {}
+    if (updates.title !== undefined) payload.title = updates.title
+    if (updates.description !== undefined) payload.description = updates.description
+    if (updates.status !== undefined) payload.status = updates.status
+    if (updates.priority !== undefined) payload.priority = updates.priority
+    if (updates.dueDate !== undefined) {
+      payload.due_date = updates.dueDate instanceof Date ? updates.dueDate.toISOString() : updates.dueDate
+    }
+    if (updates.scheduledAt !== undefined) payload.scheduled_at = updates.scheduledAt
+    if (updates.companyId !== undefined) payload.company_id = updates.companyId
+    if (updates.companyNameSnapshot !== undefined) payload.company_name_snapshot = updates.companyNameSnapshot
+    if (updates.eventId !== undefined) payload.event_id = updates.eventId
+    if (updates.eventTitleSnapshot !== undefined) payload.event_title_snapshot = updates.eventTitleSnapshot
+    if (updates.category !== undefined) payload.category = updates.category
+    if (updates.archived !== undefined) payload.archived = updates.archived
 
     const { data, error } = await this.supabase
       .from('tasks')
-      .update(updateData)
+      .update(payload)
       .eq('id', id)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('updateTask error:', error)
+      throw new Error(`Failed to update task: ${error.message}`)
+    }
     return this.mapTaskFromDB(data)
   }
 
   async deleteTask(id: string) {
+    if (!id) throw new Error('Task ID is required')
+
     const { error } = await this.supabase.from('tasks').delete().eq('id', id)
-    if (error) throw error
+    if (error) {
+      console.error('deleteTask error:', error)
+      throw new Error(`Failed to delete task: ${error.message}`)
+    }
   }
 
   // Goals
   async getGoals(userId: string) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('goals')
       .select('*')
-      .eq('owner_uid', userId)
+      .eq('owner_uid', validUserId)
       .order('date', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('getGoals error:', error)
+      throw new Error(`Failed to load goals: ${error.message}`)
+    }
     return this.mapGoalsFromDB(data || [])
   }
 
   async upsertGoal(userId: string, goal: Omit<DailyGoal, 'createdAt' | 'updatedAt'> | DailyGoal) {
+    const validUserId = validateUserId(userId)
+    if (!goal.date) throw new Error('Goal date is required')
+
+    const payload = cleanPayload({
+      id: goal.id || undefined,
+      owner_uid: validUserId,
+      date: goal.date,
+      items: goal.items || [],
+      reflection: goal.reflection || {},
+    })
+
     const { data, error } = await this.supabase
       .from('goals')
-      .upsert(
-        {
-          id: goal.id,
-          owner_uid: userId,
-          date: goal.date,
-          items: goal.items,
-          reflection: goal.reflection || {},
-        },
-        { onConflict: 'owner_uid,date' }
-      )
+      .upsert(payload, { onConflict: 'owner_uid,date' })
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('upsertGoal error:', error)
+      throw new Error(`Failed to save goal: ${error.message}`)
+    }
     return this.mapGoalFromDB(data)
   }
 
   async deleteGoal(id: string) {
-    const { error} = await this.supabase.from('goals').delete().eq('id', id)
-    if (error) throw error
+    if (!id) throw new Error('Goal ID is required')
+
+    const { error } = await this.supabase.from('goals').delete().eq('id', id)
+    if (error) {
+      console.error('deleteGoal error:', error)
+      throw new Error(`Failed to delete goal: ${error.message}`)
+    }
+  }
+
+  // Check migration status - gracefully handles missing table
+  async checkMigrationStatus(userId: string): Promise<boolean> {
+    try {
+      const validUserId = validateUserId(userId)
+
+      const { data, error } = await this.supabase
+        .from('migration_status')
+        .select('owner_uid')
+        .eq('owner_uid', validUserId)
+        .single()
+
+      // PGRST116 = not found, which is fine
+      if (error && error.code !== 'PGRST116') {
+        // Table might not exist - treat as not migrated
+        console.warn('Migration status check failed:', error.message)
+        return false
+      }
+
+      return !!data
+    } catch (error) {
+      console.warn('Migration status check error:', error)
+      return false
+    }
+  }
+
+  async markMigrationComplete(userId: string, migrationData: any): Promise<void> {
+    try {
+      const validUserId = validateUserId(userId)
+
+      await this.supabase.from('migration_status').insert({
+        owner_uid: validUserId,
+        migration_data: migrationData,
+      })
+    } catch (error) {
+      console.warn('Failed to mark migration complete:', error)
+      // Don't throw - migration status is not critical
+    }
   }
 
   // Mapping helpers
@@ -314,8 +504,8 @@ export class DatabaseService {
       contactEmail: data.contact_email,
       contactPhone: data.contact_phone,
       notes: data.notes,
-      contract: data.contract,
-      paymentTerms: data.payment_terms,
+      contract: data.contract || {},
+      paymentTerms: data.payment_terms || {},
       status: data.status,
       createdAt: new Date(data.created_at),
       updatedAt: new Date(data.updated_at),
@@ -395,24 +585,30 @@ export class DatabaseService {
 
   // AI Content
   async getAIGenerations(userId: string) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('ai_generations')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', validUserId)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('getAIGenerations error:', error)
+      throw new Error(`Failed to load AI generations: ${error.message}`)
+    }
     return this.mapAIGenerationsFromDB(data || [])
   }
 
   async generateAIContent(userId: string, input: AIGenerationInput) {
-    // Mock AI generation for now
+    const validUserId = validateUserId(userId)
+
     const mockOutput = this.generateMockContent(input)
 
     const { data, error } = await this.supabase
       .from('ai_generations')
       .insert({
-        user_id: userId,
+        user_id: validUserId,
         template_id: input.templateId,
         input_data: input,
         output: mockOutput,
@@ -420,11 +616,16 @@ export class DatabaseService {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('generateAIContent error:', error)
+      throw new Error(`Failed to generate content: ${error.message}`)
+    }
     return this.mapAIGenerationFromDB(data)
   }
 
   async updateAIGeneration(id: string, updates: { output: string }) {
+    if (!id) throw new Error('Generation ID is required')
+
     const { data, error } = await this.supabase
       .from('ai_generations')
       .update({ output: updates.output })
@@ -432,13 +633,21 @@ export class DatabaseService {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('updateAIGeneration error:', error)
+      throw new Error(`Failed to update generation: ${error.message}`)
+    }
     return this.mapAIGenerationFromDB(data)
   }
 
   async deleteAIGeneration(id: string) {
+    if (!id) throw new Error('Generation ID is required')
+
     const { error } = await this.supabase.from('ai_generations').delete().eq('id', id)
-    if (error) throw error
+    if (error) {
+      console.error('deleteAIGeneration error:', error)
+      throw new Error(`Failed to delete generation: ${error.message}`)
+    }
   }
 
   private generateMockContent(input: AIGenerationInput): string {
@@ -473,14 +682,19 @@ export class DatabaseService {
 
   // Activity Events
   async getActivityEvents(userId: string, limit = 50) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('activity_events')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', validUserId)
       .order('created_at', { ascending: false })
       .limit(limit)
 
-    if (error) throw error
+    if (error) {
+      console.error('getActivityEvents error:', error)
+      throw new Error(`Failed to load activity: ${error.message}`)
+    }
     return this.mapActivityEventsFromDB(data || [])
   }
 
@@ -491,19 +705,24 @@ export class DatabaseService {
     entityName?: string,
     metadata?: Record<string, any>
   ) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('activity_events')
       .insert({
-        user_id: userId,
+        user_id: validUserId,
         type,
-        entity_id: entityId,
-        entity_name: entityName,
-        metadata,
+        entity_id: entityId || null,
+        entity_name: entityName || null,
+        metadata: metadata || null,
       })
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('createActivityEvent error:', error)
+      throw new Error(`Failed to log activity: ${error.message}`)
+    }
     return this.mapActivityEventFromDB(data)
   }
 
@@ -525,26 +744,36 @@ export class DatabaseService {
 
   // Weekly Reviews
   async getWeeklyReviews(userId: string, limit = 10) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('weekly_reviews')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', validUserId)
       .order('week_start_date', { ascending: false })
       .limit(limit)
 
-    if (error) throw error
+    if (error) {
+      console.error('getWeeklyReviews error:', error)
+      throw new Error(`Failed to load weekly reviews: ${error.message}`)
+    }
     return this.mapWeeklyReviewsFromDB(data || [])
   }
 
   async getWeeklyReview(userId: string, weekStartDate: string) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('weekly_reviews')
       .select('*')
-      .eq('user_id', userId)
+      .eq('user_id', validUserId)
       .eq('week_start_date', weekStartDate)
       .single()
 
-    if (error && error.code !== 'PGRST116') throw error
+    if (error && error.code !== 'PGRST116') {
+      console.error('getWeeklyReview error:', error)
+      throw new Error(`Failed to load weekly review: ${error.message}`)
+    }
     return data ? this.mapWeeklyReviewFromDB(data) : null
   }
 
@@ -552,19 +781,24 @@ export class DatabaseService {
     userId: string,
     review: Omit<WeeklyReview, 'id' | 'userId' | 'createdAt' | 'updatedAt'>
   ) {
+    const validUserId = validateUserId(userId)
+
     const { data, error } = await this.supabase
       .from('weekly_reviews')
       .upsert({
-        user_id: userId,
+        user_id: validUserId,
         week_start_date: review.weekStartDate,
         stats: review.stats,
-        what_worked: review.reflection.whatWorked,
-        improve_next: review.reflection.improveNext,
+        what_worked: review.reflection.whatWorked || null,
+        improve_next: review.reflection.improveNext || null,
       })
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('upsertWeeklyReview error:', error)
+      throw new Error(`Failed to save weekly review: ${error.message}`)
+    }
     return this.mapWeeklyReviewFromDB(data)
   }
 
@@ -589,19 +823,21 @@ export class DatabaseService {
 
   // Agency Methods
 
-  // Get agency dashboard stats
   async getAgencyDashboardStats(agencyId: string): Promise<AgencyDashboardStats> {
-    // Get creator stats from the view
+    const validAgencyId = validateUserId(agencyId)
+
     const { data: creatorStats, error: statsError } = await this.supabase
       .from('agency_creator_stats')
       .select('*')
-      .eq('agency_id', agencyId)
+      .eq('agency_id', validAgencyId)
 
-    if (statsError) throw statsError
+    if (statsError) {
+      console.error('getAgencyDashboardStats error:', statsError)
+      throw new Error(`Failed to load agency stats: ${statsError.message}`)
+    }
 
     const creators = (creatorStats || []).map(this.mapCreatorStatsFromDB)
 
-    // Calculate totals
     const totalMonthlyEarnings = creators.reduce((sum, c) => sum + c.monthlyEarnings, 0)
     const totalYearlyEarnings = creators.reduce((sum, c) => sum + c.yearlyEarnings, 0)
     const totalActiveCompanies = creators.reduce((sum, c) => sum + c.activeCompanyCount, 0)
@@ -615,36 +851,45 @@ export class DatabaseService {
     }
   }
 
-  // Get agency members
   async getAgencyMembers(agencyId: string): Promise<AgencyMembership[]> {
+    const validAgencyId = validateUserId(agencyId)
+
     const { data, error } = await this.supabase
       .from('agency_memberships')
       .select('*')
-      .eq('agency_id', agencyId)
+      .eq('agency_id', validAgencyId)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('getAgencyMembers error:', error)
+      throw new Error(`Failed to load agency members: ${error.message}`)
+    }
     return (data || []).map(this.mapMembershipFromDB)
   }
 
-  // Get active agency members count
   async getActiveMembersCount(agencyId: string): Promise<number> {
+    const validAgencyId = validateUserId(agencyId)
+
     const { count, error } = await this.supabase
       .from('agency_memberships')
       .select('*', { count: 'exact', head: true })
-      .eq('agency_id', agencyId)
+      .eq('agency_id', validAgencyId)
       .eq('status', 'active')
 
-    if (error) throw error
+    if (error) {
+      console.error('getActiveMembersCount error:', error)
+      throw new Error(`Failed to count members: ${error.message}`)
+    }
     return count || 0
   }
 
-  // Invite creator to agency
   async inviteCreatorToAgency(
     agencyId: string,
     email: string
   ): Promise<AgencyMembership> {
-    // Check if user exists
+    const validAgencyId = validateUserId(agencyId)
+    if (!email || !email.includes('@')) throw new Error('Valid email is required')
+
     const { data: existingUser } = await this.supabase
       .from('user_profiles')
       .select('id')
@@ -652,7 +897,7 @@ export class DatabaseService {
       .single()
 
     const insertData: any = {
-      agency_id: agencyId,
+      agency_id: validAgencyId,
       role: 'creator',
       status: existingUser ? 'active' : 'invited',
     }
@@ -669,43 +914,55 @@ export class DatabaseService {
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('inviteCreatorToAgency error:', error)
+      throw new Error(`Failed to invite creator: ${error.message}`)
+    }
     return this.mapMembershipFromDB(data)
   }
 
-  // Remove creator from agency
   async removeCreatorFromAgency(membershipId: string): Promise<void> {
+    if (!membershipId) throw new Error('Membership ID is required')
+
     const { error } = await this.supabase
       .from('agency_memberships')
       .update({ status: 'removed' })
       .eq('id', membershipId)
 
-    if (error) throw error
+    if (error) {
+      console.error('removeCreatorFromAgency error:', error)
+      throw new Error(`Failed to remove creator: ${error.message}`)
+    }
   }
 
-  // Delete membership completely
   async deleteMembership(membershipId: string): Promise<void> {
+    if (!membershipId) throw new Error('Membership ID is required')
+
     const { error } = await this.supabase
       .from('agency_memberships')
       .delete()
       .eq('id', membershipId)
 
-    if (error) throw error
+    if (error) {
+      console.error('deleteMembership error:', error)
+      throw new Error(`Failed to delete membership: ${error.message}`)
+    }
   }
 
-  // Get earnings for a creator
   async getCreatorEarnings(
     creatorId: string,
     startDate?: Date,
     endDate?: Date
   ): Promise<EarningsEntry[]> {
+    const validCreatorId = validateUserId(creatorId)
+
     let query = this.supabase
       .from('earnings_entries')
       .select(`
         *,
         companies:company_id (name)
       `)
-      .eq('creator_user_id', creatorId)
+      .eq('creator_user_id', validCreatorId)
       .order('earned_on', { ascending: false })
 
     if (startDate) {
@@ -717,28 +974,33 @@ export class DatabaseService {
 
     const { data, error } = await query
 
-    if (error) throw error
+    if (error) {
+      console.error('getCreatorEarnings error:', error)
+      throw new Error(`Failed to load earnings: ${error.message}`)
+    }
     return (data || []).map(this.mapEarningsFromDB)
   }
 
-  // Create earnings entry
   async createEarningsEntry(
     creatorId: string,
     entry: Omit<EarningsEntry, 'id' | 'createdAt' | 'updatedAt' | 'creatorUserId'>,
     createdBy?: string
   ): Promise<EarningsEntry> {
+    const validCreatorId = validateUserId(creatorId)
+    if (!entry.amount || entry.amount < 0) throw new Error('Valid amount is required')
+
     const { data, error } = await this.supabase
       .from('earnings_entries')
       .insert({
-        creator_user_id: creatorId,
-        company_id: entry.companyId,
+        creator_user_id: validCreatorId,
+        company_id: entry.companyId || null,
         amount: entry.amount,
-        currency: entry.currency,
+        currency: entry.currency || 'ILS',
         earned_on: entry.earnedOn instanceof Date
           ? entry.earnedOn.toISOString().split('T')[0]
           : entry.earnedOn,
-        notes: entry.notes,
-        created_by: createdBy,
+        notes: entry.notes || null,
+        created_by: createdBy || null,
       })
       .select(`
         *,
@@ -746,29 +1008,33 @@ export class DatabaseService {
       `)
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('createEarningsEntry error:', error)
+      throw new Error(`Failed to create earnings entry: ${error.message}`)
+    }
     return this.mapEarningsFromDB(data)
   }
 
-  // Update earnings entry
   async updateEarningsEntry(
     entryId: string,
     updates: Partial<Omit<EarningsEntry, 'id' | 'createdAt' | 'updatedAt' | 'creatorUserId'>>
   ): Promise<EarningsEntry> {
-    const updateData: any = {}
-    if (updates.companyId !== undefined) updateData.company_id = updates.companyId
-    if (updates.amount !== undefined) updateData.amount = updates.amount
-    if (updates.currency !== undefined) updateData.currency = updates.currency
+    if (!entryId) throw new Error('Entry ID is required')
+
+    const payload: Record<string, any> = {}
+    if (updates.companyId !== undefined) payload.company_id = updates.companyId
+    if (updates.amount !== undefined) payload.amount = updates.amount
+    if (updates.currency !== undefined) payload.currency = updates.currency
     if (updates.earnedOn !== undefined) {
-      updateData.earned_on = updates.earnedOn instanceof Date
+      payload.earned_on = updates.earnedOn instanceof Date
         ? updates.earnedOn.toISOString().split('T')[0]
         : updates.earnedOn
     }
-    if (updates.notes !== undefined) updateData.notes = updates.notes
+    if (updates.notes !== undefined) payload.notes = updates.notes
 
     const { data, error } = await this.supabase
       .from('earnings_entries')
-      .update(updateData)
+      .update(payload)
       .eq('id', entryId)
       .select(`
         *,
@@ -776,71 +1042,74 @@ export class DatabaseService {
       `)
       .single()
 
-    if (error) throw error
+    if (error) {
+      console.error('updateEarningsEntry error:', error)
+      throw new Error(`Failed to update earnings entry: ${error.message}`)
+    }
     return this.mapEarningsFromDB(data)
   }
 
-  // Delete earnings entry
   async deleteEarningsEntry(entryId: string): Promise<void> {
+    if (!entryId) throw new Error('Entry ID is required')
+
     const { error } = await this.supabase
       .from('earnings_entries')
       .delete()
       .eq('id', entryId)
 
-    if (error) throw error
+    if (error) {
+      console.error('deleteEarningsEntry error:', error)
+      throw new Error(`Failed to delete earnings entry: ${error.message}`)
+    }
   }
 
-  // Get creator detail for agency view
   async getCreatorDetailForAgency(
     agencyId: string,
     creatorId: string
   ): Promise<CreatorDetailData | null> {
-    // Verify membership
+    const validAgencyId = validateUserId(agencyId)
+    const validCreatorId = validateUserId(creatorId)
+
     const { data: membership } = await this.supabase
       .from('agency_memberships')
       .select('*')
-      .eq('agency_id', agencyId)
-      .eq('creator_user_id', creatorId)
+      .eq('agency_id', validAgencyId)
+      .eq('creator_user_id', validCreatorId)
       .eq('status', 'active')
       .single()
 
     if (!membership) return null
 
-    // Get creator profile
     const { data: creatorProfile } = await this.supabase
       .from('user_profiles')
       .select('id, name, email')
-      .eq('id', creatorId)
+      .eq('id', validCreatorId)
       .single()
 
     if (!creatorProfile) return null
 
-    // Get companies
     const { data: companies } = await this.supabase
       .from('companies')
       .select('id, name, brand_type, status, payment_terms')
-      .eq('owner_uid', creatorId)
+      .eq('owner_uid', validCreatorId)
 
-    // Get earnings
     const { data: earnings } = await this.supabase
       .from('earnings_entries')
       .select(`
         *,
         companies:company_id (name)
       `)
-      .eq('creator_user_id', creatorId)
+      .eq('creator_user_id', validCreatorId)
       .order('earned_on', { ascending: false })
       .limit(100)
 
-    // Get recent activity
     const { data: activity } = await this.supabase
       .from('activity_events')
       .select('id, type, entity_name, created_at')
-      .eq('user_id', creatorId)
+      .eq('user_id', validCreatorId)
       .order('created_at', { ascending: false })
       .limit(20)
 
-    // Calculate monthly breakdown
     const earningsData = (earnings || []).map(this.mapEarningsFromDB)
     const monthlyBreakdown = this.calculateMonthlyBreakdown(earningsData)
 
@@ -869,20 +1138,25 @@ export class DatabaseService {
     }
   }
 
-  // Get companies for a creator (agency view)
   async getCreatorCompanies(creatorId: string): Promise<Company[]> {
+    const validCreatorId = validateUserId(creatorId)
+
     const { data, error } = await this.supabase
       .from('companies')
       .select('*')
-      .eq('owner_uid', creatorId)
+      .eq('owner_uid', validCreatorId)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('getCreatorCompanies error:', error)
+      throw new Error(`Failed to load companies: ${error.message}`)
+    }
     return this.mapCompaniesFromDB(data || [])
   }
 
-  // Get calendar events for a creator (agency view)
   async getCreatorCalendarEvents(creatorId: string): Promise<CalendarEvent[]> {
+    const validCreatorId = validateUserId(creatorId)
+
     const { data, error } = await this.supabase
       .from('calendar_events')
       .select(`
@@ -890,27 +1164,33 @@ export class DatabaseService {
         calendar_reminders (*),
         calendar_linked_tasks (*)
       `)
-      .eq('owner_uid', creatorId)
+      .eq('owner_uid', validCreatorId)
       .order('date', { ascending: true })
 
-    if (error) throw error
+    if (error) {
+      console.error('getCreatorCalendarEvents error:', error)
+      throw new Error(`Failed to load events: ${error.message}`)
+    }
     return this.mapEventsFromDB(data || [])
   }
 
-  // Get tasks for a creator (agency view)
   async getCreatorTasks(creatorId: string): Promise<Task[]> {
+    const validCreatorId = validateUserId(creatorId)
+
     const { data, error } = await this.supabase
       .from('tasks')
       .select('*')
-      .eq('owner_uid', creatorId)
+      .eq('owner_uid', validCreatorId)
       .eq('archived', false)
       .order('created_at', { ascending: false })
 
-    if (error) throw error
+    if (error) {
+      console.error('getCreatorTasks error:', error)
+      throw new Error(`Failed to load tasks: ${error.message}`)
+    }
     return this.mapTasksFromDB(data || [])
   }
 
-  // Helper: Calculate monthly earnings breakdown
   private calculateMonthlyBreakdown(earnings: EarningsEntry[]) {
     const breakdown: Map<string, {
       month: string
@@ -955,7 +1235,6 @@ export class DatabaseService {
       }))
   }
 
-  // Agency mapping helpers
   private mapCreatorStatsFromDB(data: any): AgencyCreatorStats {
     return {
       agencyId: data.agency_id,
