@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useState, useEffect, useRef, ReactNode, useCallback } from 'react'
-import { createClient, clearSupabaseClient } from '@/lib/supabase/client'
+import { createClient, clearSupabaseClient, clearProjectAuthStorage } from '@/lib/supabase/client'
 import { setCurrentUserId } from '@/lib/supabase/auth-helpers'
 import type { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { clearAllStores } from '@/lib/store-reset'
@@ -31,6 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
   const initRef = useRef(false)
+  const previousUserIdRef = useRef<string | null>(null)
   const supabaseRef = useRef(createClient())
 
   const loadUserProfile = useCallback(async (supabaseUser: SupabaseUser): Promise<User | null> => {
@@ -100,6 +101,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  /**
+   * Handle user change - reset all stores when user ID changes
+   * This prevents cross-account data leakage
+   */
+  const handleUserChange = useCallback((newUserId: string | null) => {
+    const previousUserId = previousUserIdRef.current
+
+    // If user ID changed (including from null to user or user to null)
+    if (previousUserId !== newUserId) {
+      // Clear all user-scoped stores immediately
+      clearAllStores()
+      previousUserIdRef.current = newUserId
+    }
+  }, [])
+
   useEffect(() => {
     // Prevent double initialization in React StrictMode
     if (initRef.current) return
@@ -123,14 +139,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
 
         if (session?.user) {
-          // Clear any demo data when restoring a real user session
-          clearAllStores()
+          // Handle user change (clears stores if different user)
+          handleUserChange(session.user.id)
 
           const userData = await loadUserProfile(session.user)
           if (mounted && userData) {
             setUser(userData)
             setCurrentUserId(userData.id)
           }
+        } else {
+          // No session - ensure stores are cleared
+          handleUserChange(null)
         }
       } catch (error) {
         console.error('Error initializing auth:', error)
@@ -152,6 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mounted) return
 
       if (event === 'SIGNED_OUT') {
+        handleUserChange(null)
         setUser(null)
         setCurrentUserId(null)
         setIsLoading(false)
@@ -160,10 +180,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         if (session?.user) {
-          // Clear demo data on sign in
-          if (event === 'SIGNED_IN') {
-            clearAllStores()
-          }
+          // Handle user change - this clears stores if user ID is different
+          handleUserChange(session.user.id)
 
           setIsLoading(true)
           const userData = await loadUserProfile(session.user)
@@ -187,16 +205,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       mounted = false
       subscription.unsubscribe()
     }
-  }, [loadUserProfile])
+  }, [loadUserProfile, handleUserChange])
 
   const login = async (email: string, password: string) => {
     const supabase = supabaseRef.current
     setIsLoading(true)
 
     try {
-      // Clear any existing session data first
-      clearAllStores()
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -205,6 +220,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error
 
       if (data.user) {
+        // Handle user change - clears stores for new user
+        handleUserChange(data.user.id)
+
         const userData = await loadUserProfile(data.user)
         if (userData) {
           setUser(userData)
@@ -238,6 +256,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) throw error
 
       if (data.user) {
+        // Handle user change - clears stores for new user
+        handleUserChange(data.user.id)
+
         const userData = await loadUserProfile(data.user)
         if (userData) {
           setUser(userData)
@@ -253,47 +274,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  /**
+   * Logout - fully idempotent, always resets state and redirects
+   * Even if signOut fails or no session exists, local state is cleared
+   */
   const logout = async () => {
     const supabase = supabaseRef.current
 
-    try {
-      // Sign out from Supabase (this clears the session)
-      const { error } = await supabase.auth.signOut({ scope: 'local' })
+    // Always clear local state first (idempotent)
+    setUser(null)
+    setCurrentUserId(null)
+    handleUserChange(null)
 
-      if (error) {
-        console.error('Logout error:', error)
-      }
-    } catch (error) {
-      console.error('Logout error:', error)
-    } finally {
-      // Always clear local state regardless of signOut result
-      setUser(null)
-      setCurrentUserId(null)
+    // Clear only this project's auth storage (not all sb-* keys)
+    clearProjectAuthStorage()
 
-      // Clear all stores to prevent data leakage
-      clearAllStores()
-
-      // Clear the Supabase client singleton to ensure fresh state
-      clearSupabaseClient()
-
-      // Clear auth storage key explicitly
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('creators-os-auth')
-        // Also clear any Supabase default storage keys
-        const keysToRemove: string[] = []
-        for (let i = 0; i < localStorage.length; i++) {
-          const key = localStorage.key(i)
-          if (key && (key.startsWith('sb-') || key.includes('supabase'))) {
-            keysToRemove.push(key)
-          }
-        }
-        keysToRemove.forEach(key => localStorage.removeItem(key))
-
-        // Clear session storage as well
-        sessionStorage.removeItem('creators-os-splash-seen')
-        sessionStorage.removeItem('creators-os-just-logged-in')
-      }
+    // Clear session storage items
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('creators-os-splash-seen')
+      sessionStorage.removeItem('creators-os-just-logged-in')
     }
+
+    try {
+      // Attempt to sign out from Supabase
+      await supabase.auth.signOut({ scope: 'local' })
+    } catch (error) {
+      // Ignore errors - we've already cleared local state
+      console.error('Logout signOut error (ignored):', error)
+    }
+
+    // Clear the Supabase client singleton to ensure fresh state on next login
+    clearSupabaseClient()
   }
 
   return (

@@ -38,18 +38,24 @@ export default function AppLayout({
   const allStoresHydrated = isDemoHydrated && isAgencyDemoHydrated
 
   useEffect(() => {
-    // Wait for auth to be fully initialized and all stores to hydrate before checking
-    if (!isInitialized || !allStoresHydrated) return
+    // Gate ONLY on auth initialization - not on store hydration
+    // This prevents deadlock where stores wait for auth and auth waits for stores
+    if (!isInitialized) return
 
     // Allow access if user is logged in OR if any demo mode is active
     if (!user && !isAnyDemoMode) {
       router.replace('/login')
     }
+  }, [user, isInitialized, isAnyDemoMode, router])
+
+  // Demo mode effects - separate from auth gating to prevent deadlock
+  useEffect(() => {
+    // Only process demo mode after both auth and demo stores are ready
+    if (!isInitialized || !allStoresHydrated) return
 
     // Only re-populate demo data on page refresh if:
     // 1. Demo mode is active (isDemo flag is set)
     // 2. AND there's no real user logged in (to prevent contamination)
-    // When a real user is logged in, we should NOT populate demo data
     if (isDemo && !user) {
       const { populateDemoData } = useDemoModeStore.getState()
       populateDemoData()
@@ -64,7 +70,7 @@ export default function AppLayout({
         router.push('/pricing/agencies')
       }
     }
-  }, [user, isLoading, isInitialized, isAnyDemoMode, allStoresHydrated, router, isAgencyDemo, isDemo, pathname])
+  }, [user, isInitialized, allStoresHydrated, isDemo, isAgencyDemo, pathname, router])
 
   useEffect(() => {
     // Check if user just logged in or demo mode activated
@@ -90,8 +96,9 @@ export default function AppLayout({
     setTimeout(() => setAppReady(true), 100)
   }
 
-  // Wait for auth to be fully initialized and all demo stores to be ready
-  if (!isInitialized || isLoading || !allStoresHydrated) {
+  // Wait for auth to be fully initialized - do NOT wait for store hydration
+  // Store hydration happens in parallel, not blocking initial render
+  if (!isInitialized || isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-neutral-50">
         <div className="flex flex-col items-center gap-4">
