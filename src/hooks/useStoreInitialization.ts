@@ -8,6 +8,8 @@ import { useTasksStore } from '@/stores/tasksStore'
 import { useGoalsStore } from '@/stores/goalsStore'
 import { migrateLocalStorageToSupabase, clearLocalStorageData } from '@/lib/migration/localStorage'
 
+const isDev = process.env.NODE_ENV === 'development'
+
 /**
  * Hook to initialize all stores when user logs in
  * Also handles one-time migration from localStorage to Supabase
@@ -29,7 +31,7 @@ export function useStoreInitialization() {
       migrateLocalStorageToSupabase(user.id)
         .then((migrated) => {
           if (migrated) {
-            console.log('Migration completed successfully')
+            if (isDev) console.log('Migration completed successfully')
             // Clear localStorage after successful migration
             clearLocalStorageData()
           }
@@ -43,7 +45,7 @@ export function useStoreInitialization() {
           ])
         })
         .catch((error) => {
-          console.error('Failed to initialize app:', error)
+          if (isDev) console.error('Failed to initialize app:', error)
         })
     }
   }, [user?.id, migrationAttempted])

@@ -202,6 +202,9 @@ export class DatabaseService {
 
     // If error mentions missing column, retry without the snapshot field
     if (eventError && eventError.message?.includes('company_name_snapshot')) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DEV] createCalendarEvent: retrying without snapshot columns')
+      }
       const { data: retryData, error: retryError } = await this.supabase
         .from('calendar_events')
         .insert(basePayload)
@@ -286,6 +289,9 @@ export class DatabaseService {
 
     // If error mentions missing column, retry without the snapshot field
     if (error && error.message?.includes('company_name_snapshot')) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DEV] updateCalendarEvent: retrying without snapshot columns')
+      }
       const { data: retryData, error: retryError } = await this.supabase
         .from('calendar_events')
         .update(basePayload)
@@ -389,6 +395,9 @@ export class DatabaseService {
 
     // If error mentions missing column, retry without snapshot fields
     if (error && (error.message?.includes('company_name_snapshot') || error.message?.includes('event_title_snapshot'))) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DEV] createTask: retrying without snapshot columns')
+      }
       const { data: retryData, error: retryError } = await this.supabase
         .from('tasks')
         .insert(basePayload)
@@ -441,6 +450,9 @@ export class DatabaseService {
 
     // If error mentions missing column, retry without snapshot fields
     if (error && (error.message?.includes('company_name_snapshot') || error.message?.includes('event_title_snapshot'))) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[DEV] updateTask: retrying without snapshot columns')
+      }
       const { data: retryData, error: retryError } = await this.supabase
         .from('tasks')
         .update(basePayload)
@@ -521,9 +533,15 @@ export class DatabaseService {
     }
   }
 
-  // Check migration status - gracefully handles missing table/column
-  // This is non-blocking and never throws - returns false on any error
+  // Check migration status - gated behind env flag to avoid 400s in production
+  // Returns false immediately if the feature is disabled (default in prod)
   async checkMigrationStatus(userId: string): Promise<boolean> {
+    // Only check migration status if explicitly enabled via env
+    // This prevents 400 errors when the table/column doesn't exist
+    if (process.env.NEXT_PUBLIC_ENABLE_MIGRATION_STATUS_CHECK !== 'true') {
+      return false
+    }
+
     try {
       const validUserId = validateUserId(userId)
 
@@ -531,22 +549,25 @@ export class DatabaseService {
         .from('migration_status')
         .select('owner_uid')
         .eq('owner_uid', validUserId)
-        .maybeSingle() // Use maybeSingle to avoid error when not found
+        .maybeSingle()
 
-      // Any error (including missing table/column) - silently return false
+      // Silently return false on any error - no console output
       if (error) {
-        // Don't log errors to avoid console spam
         return false
       }
 
       return !!data
     } catch {
-      // Silently handle any exception
       return false
     }
   }
 
   async markMigrationComplete(userId: string, migrationData: any): Promise<void> {
+    // Only attempt to mark migration if the feature is enabled
+    if (process.env.NEXT_PUBLIC_ENABLE_MIGRATION_STATUS_CHECK !== 'true') {
+      return
+    }
+
     try {
       const validUserId = validateUserId(userId)
 
@@ -554,9 +575,8 @@ export class DatabaseService {
         owner_uid: validUserId,
         migration_data: migrationData,
       })
-    } catch (error) {
-      console.warn('Failed to mark migration complete:', error)
-      // Don't throw - migration status is not critical
+    } catch {
+      // Silently ignore - migration status is not critical
     }
   }
 

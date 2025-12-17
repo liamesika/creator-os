@@ -1,16 +1,18 @@
 import { db } from '@/lib/supabase/database'
 
+const isDev = process.env.NODE_ENV === 'development'
+
 export async function migrateLocalStorageToSupabase(userId: string): Promise<boolean> {
   try {
     // Check if already migrated using the new db method
     const alreadyMigrated = await db.checkMigrationStatus(userId)
 
     if (alreadyMigrated) {
-      console.log('Migration already completed')
+      if (isDev) console.log('Migration already completed')
       return true
     }
 
-    console.log('Starting localStorage migration...')
+    if (isDev) console.log('Starting localStorage migration...')
 
     // Get data from localStorage
     const companiesData = localStorage.getItem('creators-os-companies')
@@ -46,11 +48,11 @@ export async function migrateLocalStorageToSupabase(userId: string): Promise<boo
             })
             migratedCounts.companies++
           } catch (err) {
-            console.warn('Failed to migrate company:', company.name, err)
+            if (isDev) console.warn('Failed to migrate company:', company.name, err)
           }
         }
       } catch (error) {
-        console.error('Error parsing companies data:', error)
+        if (isDev) console.error('Error parsing companies data:', error)
       }
     }
 
@@ -77,11 +79,11 @@ export async function migrateLocalStorageToSupabase(userId: string): Promise<boo
             })
             migratedCounts.events++
           } catch (err) {
-            console.warn('Failed to migrate event:', event.title, err)
+            if (isDev) console.warn('Failed to migrate event:', event.title, err)
           }
         }
       } catch (error) {
-        console.error('Error parsing calendar data:', error)
+        if (isDev) console.error('Error parsing calendar data:', error)
       }
     }
 
@@ -108,11 +110,11 @@ export async function migrateLocalStorageToSupabase(userId: string): Promise<boo
             })
             migratedCounts.tasks++
           } catch (err) {
-            console.warn('Failed to migrate task:', task.title, err)
+            if (isDev) console.warn('Failed to migrate task:', task.title, err)
           }
         }
       } catch (error) {
-        console.error('Error parsing tasks data:', error)
+        if (isDev) console.error('Error parsing tasks data:', error)
       }
     }
 
@@ -134,21 +136,21 @@ export async function migrateLocalStorageToSupabase(userId: string): Promise<boo
             })
             migratedCounts.goals++
           } catch (err) {
-            console.warn('Failed to migrate goal:', goal.date, err)
+            if (isDev) console.warn('Failed to migrate goal:', goal.date, err)
           }
         }
       } catch (error) {
-        console.error('Error parsing goals data:', error)
+        if (isDev) console.error('Error parsing goals data:', error)
       }
     }
 
     // Mark migration as complete
     await db.markMigrationComplete(userId, migratedCounts)
 
-    console.log('Migration completed:', migratedCounts)
+    if (isDev) console.log('Migration completed:', migratedCounts)
     return true
   } catch (error) {
-    console.error('Migration failed:', error)
+    if (isDev) console.error('Migration failed:', error)
     return false
   }
 }
@@ -158,5 +160,5 @@ export function clearLocalStorageData() {
   localStorage.removeItem('creators-os-calendar')
   localStorage.removeItem('creators-os-tasks')
   localStorage.removeItem('creators-os-goals')
-  console.log('localStorage data cleared')
+  if (isDev) console.log('localStorage data cleared')
 }
