@@ -472,7 +472,12 @@ CREATE POLICY "Users can delete own events"
   USING (auth.uid() = owner_uid);
 
 -- =====================================================
+-- RELOAD POSTGREST SCHEMA CACHE
+-- =====================================================
+NOTIFY pgrst, 'reload schema';
+
+-- =====================================================
 -- DONE - Migration fix complete!
 -- =====================================================
 
-SELECT 'Migration fix completed successfully!' as status;
+SELECT 'Migration fix completed successfully! Schema cache reloaded.' as status;

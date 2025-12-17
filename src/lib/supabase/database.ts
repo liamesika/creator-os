@@ -451,7 +451,8 @@ export class DatabaseService {
     }
   }
 
-  // Check migration status - gracefully handles missing table
+  // Check migration status - gracefully handles missing table/column
+  // This is non-blocking and never throws - returns false on any error
   async checkMigrationStatus(userId: string): Promise<boolean> {
     try {
       const validUserId = validateUserId(userId)
@@ -460,18 +461,17 @@ export class DatabaseService {
         .from('migration_status')
         .select('owner_uid')
         .eq('owner_uid', validUserId)
-        .single()
+        .maybeSingle() // Use maybeSingle to avoid error when not found
 
-      // PGRST116 = not found, which is fine
-      if (error && error.code !== 'PGRST116') {
-        // Table might not exist - treat as not migrated
-        console.warn('Migration status check failed:', error.message)
+      // Any error (including missing table/column) - silently return false
+      if (error) {
+        // Don't log errors to avoid console spam
         return false
       }
 
       return !!data
-    } catch (error) {
-      console.warn('Migration status check error:', error)
+    } catch {
+      // Silently handle any exception
       return false
     }
   }
