@@ -175,7 +175,8 @@ export class DatabaseService {
     const title = validateRequired(event.title, 'Event title')
     const category = validateRequired(event.category, 'Event category')
 
-    const payload = cleanPayload({
+    // Build base payload without optional snapshot field
+    const basePayload = cleanPayload({
       owner_uid: validUserId,
       category,
       title,
@@ -185,14 +186,31 @@ export class DatabaseService {
       is_all_day: event.isAllDay || false,
       notes: event.notes || null,
       company_id: event.companyId || null,
-      company_name_snapshot: event.companyNameSnapshot || null,
     })
 
-    const { data: eventData, error: eventError } = await this.supabase
+    // Try with company_name_snapshot first, fallback without it if column missing
+    let payload: Record<string, any> = {
+      ...basePayload,
+      company_name_snapshot: event.companyNameSnapshot || null,
+    }
+
+    let { data: eventData, error: eventError } = await this.supabase
       .from('calendar_events')
       .insert(payload)
       .select()
       .single()
+
+    // If error mentions missing column, retry without the snapshot field
+    if (eventError && eventError.message?.includes('company_name_snapshot')) {
+      const { data: retryData, error: retryError } = await this.supabase
+        .from('calendar_events')
+        .insert(basePayload)
+        .select()
+        .single()
+
+      eventData = retryData
+      eventError = retryError
+    }
 
     if (eventError) {
       console.error('createCalendarEvent error:', eventError)
@@ -242,25 +260,42 @@ export class DatabaseService {
   async updateCalendarEvent(id: string, updates: Partial<CalendarEvent>) {
     if (!id) throw new Error('Event ID is required')
 
-    const payload: Record<string, any> = {}
-    if (updates.category !== undefined) payload.category = updates.category
-    if (updates.title !== undefined) payload.title = updates.title
+    // Build base payload without optional snapshot field
+    const basePayload: Record<string, any> = {}
+    if (updates.category !== undefined) basePayload.category = updates.category
+    if (updates.title !== undefined) basePayload.title = updates.title
     if (updates.date !== undefined) {
-      payload.date = updates.date instanceof Date ? updates.date.toISOString() : updates.date
+      basePayload.date = updates.date instanceof Date ? updates.date.toISOString() : updates.date
     }
-    if (updates.startTime !== undefined) payload.start_time = updates.startTime
-    if (updates.endTime !== undefined) payload.end_time = updates.endTime
-    if (updates.isAllDay !== undefined) payload.is_all_day = updates.isAllDay
-    if (updates.notes !== undefined) payload.notes = updates.notes
-    if (updates.companyId !== undefined) payload.company_id = updates.companyId
+    if (updates.startTime !== undefined) basePayload.start_time = updates.startTime
+    if (updates.endTime !== undefined) basePayload.end_time = updates.endTime
+    if (updates.isAllDay !== undefined) basePayload.is_all_day = updates.isAllDay
+    if (updates.notes !== undefined) basePayload.notes = updates.notes
+    if (updates.companyId !== undefined) basePayload.company_id = updates.companyId
+
+    // Add snapshot field to full payload
+    const payload = { ...basePayload }
     if (updates.companyNameSnapshot !== undefined) payload.company_name_snapshot = updates.companyNameSnapshot
 
-    const { data, error } = await this.supabase
+    let { data, error } = await this.supabase
       .from('calendar_events')
       .update(payload)
       .eq('id', id)
       .select()
       .single()
+
+    // If error mentions missing column, retry without the snapshot field
+    if (error && error.message?.includes('company_name_snapshot')) {
+      const { data: retryData, error: retryError } = await this.supabase
+        .from('calendar_events')
+        .update(basePayload)
+        .eq('id', id)
+        .select()
+        .single()
+
+      data = retryData
+      error = retryError
+    }
 
     if (error) {
       console.error('updateCalendarEvent error:', error)
@@ -324,7 +359,8 @@ export class DatabaseService {
     const validUserId = validateUserId(userId)
     const title = validateRequired(task.title, 'Task title')
 
-    const payload = cleanPayload({
+    // Build base payload without optional snapshot fields
+    const basePayload = cleanPayload({
       owner_uid: validUserId,
       title,
       description: task.description || null,
@@ -333,18 +369,35 @@ export class DatabaseService {
       due_date: task.dueDate instanceof Date ? task.dueDate.toISOString() : task.dueDate || null,
       scheduled_at: task.scheduledAt || null,
       company_id: task.companyId || null,
-      company_name_snapshot: task.companyNameSnapshot || null,
       event_id: task.eventId || null,
-      event_title_snapshot: task.eventTitleSnapshot || null,
       category: task.category || null,
       archived: false,
     })
 
-    const { data, error } = await this.supabase
+    // Try with snapshot fields first
+    const payload: Record<string, any> = {
+      ...basePayload,
+      company_name_snapshot: task.companyNameSnapshot || null,
+      event_title_snapshot: task.eventTitleSnapshot || null,
+    }
+
+    let { data, error } = await this.supabase
       .from('tasks')
       .insert(payload)
       .select()
       .single()
+
+    // If error mentions missing column, retry without snapshot fields
+    if (error && (error.message?.includes('company_name_snapshot') || error.message?.includes('event_title_snapshot'))) {
+      const { data: retryData, error: retryError } = await this.supabase
+        .from('tasks')
+        .insert(basePayload)
+        .select()
+        .single()
+
+      data = retryData
+      error = retryError
+    }
 
     if (error) {
       console.error('createTask error:', error)
@@ -359,28 +412,45 @@ export class DatabaseService {
   async updateTask(id: string, updates: Partial<Task>) {
     if (!id) throw new Error('Task ID is required')
 
-    const payload: Record<string, any> = {}
-    if (updates.title !== undefined) payload.title = updates.title
-    if (updates.description !== undefined) payload.description = updates.description
-    if (updates.status !== undefined) payload.status = updates.status
-    if (updates.priority !== undefined) payload.priority = updates.priority
+    // Build base payload without optional snapshot fields
+    const basePayload: Record<string, any> = {}
+    if (updates.title !== undefined) basePayload.title = updates.title
+    if (updates.description !== undefined) basePayload.description = updates.description
+    if (updates.status !== undefined) basePayload.status = updates.status
+    if (updates.priority !== undefined) basePayload.priority = updates.priority
     if (updates.dueDate !== undefined) {
-      payload.due_date = updates.dueDate instanceof Date ? updates.dueDate.toISOString() : updates.dueDate
+      basePayload.due_date = updates.dueDate instanceof Date ? updates.dueDate.toISOString() : updates.dueDate
     }
-    if (updates.scheduledAt !== undefined) payload.scheduled_at = updates.scheduledAt
-    if (updates.companyId !== undefined) payload.company_id = updates.companyId
-    if (updates.companyNameSnapshot !== undefined) payload.company_name_snapshot = updates.companyNameSnapshot
-    if (updates.eventId !== undefined) payload.event_id = updates.eventId
-    if (updates.eventTitleSnapshot !== undefined) payload.event_title_snapshot = updates.eventTitleSnapshot
-    if (updates.category !== undefined) payload.category = updates.category
-    if (updates.archived !== undefined) payload.archived = updates.archived
+    if (updates.scheduledAt !== undefined) basePayload.scheduled_at = updates.scheduledAt
+    if (updates.companyId !== undefined) basePayload.company_id = updates.companyId
+    if (updates.eventId !== undefined) basePayload.event_id = updates.eventId
+    if (updates.category !== undefined) basePayload.category = updates.category
+    if (updates.archived !== undefined) basePayload.archived = updates.archived
 
-    const { data, error } = await this.supabase
+    // Add snapshot fields to full payload
+    const payload = { ...basePayload }
+    if (updates.companyNameSnapshot !== undefined) payload.company_name_snapshot = updates.companyNameSnapshot
+    if (updates.eventTitleSnapshot !== undefined) payload.event_title_snapshot = updates.eventTitleSnapshot
+
+    let { data, error } = await this.supabase
       .from('tasks')
       .update(payload)
       .eq('id', id)
       .select()
       .single()
+
+    // If error mentions missing column, retry without snapshot fields
+    if (error && (error.message?.includes('company_name_snapshot') || error.message?.includes('event_title_snapshot'))) {
+      const { data: retryData, error: retryError } = await this.supabase
+        .from('tasks')
+        .update(basePayload)
+        .eq('id', id)
+        .select()
+        .single()
+
+      data = retryData
+      error = retryError
+    }
 
     if (error) {
       console.error('updateTask error:', error)
