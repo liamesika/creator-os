@@ -111,8 +111,13 @@ export default function BottomSheet({
     }
   }
 
-  // Use 100dvh for proper mobile viewport handling
-  const height = fullHeight ? '100dvh' : `${currentSnapPoint * 100}dvh`
+  // Calculate height: fullHeight uses 95% viewport to leave room at top
+  const getSheetHeight = () => {
+    if (fullHeight) {
+      return '95dvh'
+    }
+    return `${currentSnapPoint * 100}dvh`
+  }
 
   return (
     <AnimatePresence>
@@ -154,8 +159,8 @@ export default function BottomSheet({
               className
             )}
             style={{
-              height,
-              maxHeight: '100dvh',
+              height: getSheetHeight(),
+              maxHeight: '95dvh',
             }}
           >
             {/* Drag Handle */}
@@ -165,15 +170,15 @@ export default function BottomSheet({
 
             {/* Header */}
             {(title || showCloseButton) && (
-              <div className="flex-shrink-0 px-6 pb-4 flex items-center justify-between border-b border-neutral-100">
-                <h2 id="sheet-title" className="text-xl font-bold text-neutral-900">{title}</h2>
+              <div className="flex-shrink-0 px-5 pb-3 flex items-center justify-between border-b border-neutral-100">
+                <h2 id="sheet-title" className="text-lg font-bold text-neutral-900">{title}</h2>
                 {showCloseButton && (
                   <button
                     onClick={onClose}
                     className="p-2 rounded-full hover:bg-neutral-100 transition-colors"
                     aria-label="Close sheet"
                   >
-                    <X size={24} className="text-neutral-600" />
+                    <X size={22} className="text-neutral-600" />
                   </button>
                 )}
               </div>

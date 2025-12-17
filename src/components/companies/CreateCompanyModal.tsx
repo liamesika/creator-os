@@ -898,7 +898,7 @@ export default function CreateCompanyModal({
             </div>
 
             {/* Footer */}
-            <div className="flex items-center justify-between gap-3 px-5 py-4 border-t border-neutral-100 bg-neutral-50/50">
+            <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-neutral-100 bg-neutral-50/50 safe-area-bottom">
               <button
                 onClick={handleBack}
                 disabled={currentStep === 1}

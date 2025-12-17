@@ -302,6 +302,20 @@
   .safe-area-pb {
     padding-bottom: calc(0.5rem + env(safe-area-inset-bottom));
   }
+
+  .safe-area-bottom {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+}
+
+/* Safe area bottom - fallback for non-supported browsers */
+.safe-area-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
+}
+
+/* Modal footer with bottom nav avoidance */
+.modal-footer-safe {
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }
 
 /* Hide scrollbar for nav */
