@@ -123,17 +123,17 @@ export default function BottomSheet({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - z-109, above bottom nav z-50 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[109]"
             aria-hidden="true"
           />
 
-          {/* Sheet */}
+          {/* Sheet - z-110 */}
           <motion.div
             ref={sheetRef}
             initial={{ y: '100%' }}
@@ -153,7 +153,7 @@ export default function BottomSheet({
             aria-modal="true"
             aria-labelledby={title ? 'sheet-title' : undefined}
             className={cn(
-              'fixed bottom-0 left-0 right-0 z-[101]',
+              'fixed bottom-0 left-0 right-0 z-[110]',
               'bg-white rounded-t-3xl shadow-2xl',
               'flex flex-col',
               className

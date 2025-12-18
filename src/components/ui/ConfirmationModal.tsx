@@ -63,22 +63,22 @@ export default function ConfirmationModal({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - z-109, above bottom nav z-50 */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[109]"
           />
 
-          {/* Modal */}
+          {/* Modal - z-110 */}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 flex items-center justify-center z-[101] p-4"
+            className="fixed inset-0 flex items-center justify-center z-[110] p-4"
           >
             <div
               className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden"

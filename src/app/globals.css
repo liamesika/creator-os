@@ -297,6 +297,15 @@
   }
 }
 
+/*
+ * Z-INDEX HIERARCHY:
+ * - App Header: z-30
+ * - Sidebar: z-40
+ * - Bottom Nav: z-50
+ * - Modal Backdrop: z-[109]
+ * - Modal Content: z-[110]
+ */
+
 /* Safe area for mobile */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .safe-area-pb {
@@ -306,6 +315,10 @@
   .safe-area-bottom {
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
+
+  .safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
 }
 
 /* Safe area bottom - fallback for non-supported browsers */
@@ -313,7 +326,7 @@
   padding-bottom: max(1rem, env(safe-area-inset-bottom, 1rem));
 }
 
-/* Modal footer with bottom nav avoidance */
+/* Modal footer with bottom nav avoidance - accounts for iOS home indicator */
 .modal-footer-safe {
   padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
 }
