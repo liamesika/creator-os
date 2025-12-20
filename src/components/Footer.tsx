@@ -23,10 +23,10 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { icon: Instagram, href: '#', label: 'Instagram' },
-  { icon: Twitter, href: '#', label: 'Twitter' },
-  { icon: Linkedin, href: '#', label: 'LinkedIn' },
-  { icon: Mail, href: 'mailto:hello@creators-os.com', label: 'Email' },
+  { icon: Instagram, href: 'https://www.instagram.com/creators_osai', label: 'Instagram', external: true },
+  { icon: Twitter, href: '#', label: 'Twitter', external: false },
+  { icon: Linkedin, href: '#', label: 'LinkedIn', external: false },
+  { icon: Mail, href: 'mailto:creators.os.ai@gmail.com', label: 'Email', external: false },
 ]
 
 export default function Footer() {
@@ -41,12 +41,34 @@ export default function Footer() {
             <p className="mt-4 text-sm text-neutral-500 max-w-xs">
               מערכת ניהול חכמה ליוצרי תוכן. שליטה מלאה בזמן, בתוכן ובשגרה שלך.
             </p>
+            {/* Contact Info */}
+            <div className="mt-4 space-y-2">
+              <a
+                href="mailto:creators.os.ai@gmail.com"
+                className="flex items-center gap-2 text-sm text-neutral-500 hover:text-accent-600 transition-colors"
+              >
+                <Mail size={14} />
+                <span dir="ltr">creators.os.ai@gmail.com</span>
+              </a>
+              <a
+                href="https://www.instagram.com/creators_osai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-sm text-neutral-500 hover:text-accent-600 transition-colors"
+              >
+                <Instagram size={14} />
+                <span dir="ltr">@creators_osai</span>
+              </a>
+            </div>
+
             {/* Social links */}
             <div className="flex gap-3 mt-6">
               {socialLinks.map((social) => (
                 <motion.a
                   key={social.label}
                   href={social.href}
+                  target={social.external ? '_blank' : undefined}
+                  rel={social.external ? 'noopener noreferrer' : undefined}
                   whileHover={{ scale: 1.1, y: -2 }}
                   whileTap={{ scale: 0.95 }}
                   className="w-10 h-10 rounded-xl bg-white border border-neutral-200 flex items-center justify-center text-neutral-500 hover:text-accent-600 hover:border-accent-200 transition-colors"
