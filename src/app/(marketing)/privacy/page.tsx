@@ -127,7 +127,7 @@ export default function PrivacyPage() {
                 לשאלות או בקשות בנוגע למדיניות פרטיות זו, אנא פנו אלינו:
               </p>
               <p className="text-gray-700 font-medium mt-3" dir="ltr">
-                Email: liamesika2121@gmail.com
+                Email: creators.os.ai@gmail.com
                 <br />
                 Phone: +972 58-787-8676
               </p>

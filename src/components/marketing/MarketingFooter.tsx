@@ -74,11 +74,11 @@ export default function MarketingFooter() {
 
             <div className="flex items-center gap-6">
               <Link
-                href="mailto:liamesika2121@gmail.com"
+                href="mailto:creators.os.ai@gmail.com"
                 className="group flex items-center gap-2 text-sm text-gray-600 hover:text-purple-600 transition-colors"
               >
                 <Mail size={16} className="group-hover:scale-110 transition-transform" />
-                <span dir="ltr">liamesika2121@gmail.com</span>
+                <span dir="ltr">creators.os.ai@gmail.com</span>
               </Link>
             </div>
           </div>
