@@ -5,6 +5,7 @@ import { useTasksStore } from '@/stores/tasksStore'
 import { useCalendarStore } from '@/stores/calendarStore'
 import { useCompaniesStore } from '@/stores/companiesStore'
 import { useAuth } from '@/context/AuthContext'
+import { useDemoModeStore } from '@/stores/demoModeStore'
 import { computeInsights, computeAgencyInsights } from '@/lib/insights/computeInsights'
 import type { InsightDisplay } from '@/types/insights'
 
@@ -23,12 +24,14 @@ interface UseInsightsReturn {
 export function useInsights(options: UseInsightsOptions = {}): UseInsightsReturn {
   const { scope = 'creator' } = options
   const { user } = useAuth()
+  const { isDemo } = useDemoModeStore()
   const { tasks } = useTasksStore()
   const { events } = useCalendarStore()
   const { companies } = useCompaniesStore()
 
   const insights = useMemo((): InsightDisplay[] => {
-    if (!user) return []
+    // Allow insights in demo mode even without user
+    if (!user && !isDemo) return []
 
     if (scope === 'creator') {
       return computeInsights({
@@ -47,7 +50,7 @@ export function useInsights(options: UseInsightsOptions = {}): UseInsightsReturn
       companies: companies.map(c => ({ id: c.id, name: c.name })),
       scope: 'agency',
     })
-  }, [user, tasks, events, companies, scope])
+  }, [user, isDemo, tasks, events, companies, scope])
 
   return {
     insights,

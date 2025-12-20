@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
+import { useDemoModeStore } from '@/stores/demoModeStore'
 import { computeHealthScore, calculateStreakPressure, calculateDailyLoad, type HealthResult } from '@/lib/health/computeHealthScore'
 import { useTasksStore } from '@/stores/tasksStore'
 import { useCalendarStore } from '@/stores/calendarStore'
@@ -15,6 +16,7 @@ interface UseHealthScoreReturn {
 
 export function useHealthScore(): UseHealthScoreReturn {
   const { user } = useAuth()
+  const { isDemo } = useDemoModeStore()
   const [health, setHealth] = useState<HealthResult | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -23,7 +25,8 @@ export function useHealthScore(): UseHealthScoreReturn {
   const { events } = useCalendarStore()
 
   const computeScore = useCallback(() => {
-    if (!user) {
+    // Allow computation in demo mode even without user
+    if (!user && !isDemo) {
       setHealth(null)
       setIsLoading(false)
       return
@@ -112,7 +115,7 @@ export function useHealthScore(): UseHealthScoreReturn {
     } finally {
       setIsLoading(false)
     }
-  }, [user, tasks, events])
+  }, [user, isDemo, tasks, events])
 
   useEffect(() => {
     computeScore()

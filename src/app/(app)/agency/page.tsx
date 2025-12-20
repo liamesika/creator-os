@@ -80,11 +80,8 @@ export default function AgencyDashboardPage() {
   }, [user, router, isAgencyDemo])
 
   const loadDashboardStats = async () => {
-    // In demo mode, use demo data
+    // In demo mode, use demo data - instant load, no delay
     if (isAgencyDemo) {
-      setIsLoading(true)
-      // Simulate loading delay for realistic UX
-      await new Promise(resolve => setTimeout(resolve, 500))
       setStats(getAgencyDemoDashboardStats())
       setIsLoading(false)
       return
