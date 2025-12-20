@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '@/context/AuthContext'
-import { useDemoModeStore } from '@/stores/demoModeStore'
 import { computeHealthScore, calculateStreakPressure, calculateDailyLoad, type HealthResult } from '@/lib/health/computeHealthScore'
 import { useTasksStore } from '@/stores/tasksStore'
 import { useCalendarStore } from '@/stores/calendarStore'
@@ -15,8 +14,8 @@ interface UseHealthScoreReturn {
 }
 
 export function useHealthScore(): UseHealthScoreReturn {
+  // useAuth now returns demo user when in demo mode - no separate check needed
   const { user } = useAuth()
-  const { isDemo } = useDemoModeStore()
   const [health, setHealth] = useState<HealthResult | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -25,8 +24,8 @@ export function useHealthScore(): UseHealthScoreReturn {
   const { events } = useCalendarStore()
 
   const computeScore = useCallback(() => {
-    // Allow computation in demo mode even without user
-    if (!user && !isDemo) {
+    // user will be demo user or real user - useAuth handles demo mode
+    if (!user) {
       setHealth(null)
       setIsLoading(false)
       return
@@ -115,7 +114,7 @@ export function useHealthScore(): UseHealthScoreReturn {
     } finally {
       setIsLoading(false)
     }
-  }, [user, isDemo, tasks, events])
+  }, [user, tasks, events])
 
   useEffect(() => {
     computeScore()

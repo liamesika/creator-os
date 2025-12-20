@@ -5,8 +5,11 @@ import { createClient, clearSupabaseClient, clearProjectAuthStorage } from '@/li
 import { setCurrentUserId } from '@/lib/supabase/auth-helpers'
 import type { User as SupabaseUser, AuthChangeEvent, Session } from '@supabase/supabase-js'
 import { clearAllStores } from '@/lib/store-reset'
+import { useDemoModeStore } from '@/stores/demoModeStore'
+import { useAgencyDemoStore } from '@/stores/agencyDemoStore'
+import { DEMO_USER, DEMO_AGENCY_USER } from '@/lib/demo-data'
 
-interface User {
+export interface User {
   id: string
   name: string
   email: string
@@ -319,5 +322,30 @@ export function useAuth() {
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider')
   }
+
+  // Get demo mode states directly from stores (synchronous)
+  const isDemo = useDemoModeStore((state) => state.isDemo)
+  const isAgencyDemo = useAgencyDemoStore((state) => state.isAgencyDemo)
+
+  // CRITICAL: In demo mode, ALWAYS return the demo user
+  // This overrides any real authenticated user to ensure complete isolation
+  if (isAgencyDemo) {
+    return {
+      ...context,
+      user: DEMO_AGENCY_USER,
+      isLoading: false,
+      isInitialized: true,
+    }
+  }
+
+  if (isDemo) {
+    return {
+      ...context,
+      user: DEMO_USER,
+      isLoading: false,
+      isInitialized: true,
+    }
+  }
+
   return context
 }

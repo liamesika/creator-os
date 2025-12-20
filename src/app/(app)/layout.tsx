@@ -19,6 +19,8 @@ export default function AppLayout({
 }: {
   children: React.ReactNode
 }) {
+  // useAuth now returns demo user when in demo mode
+  // user will always be defined when demo mode is active
   const { user, isLoading, isInitialized } = useAuth()
   const { isDemo } = useDemoModeStore()
   const { isAgencyDemo } = useAgencyDemoStore()
@@ -29,28 +31,26 @@ export default function AppLayout({
   const [appReady, setAppReady] = useState(false)
   const demoDataPopulatedRef = useRef(false)
 
-  // Initialize all stores with user data (only for real users)
+  // Initialize all stores with user data (only for real users, not demo)
   useStoreInitialization()
 
-  // Combined demo mode check - synchronous, no hydration wait needed
-  const isAnyDemoMode = isDemo || isAgencyDemo
-
-  // Auth gating - redirect to login if not authenticated and not in demo mode
+  // Auth gating - redirect to login if not authenticated
+  // In demo mode, useAuth returns demo user so user will be defined
   useEffect(() => {
     if (!isInitialized) return
 
-    // Allow access if user is logged in OR if any demo mode is active
-    if (!user && !isAnyDemoMode) {
+    // user is now always defined in demo mode (useAuth handles this)
+    if (!user) {
       router.replace('/login')
     }
-  }, [user, isInitialized, isAnyDemoMode, router])
+  }, [user, isInitialized, router])
 
   // Demo mode data population - run once, synchronously
   useEffect(() => {
     if (!isInitialized) return
 
     // Populate demo data immediately when demo mode is active (only once per session)
-    if (isDemo && !user && !demoDataPopulatedRef.current) {
+    if (isDemo && !demoDataPopulatedRef.current) {
       demoDataPopulatedRef.current = true
       const { populateDemoData } = useDemoModeStore.getState()
       populateDemoData()
@@ -64,15 +64,15 @@ export default function AppLayout({
         router.push('/pricing/agencies')
       }
     }
-  }, [user, isInitialized, isDemo, isAgencyDemo, pathname, router])
+  }, [isInitialized, isDemo, isAgencyDemo, pathname, router])
 
   // Splash screen logic
   useEffect(() => {
     const justLoggedIn = sessionStorage.getItem('creators-os-just-logged-in')
-    if (justLoggedIn === 'true' && (user || isAnyDemoMode)) {
+    if (justLoggedIn === 'true' && user) {
       setShowSplash(true)
       sessionStorage.removeItem('creators-os-just-logged-in')
-    } else if (user || isAnyDemoMode) {
+    } else if (user) {
       const hasSeenSplash = sessionStorage.getItem('creators-os-splash-seen')
       if (!hasSeenSplash) {
         setShowSplash(true)
@@ -81,7 +81,7 @@ export default function AppLayout({
         setAppReady(true)
       }
     }
-  }, [user, isAnyDemoMode])
+  }, [user])
 
   const handleSplashComplete = () => {
     setShowSplash(false)
@@ -101,8 +101,8 @@ export default function AppLayout({
     )
   }
 
-  // Allow access if user is logged in OR any demo mode is active
-  if (!user && !isAnyDemoMode) {
+  // No user means not authenticated and not in demo mode
+  if (!user) {
     return null
   }
 

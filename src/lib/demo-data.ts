@@ -6,7 +6,27 @@ import type { AIGeneratedContent } from '@/types/ai-content'
 import type { ActivityEvent } from '@/types/activity'
 import { addDays, format } from 'date-fns'
 
-const DEMO_USER_ID = 'demo-user'
+// Dedicated demo user - completely isolated from real users
+export const DEMO_USER_ID = 'demo-user-12345'
+
+export const DEMO_USER = {
+  id: DEMO_USER_ID,
+  name: 'שירה כהן',
+  email: 'demo@creators-os.com',
+  avatar: undefined,
+  plan: 'premium' as const,
+  accountType: 'creator' as const,
+}
+
+// Demo agency user for agency demo mode
+export const DEMO_AGENCY_USER = {
+  id: 'demo-agency-user-12345',
+  name: 'סוכנות דיגיטל פלוס',
+  email: 'agency-demo@creators-os.com',
+  avatar: undefined,
+  plan: 'premium' as const,
+  accountType: 'agency' as const,
+}
 
 export function getDemoCompanies(): Omit<Company, 'createdAt' | 'updatedAt'>[] {
   return [
