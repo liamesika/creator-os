@@ -102,11 +102,11 @@ export default function AgencyControlPageV2() {
   const { user } = useAuth()
   const { isAgencyDemo } = useAgencyDemoStore()
 
-  // Calculate week dates
-  const getWeekDates = (offset: number) => {
+  // Calculate week dates - memoized to prevent infinite re-renders
+  const weekDates = useMemo(() => {
     const today = new Date()
     const startOfWeek = new Date(today)
-    startOfWeek.setDate(today.getDate() - today.getDay() + offset * 7)
+    startOfWeek.setDate(today.getDate() - today.getDay() + weekOffset * 7)
     startOfWeek.setHours(0, 0, 0, 0)
 
     const dates: Date[] = []
@@ -116,9 +116,7 @@ export default function AgencyControlPageV2() {
       dates.push(date)
     }
     return dates
-  }
-
-  const weekDates = getWeekDates(weekOffset)
+  }, [weekOffset])
 
   // Fetch data
   useEffect(() => {
